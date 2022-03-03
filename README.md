@@ -22,15 +22,15 @@
 8. flight_log(flight_log_id, log_date(CURRENT TIMESTAMP), username, flight_id, flight_no_old, flight_no_new);
 
 ## Note 1:
-> **Location**: vị trí của các sân bay trên toàn thế giới
+> **LOCATION**: vị trí của các sân bay trên toàn thế giới
 > 
-> **flight**: Chuyến bay được cấu hình sẵn (VD: máy bay Boeing 747 (airplane_name) mang số hiệu (airplane_id) bay từ sân bay Cam Ranh (from_airport_id) đến sân bay TSN (to_airport_id). Với mỗi chủng loại máy bay, một lịch trình sẽ là một chuyến bay riêng (cặp khoá *airplane_id, from_airport_id, to_airport_id*)
+> **FLIGHT**: Chuyến bay được cấu hình sẵn (VD: máy bay Boeing 747 (airplane_name) mang số hiệu (airplane_id) bay từ sân bay Cam Ranh (from_airport_id) đến sân bay TSN (to_airport_id). Với mỗi chủng loại máy bay, một lịch trình sẽ là một chuyến bay riêng (cặp khoá *airplane_id, from_airport_id, to_airport_id*)
 > 
-> **flight_schedule**: Lịch trình bay ứng với chuyến bay mang số hiệu VN123(flight_no) với **timestamp** (start_time, end_time) và còn trống **avaialble_seat**
+> **FLIGHT_SCHEDULE**: Lịch trình bay ứng với chuyến bay mang số hiệu VN123(flight_no) với **timestamp** (start_time, end_time) và còn trống **avaialble_seat**
 > 
-> **ticket**: các lượt vé bán ra ứng với flight_schedule_id => INSERT hoặc UDPATE đều phải UPDATE lại trường **avaialble_seat** của bảng **flight_schedule**
+> **TICKET**: các lượt vé bán ra ứng với flight_schedule_id => INSERT hoặc UDPATE đều phải UPDATE lại trường **avaialble_seat** của bảng **flight_schedule**
 > 
-> **Các sự kiện đều phải ghi vào bảng flight_log**
+> **Các sự kiện đều phải ghi vào bảng FLIGHT_LOG**
 
 ## Note 2:
 > 1. Lấy dữ liệu tổng quan về chuyến bay => Click vào sẽ gọi API lấy dữ liệu chi tiết chuyến bay (số chỗ ngồi còn trống, lịch trình bay, loại máy bay, thời gian, ...) => Giảm tải nhẹ query
