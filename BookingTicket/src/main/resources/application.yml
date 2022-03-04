@@ -1,0 +1,37 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: authen-service
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: ${DRIVER_CLASS_NAME}
+  data:
+    web:
+      pageable:
+        size-parameter: size
+        page-parameter: page
+        default-page-size: 20
+        max-page-size: 100
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+        temp.use_jdbc_metadata_defaults: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${USERNAME_EMAIL}
+    password: ${PASSWORD_EMAIL}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
