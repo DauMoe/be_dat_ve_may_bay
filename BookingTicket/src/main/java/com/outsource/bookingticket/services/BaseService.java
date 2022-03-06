@@ -6,5 +6,5 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class BaseService {
     @Autowired protected UserRepository userRepository;
-    @Autowired protected ModelMapper modelMapper;
+//    @Autowired protected ModelMapper modelMapper;
 }
