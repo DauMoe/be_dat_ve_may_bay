@@ -11,8 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
-    @Query("SELECT u FROM UserEntity u WHERE u.email = ?1")
-    UserEntity getUserByEmail( String email);
+    @Query("SELECT u FROM UserEntity u WHERE u.email = ?1 OR u.username = ?1")
+    UserEntity getUserByEmailOrUsername(String email);
+
+    @Query("SELECT u FROM UserEntity u WHERE u.email = ?1 ")
+    UserEntity getUserByEmail(String email);
 
     Boolean existsByEmail(String email);
 
@@ -22,4 +25,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     @Query("UPDATE UserEntity u SET u.enabled = true, u.verificationCode = null WHERE u.id = ?1")
     @Modifying
     void enable(Integer id);
+
+    @Query("UPDATE UserEntity u SET u.password = ?2 WHERE u.id =?1")
+    @Modifying
+    int updatePassword(Integer id, String password);
 }

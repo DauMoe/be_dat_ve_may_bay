@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        UserEntity user = userRepo.getUserByEmail(username);
+        UserEntity user = userRepo.getUserByEmailOrUsername(username);
 
         if (user == null) {
             throw new UsernameNotFoundException(username);

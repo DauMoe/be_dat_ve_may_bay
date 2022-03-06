@@ -7,8 +7,10 @@ import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.jwt.CustomUserDetails;
 import com.outsource.bookingticket.jwt.JwtTokenProvider;
 import com.outsource.bookingticket.pojo.LoginRequest;
+import com.outsource.bookingticket.pojo.PasswordResetDTO;
 import com.outsource.bookingticket.pojo.SignupRequest;
 import com.outsource.bookingticket.utils.MailUtil;
+import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,20 +80,21 @@ public class UserController extends BaseController {
 
     @PostMapping(value = "/create", produces = "application/json")
     public ResponseEntity<?> createUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
-
+        ResponseCommon responseCommon = new ResponseCommon();
         if (userService.exitUserByEmail(signupRequest.getEmail())) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            responseCommon.setCode(204);
+            responseCommon.setResult("There has error!");
+            return new ResponseEntity<>(responseCommon, HttpStatus.NO_CONTENT);
         }
 
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(signupRequest.getUsername());
-        userEntity.setUsername(signupRequest.getEmail());
-        userEntity.setUsername(signupRequest.getPassword());
+        userEntity.setEmail(signupRequest.getEmail());
+        userEntity.setPassword(signupRequest.getPassword());
 
         userService.registerUser(userEntity);
         sendVerificationEmail(request, userEntity);
 
-        ResponseCommon responseCommon = new ResponseCommon();
         responseCommon.setCode(200);
         responseCommon.setResult("Registration success");
 
@@ -107,6 +110,26 @@ public class UserController extends BaseController {
         responseCommon.setCode(200);
         responseCommon.setResult(result);
 
+        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/password-reset-token", produces = "application/json")
+    public ResponseEntity<?> resetPasswordToken(HttpServletRequest request, @RequestBody PasswordResetDTO passwordResetDTO) throws MessagingException, UnsupportedEncodingException {
+        UserEntity user = userService.getUserByEmail(passwordResetDTO.getEmail());
+        ResponseCommon responseCommon = new ResponseCommon();
+
+        if (user == null) {
+            responseCommon.setCode(404);
+            responseCommon.setResult("There were an error");
+            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
+        }
+
+        String token = RandomString.make(64);
+        userService.createPasswordResetTokenForUser(token, user);
+
+        sendURLPasswordResetToken(request, token, user);
+        responseCommon.setCode(200);
+        responseCommon.setResult("Your link reset password has been send. Please check your e-mail.");
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
@@ -131,6 +154,29 @@ public class UserController extends BaseController {
         content = content.replace("[[URL]]", verifyURL);
 
         help.setText(content, true);
+        mailSender.send(message);
+    }
+
+    private void sendURLPasswordResetToken(HttpServletRequest request, String token, UserEntity user) throws MessagingException, UnsupportedEncodingException {
+        JavaMailSenderImpl mailSender = MailUtil.prepareMailSender();
+
+        String toAddress = user.getEmail();
+        String subject = Constants.RESET_PASSWORD_WEB_SUBJECT;
+        String content = Constants.RESET_PASSWORD_WEB_CONTENT;
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        helper.setFrom(Constants.MAIL_FROM, Constants.MAIL_SENDER_NAME);
+        helper.setTo(toAddress);
+        helper.setSubject(subject);
+
+        content = content.replace("[[name]]", user.getUsername());
+
+        String resetURL = MailUtil.getSiteURL(request, "/api/user/password-reset-token") + "/api/forgot/reset-password?token=" + token;
+        content = content.replace("[[URL]]", resetURL);
+
+        helper.setText(content, true);
         mailSender.send(message);
     }
 }
