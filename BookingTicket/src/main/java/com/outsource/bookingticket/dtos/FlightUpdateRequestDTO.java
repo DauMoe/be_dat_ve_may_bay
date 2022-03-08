@@ -14,11 +14,8 @@ public class FlightUpdateRequestDTO {
     @JsonProperty("flight_id")
     private Integer flightId;
 
-    @JsonProperty("from_airport_id")
-    private Integer fromAirportId;
-
-    @JsonProperty("to_airport_id")
-    private Integer toAirportId;
+    @JsonProperty("flight_no")
+    private String flightNo;
 
     @JsonProperty("airplane_id")
     private Integer airplaneId;

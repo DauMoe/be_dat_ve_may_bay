@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.entities.flight;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@Builder
 @Table(name = "flight_no")
 @Entity
 @AllArgsConstructor
@@ -29,8 +31,8 @@ public class FlightLog implements Serializable {
     private Integer flightId;
 
     @Column(name = "flight_no_old")
-    private Integer flightNoOld;
+    private String flightNoOld;
 
     @Column(name = "flight_no_new")
-    private Integer flightNoNew;
+    private String flightNoNew;
 }

@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 public class FlightController extends BaseController {
 
     @PostMapping(path = "/update")
-    ResponseEntity<?> updateFlight(@RequestBody FlightUpdateRequestDTO flightUpdateRequestDTO) {
-        return flightService.updateFlight(flightUpdateRequestDTO);
+    ResponseEntity<?> updateFlight(@RequestHeader("Authorization") String token,
+                                   @RequestBody FlightUpdateRequestDTO flightUpdateRequestDTO) {
+        return flightService.updateFlight(flightUpdateRequestDTO, token);
     }
 }
