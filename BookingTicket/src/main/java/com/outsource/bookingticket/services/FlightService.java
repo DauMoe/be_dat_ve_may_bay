@@ -2,6 +2,7 @@ package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.FlightUpdateRequestDTO;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
+import com.outsource.bookingticket.exception.ErrorException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,6 @@ public class FlightService extends BaseService {
 //    }
 //
 //    private FlightEntity getFlightEntity(Integer flightId) {
-//        if ()
+//
 //    }
 }
