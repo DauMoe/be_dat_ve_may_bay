@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.entities.flight_schedule;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity(name = "flight_schedule")
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class FlightSchedule {
 
     @Id

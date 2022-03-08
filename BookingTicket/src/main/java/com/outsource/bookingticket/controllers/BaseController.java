@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.controllers;
 
+import com.outsource.bookingticket.services.BookingService;
 import com.outsource.bookingticket.services.FlightService;
 import com.outsource.bookingticket.services.LogService;
 import com.outsource.bookingticket.services.UserService;
@@ -12,4 +13,5 @@ public class BaseController {
     @Autowired protected UserService userService;
     @Autowired protected FlightService flightService;
     @Autowired protected LogService logService;
+    @Autowired protected BookingService bookingService;
 }

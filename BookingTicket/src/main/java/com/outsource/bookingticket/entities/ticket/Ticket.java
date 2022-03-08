@@ -26,5 +26,6 @@ public class Ticket {
     @Column(name = "uid")
     private Integer uid;
     @Enumerated(EnumType.STRING)
-    private BOOKINGSTATE bookingstate;
+    @Column(name = "booking_state")
+    private BOOKINGSTATE bookingState;
 }
