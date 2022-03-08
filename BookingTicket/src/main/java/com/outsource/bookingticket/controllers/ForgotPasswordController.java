@@ -7,6 +7,8 @@ import com.outsource.bookingticket.exception.PasswordResetTokenNotFoundException
 
 import com.outsource.bookingticket.pojo.PasswordResetTokenDTO;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,22 +37,28 @@ public class ForgotPasswordController extends BaseController {
 
 
     @PostMapping(value = "/save-password", produces = "application/json")
-    public String savePassword(@RequestBody PasswordResetTokenDTO passwordDTO) throws PasswordResetTokenNotFoundException {
+    public ResponseEntity<?> savePassword(@RequestBody PasswordResetTokenDTO passwordDTO) throws PasswordResetTokenNotFoundException {
         String result = userService.validatePasswordResetToken(passwordDTO.getToken());
-
+        ResponseCommon responseCommon = new ResponseCommon();
         if (result != null) {
-            return "error/404.html";
+            responseCommon.setCode(404);
+            responseCommon.setResult("There has error!");
+            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
         }
 
         UserEntity user = userService.getUserByPasswordResetToken(passwordDTO.getToken());
         if (user == null) {
-            return "error/404.html";
+            responseCommon.setCode(404);
+            responseCommon.setResult("There has error!");
+            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
         }
 
+        responseCommon.setCode(200);
+        responseCommon.setResult("Reset password success!");
         userService.changePassword(user, passwordDTO.getNewPassword());
         // Delete PasswordReset, need fix
         userService.deletePasswordResetToken(passwordDTO.getToken());
 
-        return "reset-success.html";
+        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 }
