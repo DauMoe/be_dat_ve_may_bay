@@ -1,6 +1,8 @@
 package com.outsource.bookingticket.entities.ticket;
 
+import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -8,6 +10,7 @@ import javax.persistence.*;
 @Entity(name = "ticket")
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class Ticket {
 
     @Id
@@ -22,4 +25,6 @@ public class Ticket {
     private Long price;
     @Column(name = "uid")
     private Integer uid;
+    @Enumerated(EnumType.STRING)
+    private BOOKINGSTATE bookingstate;
 }
