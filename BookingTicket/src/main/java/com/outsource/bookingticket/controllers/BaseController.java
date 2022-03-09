@@ -1,6 +1,6 @@
 package com.outsource.bookingticket.controllers;
 
-import com.outsource.bookingticket.services.UserService;
+import com.outsource.bookingticket.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -8,4 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class BaseController {
     @Autowired protected UserService userService;
+    @Autowired protected FlightService flightService;
+    @Autowired protected LogService logService;
+    @Autowired protected BookingService bookingService;
+    @Autowired protected CancelBookingService cancelBookingService;
 }
