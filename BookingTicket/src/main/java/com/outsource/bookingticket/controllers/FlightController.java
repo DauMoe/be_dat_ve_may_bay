@@ -20,7 +20,11 @@ public class FlightController extends BaseController {
     }
 
     @PostMapping(path = "/get_info/{flight_id}")
-    ResponseEntity<?> getFlightBy(@PathVariable("flight_id") Integer flightId) {
-        return flightService.getDetailFlight(flightId);
+    ResponseEntity<?> getFlightBy(@PathVariable("flight_id") Integer flightId,
+                                  @RequestParam("start_time") String startTime,
+                                  @RequestParam("end_time") String endTime) {
+        return flightService.getDetailFlight(flightId, startTime, endTime);
     }
+
+
 }

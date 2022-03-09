@@ -3,6 +3,7 @@ package com.outsource.bookingticket.services;
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.FlightUpdateRequestDTO;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
+import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,11 +64,22 @@ public class FlightService extends BaseService {
         else throw new ErrorException(MessageUtil.FLIGHT_IS_EMPTY);
     }
 
-    public ResponseEntity<?> getDetailFlight(Integer flightId) {
+    public ResponseEntity<?> getDetailFlight(Integer flightId, String startTimeStr, String endTimeStr) {
         if (Objects.nonNull(flightId)) {
             Optional<FlightEntity> flightEntity = flightRepository.findFlightEntityByFlightId(flightId);
             if (flightEntity.isPresent()) {
-
+                List<FlightSchedule> flightSchedules =
+                        flightScheduleRepository.findFlightSchedulesByFlightNo(flightEntity.get().getFlightNo());
+                if (Objects.isNull(startTimeStr) && Objects.isNull(endTimeStr)) {
+                    return ResponseEntity.ok(Helper.createSucessCommon(flightSchedules));
+                } else {
+                    LocalDateTime startTime = convertStringToLocalDateTime(startTimeStr);
+                    LocalDateTime endTime = convertStringToLocalDateTime(endTimeStr);
+                    List<FlightSchedule> flightSchedulesFilter =
+                            flightSchedules.stream().filter(i -> filterByDate(i, startTime, endTime))
+                                    .collect(Collectors.toList());
+                    return ResponseEntity.ok(Helper.createSucessCommon(flightSchedulesFilter));
+                }
             }
         }
         throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
@@ -95,5 +109,15 @@ public class FlightService extends BaseService {
             }
         }
         throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
+    }
+
+    private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startDate, LocalDateTime endDate) {
+        return (flightSchedule.getStartTime().isEqual(startDate) || flightSchedule.getStartTime().isAfter(startDate)) &&
+                (flightSchedule.getEndTime().isEqual(endDate) || flightSchedule.getEndTime().isBefore(endDate));
+    }
+
+    private LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return LocalDateTime.parse(dateTimeString, formatter);
     }
 }
