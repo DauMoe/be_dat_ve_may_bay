@@ -13,4 +13,14 @@ public class FlightController extends BaseController {
                                    @RequestBody FlightUpdateRequestDTO flightUpdateRequestDTO) {
         return flightService.updateFlight(flightUpdateRequestDTO, token);
     }
+
+    @PostMapping(path = "/list")
+    ResponseEntity<?> getAllFlight() {
+        return flightService.getListFlight();
+    }
+
+    @PostMapping(path = "/get_info/{flight_id}")
+    ResponseEntity<?> getFlightBy(@PathVariable("flight_id") Integer flightId) {
+        return flightService.getDetailFlight(flightId);
+    }
 }

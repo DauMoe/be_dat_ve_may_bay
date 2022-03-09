@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.FlightUpdateRequestDTO;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.exception.ErrorException;
@@ -8,9 +9,9 @@ import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,29 +23,74 @@ public class FlightService extends BaseService {
 
     @Autowired private LogService logService;
 
+    // Hàm thay đổi chuyến bay
     public ResponseEntity<?> updateFlight(FlightUpdateRequestDTO flightUpdateRequestDTO, String token) {
+        // Lấy chuyến bay theo ID của chuyến bay
         FlightEntity flightEntity = getFlightEntity(flightUpdateRequestDTO.getFlightId());
+        // Nếu như có chuyến bay sẽ xử lý thay đổi
         if (Objects.nonNull(flightUpdateRequestDTO.getFlightNo())) {
+            // Thay đổi mã chuyến bay
             flightEntity.setFlightNo(flightUpdateRequestDTO.getFlightNo());
 
+            // Gọi tới hàm thay đổi để thay đổi dưới DB
             FlightEntity updated = flightRepository.saveAndFlush(flightEntity);
+            // Gọi tới hàm lưu log sau khi thay đổi
             logService.saveLogAfterUpdate(flightEntity, updated, token);
+            // Trả về thông báo thay đổi thành công
             return ResponseEntity.ok(Helper.createSucessCommon(MessageUtil.FLIGHT_UPDATED_SUCCESS));
         }
+        // Báo lỗi nếu như không tồn tại ID chuyến bay
         throw new ErrorException(MessageUtil.FLIGHT_UPDATED_EX);
     }
 
-//    public ResponseEntity<?> getListFlightByTime() {
-//        List<FlightEntity> listFlight = flightRepository.findAll();
-//        LinkedList<FlightEntity> listFlightResult = listFlight.stream()
-//                .filter()
-//                .collect(Collectors.toList());
-//    }
+    // Hàm lấy thông tin chuyến bay theo thời gian
+    public ResponseEntity<?> getListFlight() {
+        // Lấy hết thông tin chuyến bay
+        List<FlightEntity> listFlight = flightRepository.findAll();
 
-    private FlightEntity getFlightEntity(Integer flightId) {
+        // Kiểm tra danh sách chuyến bay có trống không
+        if (!CollectionUtils.isEmpty(listFlight)) {
+            // Convert list entity sang list entity DTO để trả về
+            List<FlightResponseDTO> listFlightResult = listFlight.stream()
+                    .map(this::convertFlightEntityToDTO)
+                    .collect(Collectors.toList());
+            // Trả về dữ liệu thành công
+            return ResponseEntity.ok(Helper.createSucessCommon(listFlightResult));
+        }
+        // Không có chuyến bay nào sẽ trả về thông báo
+        else throw new ErrorException(MessageUtil.FLIGHT_IS_EMPTY);
+    }
+
+    public ResponseEntity<?> getDetailFlight(Integer flightId) {
         if (Objects.nonNull(flightId)) {
+            Optional<FlightEntity> flightEntity = flightRepository.findFlightEntityByFlightId(flightId);
+            if (flightEntity.isPresent()) {
+
+            }
+        }
+        throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
+    }
+
+    // Hàm convert FlightEntity sang FlightResponseDTO
+    private FlightResponseDTO convertFlightEntityToDTO(FlightEntity flightEntity) {
+        FlightResponseDTO responseDTO = new FlightResponseDTO();
+        responseDTO.setFlightNo(flightEntity.getFlightNo());
+        responseDTO.setFlightId(flightEntity.getFlightId());
+        responseDTO.setAirplaneId(responseDTO.getAirplaneId());
+        responseDTO.setFromAirportId(responseDTO.getFromAirportId());
+        responseDTO.setToAirportId(responseDTO.getToAirportId());
+        return responseDTO;
+    }
+
+    // Hàm lấy thông tin chuyến bay
+    private FlightEntity getFlightEntity(Integer flightId) {
+        // Kiểm tra ID chuyến bay không rỗng sẽ tìm kiếm; nếu rỗng sẽ trả ra thông báo lỗi
+        if (Objects.nonNull(flightId)) {
+            // Tìm thông tin chuyến bay theo flightId
             Optional<FlightEntity> flightEntityOp = flightRepository.findFlightEntityByFlightId(flightId);
+            // Kiểm tra dữ liệu có tồn tại
             if (flightEntityOp.isPresent()) {
+                // Trả về thông tin chuyến bay
                 return flightEntityOp.get();
             }
         }
