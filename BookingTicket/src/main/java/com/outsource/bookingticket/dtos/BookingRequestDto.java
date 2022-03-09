@@ -13,6 +13,4 @@ public class BookingRequestDto {
     private Integer flightScheduleId;
     private String seatNumber;
     private Long price;
-    private BOOKINGSTATE bookingState;
-
 }
