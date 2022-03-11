@@ -80,8 +80,13 @@ public class FlightService extends BaseService {
                 if (Objects.isNull(startTimeStr) && Objects.isNull(endTimeStr)) {
                     flightSchedulesFilter = flightSchedules;
                 } else {
+                    if (!(Objects.nonNull(startTimeStr) && Objects.nonNull(endTimeStr))) {
+                        throw new ErrorException(MessageUtil.FILL_DATETIME);
+                    }
+                    // Format dạng date từ string sang LocalDatetime
                     LocalDateTime startTime = convertStringToLocalDateTime(startTimeStr);
                     LocalDateTime endTime = convertStringToLocalDateTime(endTimeStr);
+                    // Lọc những FlightSchedule theo thời gian
                     flightSchedulesFilter = flightSchedules.stream()
                             .filter(i -> filterByDate(i, startTime, endTime))
                             .collect(Collectors.toList());

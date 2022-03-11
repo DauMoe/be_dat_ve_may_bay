@@ -7,4 +7,5 @@ public class MessageUtil {
     public static final String FLIGHT_IS_EMPTY = "Không có chuyến bay nào";
     public static final String DATETIME_ERROR = "Lựa chọn lại thời gian";
     public static final String FILL_TO_SEARCH = "Chọn ít nhất 1 ô để tìm kiếm";
+    public static final String FILL_DATETIME = "Chọn cả thời gian bắt đầu và thời gian kết thúc";
 }
