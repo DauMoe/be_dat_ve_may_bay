@@ -7,6 +7,8 @@ import com.outsource.bookingticket.repositories.TicketRepository;
 import com.outsource.bookingticket.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.persistence.EntityManager;
+
 public class BaseService {
 
     @Autowired protected UserRepository userRepository;
@@ -18,4 +20,6 @@ public class BaseService {
     @Autowired protected TicketRepository ticketRepository;
 
     @Autowired protected FlightScheduleRepository flightScheduleRepository;
+
+    @Autowired protected EntityManager entityManager;
 }
