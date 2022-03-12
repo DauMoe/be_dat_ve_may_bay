@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class LogService extends BaseService {
 
     public void saveLogAfterUpdate(FlightEntity oldValue, FlightEntity newValue, String token) {
+        // Khởi tạo object để lưu log
         FlightLog newFlightLog = FlightLog.builder()
                 .logDate(LocalDateTime.now())
                 .username(token)
@@ -19,6 +20,7 @@ public class LogService extends BaseService {
                 .flightNoOld(oldValue.getFlightNo())
                 .flightNoNew(newValue.getFlightNo())
                 .build();
+        // Gọi đến hàm lưu log
         flightLogRepository.save(newFlightLog);
     }
 }

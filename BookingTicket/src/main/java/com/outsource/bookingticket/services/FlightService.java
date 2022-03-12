@@ -71,15 +71,21 @@ public class FlightService extends BaseService {
 
     // Hàm lấy thông tin chuyến bay theo ID chuyến bay
     public ResponseEntity<?> getDetailFlight(Integer flightId, String startTimeStr, String endTimeStr) {
+        // Kiểm tra ID chuyến bay có rỗng không, nếu rỗng trả ra thông báo lỗi
         if (Objects.nonNull(flightId)) {
+            // Tìm kiếm chuyến bay theo ID
             Optional<FlightEntity> flightEntity = flightRepository.findFlightEntityByFlightId(flightId);
+            // Tồn tại thông tin chuyến bay
             if (flightEntity.isPresent()) {
                 List<FlightSchedule> flightSchedulesFilter;
+                // Tìm kiếm lịch trình chuyến bay theo mã chuyến bay
                 List<FlightSchedule> flightSchedules =
                         flightScheduleRepository.findFlightSchedulesByFlightNo(flightEntity.get().getFlightNo());
+                // Kiểm tra nếu không truyền vào tham số thời gian bắt đầu và kết thúc thì sẽ trả về hết dữ liệu
                 if (Objects.isNull(startTimeStr) && Objects.isNull(endTimeStr)) {
                     flightSchedulesFilter = flightSchedules;
                 } else {
+                    // Kiểm tra nếu nhập thời gian cần nhập đủ cả 2
                     if (!(Objects.nonNull(startTimeStr) && Objects.nonNull(endTimeStr))) {
                         throw new ErrorException(MessageUtil.FILL_DATETIME);
                     }
@@ -92,10 +98,13 @@ public class FlightService extends BaseService {
                             .collect(Collectors.toList());
                 }
 
+                // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
                 List<FlightScheduleResponseDTO> listFlightResult = convertFlightScheduleToListDTO(flightSchedulesFilter);
+                // Trả về kết quả thành công
                 return ResponseEntity.ok(Helper.createSucessCommon(listFlightResult));
             }
         }
+        // Trả về thông báo lỗi
         throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
     }
 
@@ -108,8 +117,11 @@ public class FlightService extends BaseService {
 
         // Gọi tới hàm tìm kiếm theo vị trí khởi hành, kết thúc hoặc mã chuyến bay
         List<FlightEntity> listFlightResult = searchListFlight(fromAirportId, toAirportId, flightNo);
+
+        // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
         List<FlightResponseDTO> listFlightResponse = convertFlightEntityToListDTO(listFlightResult);
 
+        // Trả về kết quả thành công
         return ResponseEntity.ok(Helper.createSucessCommon(listFlightResponse));
     }
 
@@ -129,39 +141,50 @@ public class FlightService extends BaseService {
     }
 
     private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startDate, LocalDateTime endDate) {
+        // Lọc những lịch trình chuyến bay nằm trong thời gian tìm kiếm
         return (flightSchedule.getStartTime().isEqual(startDate) || flightSchedule.getStartTime().isAfter(startDate)) &&
                 (flightSchedule.getEndTime().isEqual(endDate) || flightSchedule.getEndTime().isBefore(endDate));
     }
 
+    // Hàm format date từ String sang LocalDatetime
     private LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             return LocalDateTime.parse(dateTimeString, formatter);
         } catch (Exception e) {
+            // Trả về lỗi nếu tham số truyền vào không đúng dạng
             throw new ErrorException(MessageUtil.DATETIME_ERROR);
         }
     }
 
+    // Hàm tìm kiếm chuyến bay
     private List<FlightEntity> searchListFlight(Integer fromAirportId, Integer toAirportId, String flightNo) {
+        // Khởi tạo đối tương để tạo câu truy vấn
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<FlightEntity> flightEntityQuery = builder.createQuery(FlightEntity.class);
 
+        // Khởi tạo danh sách điều kiện
         Root<FlightEntity> flightEntityRoot = flightEntityQuery.from(FlightEntity.class);
         List<Predicate> predicates = new ArrayList<>();
 
+        // Kiểm tra nếu fromAirportId khác rỗng sẽ thêm điều kiện tìm kiếm theo field này vào câu truy vấn
         if (Objects.nonNull(fromAirportId)) {
             predicates.add(builder.equal(flightEntityRoot.get("from_airport_id"), fromAirportId));
         }
 
+        // Kiểm tra nếu toAirportId khác rỗng sẽ thêm điều kiện tìm kiếm theo field này vào câu truy vấn
         if (Objects.nonNull(toAirportId)) {
             predicates.add(builder.equal(flightEntityRoot.get("to_airport_id"), toAirportId));
         }
 
+        // Kiểm tra nếu flightNo khác rỗng sẽ thêm điều kiện tìm kiếm theo field này vào câu truy vấn
         if (Objects.nonNull(flightNo)) {
             predicates.add(builder.equal(flightEntityRoot.get("flight_no"), flightNo));
         }
 
+        // Thực hiện gán danh sách điều kiện truy vấn
         flightEntityQuery.where(predicates.toArray(new Predicate[0]));
+        // Thực hiện câu query vừa ghép ở trên để chạy và trả về kết quả
         return entityManager.createQuery(flightEntityQuery).getResultList();
     }
 
@@ -176,10 +199,12 @@ public class FlightService extends BaseService {
         return responseDTO;
     }
 
+    // Hàm convert danh sách FlightEntity sang danh sách FlightResponseDTO
     private List<FlightResponseDTO> convertFlightEntityToListDTO(List<FlightEntity> listFlightEntity) {
         return listFlightEntity.stream().map(this::convertFlightEntityToDTO).collect(Collectors.toList());
     }
 
+    // Hàm convert FlightSchedule sang FlightScheduleResponseDTO
     private FlightScheduleResponseDTO convertFlightScheduleToDTO(FlightSchedule flightSchedule) {
         FlightScheduleResponseDTO responseDTO = new FlightScheduleResponseDTO();
         responseDTO.setFlightScheduleId(flightSchedule.getFlightScheduleId());
@@ -191,6 +216,7 @@ public class FlightService extends BaseService {
         return responseDTO;
     }
 
+    // Hàm convert danh sách FlightSchedule sang danh sách FlightScheduleResponseDTO
     private List<FlightScheduleResponseDTO> convertFlightScheduleToListDTO(List<FlightSchedule> listFlightSchedule) {
         return listFlightSchedule.stream().map(this::convertFlightScheduleToDTO).collect(Collectors.toList());
     }
