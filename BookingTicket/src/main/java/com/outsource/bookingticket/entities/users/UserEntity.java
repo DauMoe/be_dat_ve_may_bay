@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 @Builder
 public class UserEntity implements Serializable {
 
@@ -36,7 +36,7 @@ public class UserEntity implements Serializable {
     @Column(name = "verification_code", length = 64)
     private String verificationCode;
 
-    @Column(name ="date_of_birth", length = 64)
+    @Column(name ="dob", length = 64)
     private LocalDate dateOfBirth;
 
     @Column(name ="gender")
@@ -48,5 +48,6 @@ public class UserEntity implements Serializable {
     @Column(name ="role")
     private Boolean role;
 
+    @Column(name = "email_verified")
     private boolean enabled;
 }
