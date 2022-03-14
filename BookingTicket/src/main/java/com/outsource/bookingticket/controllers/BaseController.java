@@ -12,4 +12,5 @@ public class BaseController {
     @Autowired protected LogService logService;
     @Autowired protected BookingService bookingService;
     @Autowired protected CancelBookingService cancelBookingService;
+    @Autowired protected TicketService ticketService;
 }

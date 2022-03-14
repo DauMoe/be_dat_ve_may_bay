@@ -1,13 +1,26 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.entities.flight.FlightEntity;
+import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
+import com.outsource.bookingticket.entities.ticket.Ticket;
+import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.repositories.FlightLogRepository;
 import com.outsource.bookingticket.repositories.FlightRepository;
 import com.outsource.bookingticket.repositories.FlightScheduleRepository;
 import com.outsource.bookingticket.repositories.TicketRepository;
 import com.outsource.bookingticket.repositories.UserRepository;
+import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 
 public class BaseService {
 
@@ -22,4 +35,52 @@ public class BaseService {
     @Autowired protected FlightScheduleRepository flightScheduleRepository;
 
     @Autowired protected EntityManager entityManager;
+
+    // Hàm format date từ String sang LocalDatetime
+    protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
+        try {
+            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(dateTimeString);
+            return date.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        } catch (ParseException e) {
+            // Trả về lỗi nếu tham số truyền vào không đúng dạng
+            throw new ErrorException(MessageUtil.DATETIME_ERROR);
+        }
+    }
+
+    protected String convertLocalDatetimeToString(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return dateTime.format(formatter);
+    }
+
+    // Hàm lấy thông tin chuyến bay
+    protected Ticket getTicket(Integer ticketId) {
+        // Kiểm tra ID vé bay không rỗng sẽ tìm kiếm; nếu rỗng sẽ trả ra thông báo lỗi
+        if (Objects.nonNull(ticketId)) {
+            // Tìm thông tin chuyến bay theo flightId
+            Optional<Ticket> ticketOptional = ticketRepository.findTicketByTicketId(ticketId);
+            // Kiểm tra dữ liệu có tồn tại
+            if (ticketOptional.isPresent()) {
+                // Trả về thông tin vé bay
+                return ticketOptional.get();
+            }
+        }
+        throw new ErrorException(MessageUtil.TICKET_NOT_FOUND_EX);
+    }
+
+    protected FlightSchedule getFlightSchedule(Integer flightScheduleId) {
+        // Kiểm tra ID lịch trình bay không rỗng sẽ tìm kiếm; nếu rỗng sẽ trả ra thông báo lỗi
+        if (Objects.nonNull(flightScheduleId)) {
+            // Tìm thông tin chuyến bay theo flightId
+            Optional<FlightSchedule> flightScheduleOptional =
+                    flightScheduleRepository.findFlightSchedulesByFlightScheduleId(flightScheduleId);
+            // Kiểm tra dữ liệu có tồn tại
+            if (flightScheduleOptional.isPresent()) {
+                // Trả về thông tin lịch trình bay
+                return flightScheduleOptional.get();
+            }
+        }
+        throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_NOT_FOUND_EX);
+    }
 }

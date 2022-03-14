@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Builder
-@Table(name = "flight_no")
+@Table(name = "flight_log")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor

@@ -19,7 +19,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,29 +28,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class FlightService extends BaseService {
-
-    @Autowired
-    private LogService logService;
-
-    // Hàm thay đổi chuyến bay
-    public ResponseEntity<?> updateFlight(FlightUpdateRequestDTO flightUpdateRequestDTO, String token) {
-        // Lấy chuyến bay theo ID của chuyến bay
-        FlightEntity flightEntity = getFlightEntity(flightUpdateRequestDTO.getFlightId());
-        // Nếu như có chuyến bay sẽ xử lý thay đổi
-        if (Objects.nonNull(flightUpdateRequestDTO.getFlightNo())) {
-            // Thay đổi mã chuyến bay
-            flightEntity.setFlightNo(flightUpdateRequestDTO.getFlightNo());
-
-            // Gọi tới hàm thay đổi để thay đổi dưới DB
-            FlightEntity updated = flightRepository.saveAndFlush(flightEntity);
-            // Gọi tới hàm lưu log sau khi thay đổi
-            logService.saveLogAfterUpdate(flightEntity, updated, token);
-            // Trả về thông báo thay đổi thành công
-            return ResponseEntity.ok(Helper.createSucessCommon(MessageUtil.FLIGHT_UPDATED_SUCCESS));
-        }
-        // Báo lỗi nếu như không tồn tại ID chuyến bay
-        throw new ErrorException(MessageUtil.FLIGHT_UPDATED_EX);
-    }
 
     // Hàm lấy thông tin chuyến bay theo thời gian
     public ResponseEntity<?> getListFlight() {
@@ -98,10 +74,13 @@ public class FlightService extends BaseService {
                             .collect(Collectors.toList());
                 }
 
-                // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
-                List<FlightScheduleResponseDTO> listFlightResult = convertFlightScheduleToListDTO(flightSchedulesFilter);
-                // Trả về kết quả thành công
-                return ResponseEntity.ok(Helper.createSucessCommon(listFlightResult));
+                // Kiểm tra danh sách sau khi tìm kiếm theo ngày có dữ liệu hay không, nếu không có trả ra thông báo lỗi
+                if (!CollectionUtils.isEmpty(flightSchedulesFilter)) {
+                    // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
+                    List<FlightScheduleResponseDTO> listFlightResult = convertFlightScheduleToListDTO(flightSchedulesFilter);
+                    // Trả về kết quả thành công
+                    return ResponseEntity.ok(Helper.createSucessCommon(listFlightResult));
+                } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
             }
         }
         // Trả về thông báo lỗi
@@ -121,40 +100,24 @@ public class FlightService extends BaseService {
         // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
         List<FlightResponseDTO> listFlightResponse = convertFlightEntityToListDTO(listFlightResult);
 
-        // Trả về kết quả thành công
-        return ResponseEntity.ok(Helper.createSucessCommon(listFlightResponse));
+        if (!CollectionUtils.isEmpty(listFlightResponse)) {
+            // Trả về kết quả thành công
+            return ResponseEntity.ok(Helper.createSucessCommon(listFlightResponse));
+        } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
     }
 
-    // Hàm lấy thông tin chuyến bay
-    private FlightEntity getFlightEntity(Integer flightId) {
-        // Kiểm tra ID chuyến bay không rỗng sẽ tìm kiếm; nếu rỗng sẽ trả ra thông báo lỗi
-        if (Objects.nonNull(flightId)) {
-            // Tìm thông tin chuyến bay theo flightId
-            Optional<FlightEntity> flightEntityOp = flightRepository.findFlightEntityByFlightId(flightId);
-            // Kiểm tra dữ liệu có tồn tại
-            if (flightEntityOp.isPresent()) {
-                // Trả về thông tin chuyến bay
-                return flightEntityOp.get();
-            }
-        }
-        throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
+    public ResponseEntity<?> getAllFlightSchedule() {
+        List<FlightSchedule> flightSchedule = flightScheduleRepository.findAll();
+        if (!CollectionUtils.isEmpty(flightSchedule)) {
+            List<FlightScheduleResponseDTO> listScheduleResult = convertFlightScheduleToListDTO(flightSchedule);
+            return ResponseEntity.ok(Helper.createSucessCommon(listScheduleResult));
+        } else throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_IS_EMPTY);
     }
 
     private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startDate, LocalDateTime endDate) {
         // Lọc những lịch trình chuyến bay nằm trong thời gian tìm kiếm
-        return (flightSchedule.getStartTime().isEqual(startDate) || flightSchedule.getStartTime().isAfter(startDate)) &&
-                (flightSchedule.getEndTime().isEqual(endDate) || flightSchedule.getEndTime().isBefore(endDate));
-    }
-
-    // Hàm format date từ String sang LocalDatetime
-    private LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            return LocalDateTime.parse(dateTimeString, formatter);
-        } catch (Exception e) {
-            // Trả về lỗi nếu tham số truyền vào không đúng dạng
-            throw new ErrorException(MessageUtil.DATETIME_ERROR);
-        }
+        return flightSchedule.getStartTime().toLocalDate().isEqual(startDate.toLocalDate()) &&
+                flightSchedule.getEndTime().toLocalDate().isEqual(endDate.toLocalDate());
     }
 
     // Hàm tìm kiếm chuyến bay
@@ -169,17 +132,17 @@ public class FlightService extends BaseService {
 
         // Kiểm tra nếu fromAirportId khác rỗng sẽ thêm điều kiện tìm kiếm theo field này vào câu truy vấn
         if (Objects.nonNull(fromAirportId)) {
-            predicates.add(builder.equal(flightEntityRoot.get("from_airport_id"), fromAirportId));
+            predicates.add(builder.equal(flightEntityRoot.get("fromAirportId"), fromAirportId));
         }
 
         // Kiểm tra nếu toAirportId khác rỗng sẽ thêm điều kiện tìm kiếm theo field này vào câu truy vấn
         if (Objects.nonNull(toAirportId)) {
-            predicates.add(builder.equal(flightEntityRoot.get("to_airport_id"), toAirportId));
+            predicates.add(builder.equal(flightEntityRoot.get("toAirportId"), toAirportId));
         }
 
         // Kiểm tra nếu flightNo khác rỗng sẽ thêm điều kiện tìm kiếm theo field này vào câu truy vấn
         if (Objects.nonNull(flightNo)) {
-            predicates.add(builder.equal(flightEntityRoot.get("flight_no"), flightNo));
+            predicates.add(builder.equal(flightEntityRoot.get("flightNo"), flightNo));
         }
 
         // Thực hiện gán danh sách điều kiện truy vấn
@@ -193,9 +156,9 @@ public class FlightService extends BaseService {
         FlightResponseDTO responseDTO = new FlightResponseDTO();
         responseDTO.setFlightNo(flightEntity.getFlightNo());
         responseDTO.setFlightId(flightEntity.getFlightId());
-        responseDTO.setAirplaneId(responseDTO.getAirplaneId());
-        responseDTO.setFromAirportId(responseDTO.getFromAirportId());
-        responseDTO.setToAirportId(responseDTO.getToAirportId());
+        responseDTO.setAirplaneId(flightEntity.getAirplaneId());
+        responseDTO.setFromAirportId(flightEntity.getFromAirportId());
+        responseDTO.setToAirportId(flightEntity.getToAirportId());
         return responseDTO;
     }
 
@@ -208,8 +171,8 @@ public class FlightService extends BaseService {
     private FlightScheduleResponseDTO convertFlightScheduleToDTO(FlightSchedule flightSchedule) {
         FlightScheduleResponseDTO responseDTO = new FlightScheduleResponseDTO();
         responseDTO.setFlightScheduleId(flightSchedule.getFlightScheduleId());
-        responseDTO.setStartTime(flightSchedule.getStartTime());
-        responseDTO.setEndTime(flightSchedule.getEndTime());
+        responseDTO.setStartTime(convertLocalDatetimeToString(flightSchedule.getStartTime()));
+        responseDTO.setEndTime(convertLocalDatetimeToString(flightSchedule.getEndTime()));
         responseDTO.setAvailableSeat(flightSchedule.getAvailableSeat());
         responseDTO.setFlightNo(flightSchedule.getFlightNo());
 

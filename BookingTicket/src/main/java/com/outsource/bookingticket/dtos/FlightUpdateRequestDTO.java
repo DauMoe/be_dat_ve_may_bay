@@ -11,12 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class FlightUpdateRequestDTO {
-    @JsonProperty("flight_id")
-    private Integer flightId;
+    @JsonProperty("ticket_id")
+    private Integer ticketId;
 
-    @JsonProperty("flight_no")
-    private String flightNo;
-
-    @JsonProperty("airplane_id")
-    private Integer airplaneId;
+    @JsonProperty("flight_schedule_id")
+    private Integer flightScheduleId;
 }

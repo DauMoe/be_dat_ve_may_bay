@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,10 +15,10 @@ public class FlightScheduleResponseDTO {
     private Integer flightScheduleId;
 
     @JsonProperty("start_time")
-    private LocalDateTime startTime;
+    private String startTime;
 
     @JsonProperty("end_time")
-    private LocalDateTime endTime;
+    private String endTime;
 
     @JsonProperty("flight_no")
     private String flightNo;
