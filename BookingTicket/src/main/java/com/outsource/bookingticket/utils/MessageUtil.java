@@ -1,0 +1,15 @@
+package com.outsource.bookingticket.utils;
+
+public class MessageUtil {
+    public static final String FLIGHT_NOT_FOUND_EX = "Không tìm thấy chuyến bay";
+    public static final String TICKET_NOT_FOUND_EX = "Không tìm thấy vé bay";
+    public static final String FLIGHT_SCHEDULE_NOT_FOUND_EX = "Không tìm thấy lịch trình bay";
+    public static final String FLIGHT_UPDATED_EX = "Thay đổi không thành công";
+    public static final String FLIGHT_UPDATED_SUCCESS = "Thay đổi thành công";
+    public static final String FLIGHT_IS_EMPTY = "Không có chuyến bay nào";
+    public static final String DATETIME_ERROR = "Lựa chọn lại thời gian";
+    public static final String FILL_TO_SEARCH = "Chọn ít nhất 1 ô để tìm kiếm";
+    public static final String FILL_DATETIME = "Chọn cả thời gian bắt đầu và thời gian kết thúc";
+    public static final String NOT_HAVE_ANY_FLIGHT = "Không có chuyến bay nào phù hợp";
+    public static final String FLIGHT_SCHEDULE_IS_EMPTY = "Không có lịch trình chuyến bay nào";
+}

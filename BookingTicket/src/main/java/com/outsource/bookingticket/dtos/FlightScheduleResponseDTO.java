@@ -10,10 +10,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class FlightUpdateRequestDTO {
-    @JsonProperty("ticket_id")
-    private Integer ticketId;
-
+public class FlightScheduleResponseDTO {
     @JsonProperty("flight_schedule_id")
     private Integer flightScheduleId;
+
+    @JsonProperty("start_time")
+    private String startTime;
+
+    @JsonProperty("end_time")
+    private String endTime;
+
+    @JsonProperty("flight_no")
+    private String flightNo;
+
+    @JsonProperty("available_seat")
+    private Integer availableSeat;
 }

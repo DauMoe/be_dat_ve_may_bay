@@ -30,8 +30,7 @@ public class Location implements Serializable {
     @Column(name = "country_name")
     private String countryName;
 
-    @Column(name = "long")
-    private Long longTrip;
+    private Long longitude;
 
-    private Float iat;
+    private Float latitude;
 }
