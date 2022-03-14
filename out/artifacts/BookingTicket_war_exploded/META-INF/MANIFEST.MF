@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Created-By: IntelliJ IDEA
+Built-By: quang
+Build-Jdk: version 11.0.10
+Implementation-Title: BookingTicket
+Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Vendor-Id: com.outsource
+Main-Class: ${start-class}
+

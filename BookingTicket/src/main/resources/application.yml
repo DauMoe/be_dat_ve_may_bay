@@ -16,9 +16,10 @@ spring:
         default-page-size: 20
         max-page-size: 100
   jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
     show-sql: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
@@ -35,3 +36,8 @@ spring:
           auth: true
           starttls:
             enable: true
+app:
+  jwtSecret:
+    token: "airport"
+  jwtExpiration:
+    token: "604800000"
