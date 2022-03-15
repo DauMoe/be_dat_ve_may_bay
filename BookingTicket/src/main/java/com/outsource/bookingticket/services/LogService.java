@@ -40,8 +40,4 @@ public class LogService extends BaseService {
         // Gọi đến hàm lưu log
         flightLogRepository.save(newFlightLog);
     }
-
-    private String getTokenFromHeader(String tokenHeader) {
-        return tokenHeader.substring(7);
-    }
 }

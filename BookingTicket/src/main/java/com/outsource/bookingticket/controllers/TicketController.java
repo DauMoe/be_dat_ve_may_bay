@@ -12,4 +12,15 @@ public class TicketController extends BaseController {
                                    @RequestBody FlightUpdateRequestDTO flightUpdateRequestDTO) {
         return ticketService.updateFlight(flightUpdateRequestDTO, token);
     }
+
+    @GetMapping
+    ResponseEntity<?> getTickets(@RequestHeader("Authorization") String token,
+                                 @RequestParam(value = "filter", required = false) String filter) {
+        return ticketService.getTickets(token, filter);
+    }
+
+    @GetMapping(path = "/{ticket_id}")
+    ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId) {
+        return ticketService.getDetailTicket(ticketId);
+    }
 }
