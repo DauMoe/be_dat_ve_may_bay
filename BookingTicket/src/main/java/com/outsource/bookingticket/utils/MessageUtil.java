@@ -12,4 +12,7 @@ public class MessageUtil {
     public static final String FILL_DATETIME = "Chọn cả thời gian bắt đầu và thời gian kết thúc";
     public static final String NOT_HAVE_ANY_FLIGHT = "Không có chuyến bay nào phù hợp";
     public static final String FLIGHT_SCHEDULE_IS_EMPTY = "Không có lịch trình chuyến bay nào";
+    public static final String NOT_HAVE_ANY_TICKET = "Không tồn tại vé";
+    public static final String TICKET_NOT_FOUND = "Không tìm thấy vé của bạn";
+
 }
