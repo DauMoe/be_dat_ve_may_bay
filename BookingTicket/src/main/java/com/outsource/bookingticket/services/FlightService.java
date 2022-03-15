@@ -2,13 +2,11 @@ package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.FlightScheduleResponseDTO;
-import com.outsource.bookingticket.dtos.FlightUpdateRequestDTO;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -39,7 +37,7 @@ public class FlightService extends BaseService {
             // Convert list entity sang list entity DTO để trả về
             List<FlightResponseDTO> listFlightResult = convertFlightEntityToListDTO(listFlight);
             // Trả về dữ liệu thành công
-            return ResponseEntity.ok(Helper.createSucessCommon(listFlightResult));
+            return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResult)));
         }
         // Không có chuyến bay nào sẽ trả về thông báo
         else throw new ErrorException(MessageUtil.FLIGHT_IS_EMPTY);
@@ -79,7 +77,7 @@ public class FlightService extends BaseService {
                     // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
                     List<FlightScheduleResponseDTO> listFlightResult = convertFlightScheduleToListDTO(flightSchedulesFilter);
                     // Trả về kết quả thành công
-                    return ResponseEntity.ok(Helper.createSucessCommon(listFlightResult));
+                    return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResult)));
                 } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
             }
         }
@@ -102,7 +100,7 @@ public class FlightService extends BaseService {
 
         if (!CollectionUtils.isEmpty(listFlightResponse)) {
             // Trả về kết quả thành công
-            return ResponseEntity.ok(Helper.createSucessCommon(listFlightResponse));
+            return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResponse)));
         } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
     }
 
@@ -110,7 +108,7 @@ public class FlightService extends BaseService {
         List<FlightSchedule> flightSchedule = flightScheduleRepository.findAll();
         if (!CollectionUtils.isEmpty(flightSchedule)) {
             List<FlightScheduleResponseDTO> listScheduleResult = convertFlightScheduleToListDTO(flightSchedule);
-            return ResponseEntity.ok(Helper.createSucessCommon(listScheduleResult));
+            return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listScheduleResult)));
         } else throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_IS_EMPTY);
     }
 

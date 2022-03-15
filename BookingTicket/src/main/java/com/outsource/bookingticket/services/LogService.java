@@ -27,7 +27,7 @@ public class LogService extends BaseService {
         Integer flightId = flightEntity.get().getFlightId();
 
         // Lấy ID của user từ token và tìm user info theo ID
-        Integer userId = jwtTokenProvider.getUserIdFromJWT(token);
+        Integer userId = jwtTokenProvider.getUserIdFromJWT(getTokenFromHeader(token));
         UserEntity user = userRepository.getById(userId);
         // Khởi tạo object để lưu log
         FlightLog newFlightLog = FlightLog.builder()
@@ -39,5 +39,9 @@ public class LogService extends BaseService {
                 .build();
         // Gọi đến hàm lưu log
         flightLogRepository.save(newFlightLog);
+    }
+
+    private String getTokenFromHeader(String tokenHeader) {
+        return tokenHeader.substring(7);
     }
 }
