@@ -3,6 +3,7 @@ package com.outsource.bookingticket.services;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.exception.ErrorException;
+import com.outsource.bookingticket.jwt.JwtTokenProvider;
 import com.outsource.bookingticket.repositories.FlightLogRepository;
 import com.outsource.bookingticket.repositories.FlightRepository;
 import com.outsource.bookingticket.repositories.FlightScheduleRepository;
@@ -34,6 +35,8 @@ public class BaseService {
     @Autowired protected FlightScheduleRepository flightScheduleRepository;
 
     @Autowired protected EntityManager entityManager;
+
+    @Autowired protected JwtTokenProvider jwtTokenProvider;
 
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
