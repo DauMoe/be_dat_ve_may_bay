@@ -1,302 +1,235 @@
--- phpMyAdmin SQL Dump
--- version 5.0.2
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Mar 03, 2022 at 06:00 PM
--- Server version: 10.4.13-MariaDB
--- PHP Version: 7.2.32
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `flight_manager`
---
-
--- --------------------------------------------------------
-
 --
 -- Table structure for table `airplane`
 --
 
+DROP TABLE IF EXISTS `airplane`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `airplane` (
-  `AIRPLANE_ID` int(10) UNSIGNED NOT NULL,
-  `AIRPLANE_NAME` varchar(255) NOT NULL,
-  `CAPACITY` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                            `airplane_id` int(11) NOT NULL AUTO_INCREMENT,
+                            `airplane_name` varchar(255) DEFAULT NULL,
+                            `capacity` float DEFAULT NULL,
+                            PRIMARY KEY (`airplane_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `airplane`
+--
+
+LOCK TABLES `airplane` WRITE;
+/*!40000 ALTER TABLE `airplane` DISABLE KEYS */;
+/*!40000 ALTER TABLE `airplane` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `airport_geo`
 --
 
+DROP TABLE IF EXISTS `airport_geo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `airport_geo` (
-  `AIRPORT_GEO_ID` int(10) UNSIGNED NOT NULL,
-  `LOCATION_ID` int(10) UNSIGNED DEFAULT NULL,
-  `AIRPORT_NAME` varchar(255) DEFAULT NULL,
-  `DESCRIPTION` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                               `airport_geo_id` int(11) NOT NULL AUTO_INCREMENT,
+                               `airport_name` varchar(255) DEFAULT NULL,
+                               `description` varchar(255) DEFAULT NULL,
+                               `location_id` int(11) NOT NULL,
+                               PRIMARY KEY (`airport_geo_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `airport_geo`
+--
+
+LOCK TABLES `airport_geo` WRITE;
+/*!40000 ALTER TABLE `airport_geo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `airport_geo` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `flight`
 --
 
+DROP TABLE IF EXISTS `flight`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `flight` (
-  `FLIGHT_ID` int(10) UNSIGNED NOT NULL,
-  `FLIGHT_NO` varchar(255) DEFAULT NULL,
-  `FROM_AIRPORT_ID` int(10) UNSIGNED DEFAULT NULL,
-  `TO_AIRPORT_ID` int(10) UNSIGNED DEFAULT NULL,
-  `AIRPLANE_ID` int(10) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                          `flight_id` int(11) NOT NULL AUTO_INCREMENT,
+                          `airplane_id` int(11) NOT NULL,
+                          `flight_no` varchar(255) NOT NULL,
+                          `from_airport_id` int(11) NOT NULL,
+                          `to_airport_id` int(11) NOT NULL,
+                          PRIMARY KEY (`flight_id`),
+                          UNIQUE KEY `UK_g9lyjbdea3jbrhy3t85n9bfq2` (`flight_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `flight`
+--
+
+LOCK TABLES `flight` WRITE;
+/*!40000 ALTER TABLE `flight` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flight` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `flight_log`
 --
 
+DROP TABLE IF EXISTS `flight_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `flight_log` (
-  `FLIGHT_LOG_ID` int(10) UNSIGNED NOT NULL,
-  `LOG_DATE` datetime(6) DEFAULT NULL ON UPDATE current_timestamp(6),
-  `USERNAME` varchar(255) DEFAULT NULL,
-  `FLIGHT_ID` int(10) UNSIGNED DEFAULT NULL,
-  `FLIGHT_NO_OLD` varchar(255) DEFAULT NULL,
-  `FLIGHT_NO_NEW` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                              `flight_log_id` int(11) NOT NULL AUTO_INCREMENT,
+                              `flight_id` int(11) NOT NULL,
+                              `flight_no_new` varchar(255) DEFAULT NULL,
+                              `flight_no_old` varchar(255) DEFAULT NULL,
+                              `log_date` datetime DEFAULT NULL,
+                              `username` varchar(255) DEFAULT NULL,
+                              PRIMARY KEY (`flight_log_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `flight_log`
+--
+
+LOCK TABLES `flight_log` WRITE;
+/*!40000 ALTER TABLE `flight_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flight_log` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `flight_schedule`
 --
 
+DROP TABLE IF EXISTS `flight_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `flight_schedule` (
-  `FLIGHT_SCHEDULE_ID` int(10) UNSIGNED NOT NULL,
-  `START_TIME` datetime(6) NOT NULL,
-  `END_TIME` datetime(6) NOT NULL,
-  `FLIGHT_NO` varchar(255) NOT NULL,
-  `AVAILABLE_SEAT` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                                   `flight_schedule_id` int(11) NOT NULL AUTO_INCREMENT,
+                                   `available_seat` int(11) DEFAULT NULL,
+                                   `end_time` datetime DEFAULT NULL,
+                                   `flight_no` varchar(255) DEFAULT NULL,
+                                   `start_time` datetime DEFAULT NULL,
+                                   PRIMARY KEY (`flight_schedule_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `flight_schedule`
+--
+
+LOCK TABLES `flight_schedule` WRITE;
+/*!40000 ALTER TABLE `flight_schedule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flight_schedule` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `location`
 --
 
+DROP TABLE IF EXISTS `location`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `location` (
-  `LOCATION_ID` int(10) UNSIGNED NOT NULL,
-  `COUNTRY_CODE` int(10) UNSIGNED NOT NULL,
-  `CITY_CODE` int(10) UNSIGNED NOT NULL,
-  `COUNTRY_NAME` varchar(255) DEFAULT NULL,
-  `LONGITUDE` varchar(255) DEFAULT NULL,
-  `LATITUDE` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
+                            `location_id` int(11) NOT NULL AUTO_INCREMENT,
+                            `city_id` int(11) DEFAULT NULL,
+                            `city_name` varchar(255) DEFAULT NULL,
+                            `country_code` int(11) DEFAULT NULL,
+                            `country_name` varchar(255) DEFAULT NULL,
+                            `latitude` float DEFAULT NULL,
+                            `longitude` bigint(20) DEFAULT NULL,
+                            PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `ticket`
+-- Dumping data for table `location`
 --
 
-CREATE TABLE `ticket` (
-  `TICKET_ID` int(10) UNSIGNED NOT NULL,
-  `FLIGHT_SCHEDULE_ID` int(10) UNSIGNED DEFAULT NULL,
-  `SEAT_NUMBER` varchar(255) DEFAULT NULL,
-  `PRICE` bigint(20) DEFAULT NULL,
-  `UID` int(10) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
+LOCK TABLES `location` WRITE;
+/*!40000 ALTER TABLE `location` DISABLE KEYS */;
+/*!40000 ALTER TABLE `location` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
 --
 
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
-  `UID` int(10) UNSIGNED NOT NULL,
-  `EMAIL` varchar(255) NOT NULL,
-  `USERNAME` varchar(255) NOT NULL,
-  `PASSWORD` varchar(255) NOT NULL,
-  `EMAIL_VERIFIED` tinyint(1) UNSIGNED DEFAULT 0,
-  `DOB` date DEFAULT NULL,
-  `GENDER` varchar(255) DEFAULT NULL,
-  `PHONE` varchar(255) DEFAULT NULL,
-  `ROLE` tinyint(1) UNSIGNED DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                        `id` int(11) NOT NULL AUTO_INCREMENT,
+                        `dob` date DEFAULT NULL,
+                        `email` varchar(128) NOT NULL,
+                        `email_verified` bit(1) DEFAULT NULL,
+                        `gender` bit(1) DEFAULT NULL,
+                        `password` varchar(64) NOT NULL,
+                        `phone` varchar(10) DEFAULT NULL,
+                        `role` bit(1) DEFAULT NULL,
+                        `uid` varchar(255) DEFAULT NULL,
+                        `username` varchar(128) DEFAULT NULL,
+                        `verification_code` varchar(64) DEFAULT NULL,
+                        PRIMARY KEY (`id`),
+                        UNIQUE KEY `UK_ob8kqyqqgmefl0aco34akdtpe` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
--- Indexes for dumped tables
+-- Table structure for table `password_reset_token`
 --
 
---
--- Indexes for table `airplane`
---
-ALTER TABLE `airplane`
-  ADD PRIMARY KEY (`AIRPLANE_ID`);
+DROP TABLE IF EXISTS `password_reset_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `password_reset_token` (
+                                        `id` int(11) NOT NULL AUTO_INCREMENT,
+                                        `expiry_date` datetime DEFAULT NULL,
+                                        `token` varchar(255) DEFAULT NULL,
+                                        `user_id` int(11) NOT NULL,
+                                        PRIMARY KEY (`id`),
+                                        KEY `FK5lwtbncug84d4ero33v3cfxvl` (`user_id`),
+                                        CONSTRAINT `FK5lwtbncug84d4ero33v3cfxvl` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Indexes for table `airport_geo`
---
-ALTER TABLE `airport_geo`
-  ADD PRIMARY KEY (`AIRPORT_GEO_ID`),
-  ADD KEY `LOCATION_ID` (`LOCATION_ID`);
-
---
--- Indexes for table `flight`
---
-ALTER TABLE `flight`
-  ADD PRIMARY KEY (`FLIGHT_ID`),
-  ADD KEY `FROM_AIRPORT_ID` (`FROM_AIRPORT_ID`),
-  ADD KEY `TO_AIRPORT_ID` (`TO_AIRPORT_ID`),
-  ADD KEY `AIRPLANE_ID` (`AIRPLANE_ID`),
-  ADD KEY `FLIGHT_NO` (`FLIGHT_NO`);
-
---
--- Indexes for table `flight_log`
---
-ALTER TABLE `flight_log`
-  ADD PRIMARY KEY (`FLIGHT_LOG_ID`),
-  ADD KEY `USERNAME` (`USERNAME`),
-  ADD KEY `FLIGHT_ID` (`FLIGHT_ID`),
-  ADD KEY `FLIGHT_NO_OLD` (`FLIGHT_NO_OLD`),
-  ADD KEY `FLIGHT_NO_NEW` (`FLIGHT_NO_NEW`);
-
---
--- Indexes for table `flight_schedule`
---
-ALTER TABLE `flight_schedule`
-  ADD PRIMARY KEY (`FLIGHT_SCHEDULE_ID`) USING BTREE,
-  ADD KEY `flight_no` (`FLIGHT_NO`),
-  ADD KEY `FLIGHT_SCHEDULE_ID` (`FLIGHT_SCHEDULE_ID`);
-
---
--- Indexes for table `location`
---
-ALTER TABLE `location`
-  ADD PRIMARY KEY (`LOCATION_ID`);
-
---
--- Indexes for table `ticket`
---
-ALTER TABLE `ticket`
-  ADD PRIMARY KEY (`TICKET_ID`),
-  ADD KEY `FLIGHT_SCHEDULE_ID` (`FLIGHT_SCHEDULE_ID`),
-  ADD KEY `UID` (`UID`);
-
---
--- Indexes for table `user`
---
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`UID`),
-  ADD UNIQUE KEY `EMAIL` (`EMAIL`) USING BTREE,
-  ADD UNIQUE KEY `USERNAME_2` (`USERNAME`) USING BTREE,
-  ADD KEY `USERNAME` (`USERNAME`);
-
---
--- AUTO_INCREMENT for dumped tables
+-- Dumping data for table `password_reset_token`
 --
 
---
--- AUTO_INCREMENT for table `airplane`
---
-ALTER TABLE `airplane`
-  MODIFY `AIRPLANE_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+LOCK TABLES `password_reset_token` WRITE;
+/*!40000 ALTER TABLE `password_reset_token` DISABLE KEYS */;
+/*!40000 ALTER TABLE `password_reset_token` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- AUTO_INCREMENT for table `airport_geo`
---
-ALTER TABLE `airport_geo`
-  MODIFY `AIRPORT_GEO_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `flight`
---
-ALTER TABLE `flight`
-  MODIFY `FLIGHT_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `flight_log`
---
-ALTER TABLE `flight_log`
-  MODIFY `FLIGHT_LOG_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `flight_schedule`
---
-ALTER TABLE `flight_schedule`
-  MODIFY `FLIGHT_SCHEDULE_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `location`
---
-ALTER TABLE `location`
-  MODIFY `LOCATION_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ticket`
---
-ALTER TABLE `ticket`
-  MODIFY `TICKET_ID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user`
---
-ALTER TABLE `user`
-  MODIFY `UID` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
+-- Table structure for table `ticket`
 --
 
---
--- Constraints for table `airport_geo`
---
-ALTER TABLE `airport_geo`
-  ADD CONSTRAINT `airport_geo_ibfk_1` FOREIGN KEY (`LOCATION_ID`) REFERENCES `location` (`LOCATION_ID`) ON DELETE CASCADE ON UPDATE NO ACTION;
+DROP TABLE IF EXISTS `ticket`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ticket` (
+                          `ticket_id` int(11) NOT NULL AUTO_INCREMENT,
+                          `booking_state` varchar(255) DEFAULT NULL,
+                          `flight_schedule_id` int(11) DEFAULT NULL,
+                          `price` bigint(20) DEFAULT NULL,
+                          `seat_number` varchar(255) DEFAULT NULL,
+                          `uid` int(11) DEFAULT NULL,
+                          PRIMARY KEY (`ticket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Constraints for table `flight`
+-- Dumping data for table `ticket`
 --
-ALTER TABLE `flight`
-  ADD CONSTRAINT `flight_ibfk_1` FOREIGN KEY (`FROM_AIRPORT_ID`) REFERENCES `airport_geo` (`AIRPORT_GEO_ID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `flight_ibfk_2` FOREIGN KEY (`TO_AIRPORT_ID`) REFERENCES `airport_geo` (`AIRPORT_GEO_ID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `flight_ibfk_3` FOREIGN KEY (`AIRPLANE_ID`) REFERENCES `airplane` (`AIRPLANE_ID`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
---
--- Constraints for table `flight_log`
---
-ALTER TABLE `flight_log`
-  ADD CONSTRAINT `flight_log_ibfk_1` FOREIGN KEY (`USERNAME`) REFERENCES `user` (`USERNAME`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `flight_log_ibfk_2` FOREIGN KEY (`FLIGHT_ID`) REFERENCES `flight` (`FLIGHT_ID`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `flight_log_ibfk_3` FOREIGN KEY (`FLIGHT_NO_OLD`) REFERENCES `flight` (`FLIGHT_NO`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `flight_log_ibfk_4` FOREIGN KEY (`FLIGHT_NO_NEW`) REFERENCES `flight` (`FLIGHT_NO`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- Constraints for table `flight_schedule`
---
-ALTER TABLE `flight_schedule`
-  ADD CONSTRAINT `flight_schedule_ibfk_1` FOREIGN KEY (`flight_no`) REFERENCES `flight` (`FLIGHT_NO`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- Constraints for table `ticket`
---
-ALTER TABLE `ticket`
-  ADD CONSTRAINT `ticket_ibfk_1` FOREIGN KEY (`FLIGHT_SCHEDULE_ID`) REFERENCES `flight_schedule` (`flight_schedule_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `ticket_ibfk_2` FOREIGN KEY (`UID`) REFERENCES `user` (`UID`) ON DELETE CASCADE ON UPDATE NO ACTION;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+LOCK TABLES `ticket` WRITE;
+/*!40000 ALTER TABLE `ticket` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ticket` ENABLE KEYS */;
+UNLOCK TABLES;

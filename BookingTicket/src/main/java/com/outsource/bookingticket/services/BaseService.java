@@ -85,4 +85,8 @@ public class BaseService {
         }
         throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_NOT_FOUND_EX);
     }
+
+    protected String getTokenFromHeader(String tokenHeader) {
+        return tokenHeader.substring(7);
+    }
 }
