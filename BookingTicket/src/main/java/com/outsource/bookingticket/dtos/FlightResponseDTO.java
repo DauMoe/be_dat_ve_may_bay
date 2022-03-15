@@ -16,11 +16,11 @@ public class FlightResponseDTO {
     @JsonProperty("flight_no")
     private String flightNo;
 
-    @JsonProperty("from_airport_id")
-    private Integer fromAirportId;
+    @JsonProperty("from_airport")
+    private LocationDTO fromAirport;
 
-    @JsonProperty("to_airport_id")
-    private Integer toAirportId;
+    @JsonProperty("to_airport")
+    private LocationDTO toAirport;
 
     @JsonProperty("airplane_id")
     private Integer airplaneId;

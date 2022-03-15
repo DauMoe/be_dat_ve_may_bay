@@ -2,8 +2,10 @@ package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.FlightScheduleResponseDTO;
+import com.outsource.bookingticket.dtos.LocationDTO;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
+import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -17,10 +19,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,8 +33,11 @@ public class FlightService extends BaseService {
 
         // Kiểm tra danh sách chuyến bay có trống không
         if (!CollectionUtils.isEmpty(listFlight)) {
+            // Lấy hết địa điểm bay
+            List<Location> locationList = getAllLocationByFlight(listFlight);
+
             // Convert list entity sang list entity DTO để trả về
-            List<FlightResponseDTO> listFlightResult = convertFlightEntityToListDTO(listFlight);
+            List<FlightResponseDTO> listFlightResult = convertFlightEntityToListDTO(listFlight, locationList);
             // Trả về dữ liệu thành công
             return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResult)));
         }
@@ -95,8 +97,11 @@ public class FlightService extends BaseService {
         // Gọi tới hàm tìm kiếm theo vị trí khởi hành, kết thúc hoặc mã chuyến bay
         List<FlightEntity> listFlightResult = searchListFlight(fromAirportId, toAirportId, flightNo);
 
+        // Lấy hết địa điểm bay
+        List<Location> locationList = getAllLocationByFlight(listFlightResult);
+
         // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
-        List<FlightResponseDTO> listFlightResponse = convertFlightEntityToListDTO(listFlightResult);
+        List<FlightResponseDTO> listFlightResponse = convertFlightEntityToListDTO(listFlightResult, locationList);
 
         if (!CollectionUtils.isEmpty(listFlightResponse)) {
             // Trả về kết quả thành công
@@ -150,19 +155,44 @@ public class FlightService extends BaseService {
     }
 
     // Hàm convert FlightEntity sang FlightResponseDTO
-    private FlightResponseDTO convertFlightEntityToDTO(FlightEntity flightEntity) {
+    private FlightResponseDTO convertFlightEntityToDTO(FlightEntity flightEntity, List<Location> locationList) {
         FlightResponseDTO responseDTO = new FlightResponseDTO();
         responseDTO.setFlightNo(flightEntity.getFlightNo());
         responseDTO.setFlightId(flightEntity.getFlightId());
         responseDTO.setAirplaneId(flightEntity.getAirplaneId());
-        responseDTO.setFromAirportId(flightEntity.getFromAirportId());
-        responseDTO.setToAirportId(flightEntity.getToAirportId());
+        responseDTO.setFromAirport(mapLocation(getLocationById(flightEntity.getFromAirportId(), locationList)));
+        responseDTO.setToAirport(mapLocation(getLocationById(flightEntity.getToAirportId(), locationList)));
         return responseDTO;
     }
 
+    // Lấy địa điểm bay theo FlightEntity
+    private List<Location> getAllLocationByFlight(List<FlightEntity> listFlight) {
+        // Lấy ID của tất cả địa điểm trong danh sách chuyến bay
+        Set<Integer> listLocationId = new HashSet<>();
+        listFlight.forEach(i -> listLocationId.add(i.getFromAirportId()));
+        listFlight.forEach(i -> listLocationId.add(i.getToAirportId()));
+
+        // Lấy hết địa điểm bay
+        return locationRepository.findLocationsByLocationIdIn(listLocationId);
+    }
+
+    // Hàm chuyển Location sang LocationDTO để trả về
+    private LocationDTO mapLocation(Location location) {
+        LocationDTO locationDTO = new LocationDTO();
+        locationDTO.setLocationId(location.getLocationId());
+        locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
+        locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
+        return locationDTO;
+    }
+
+    private Location getLocationById(Integer locationId, List<Location> locationList) {
+        Optional<Location> location = locationList.stream().filter(i -> i.getLocationId().equals(locationId)).findFirst();
+        return location.orElseGet(Location::new);
+    }
+
     // Hàm convert danh sách FlightEntity sang danh sách FlightResponseDTO
-    private List<FlightResponseDTO> convertFlightEntityToListDTO(List<FlightEntity> listFlightEntity) {
-        return listFlightEntity.stream().map(this::convertFlightEntityToDTO).collect(Collectors.toList());
+    private List<FlightResponseDTO> convertFlightEntityToListDTO(List<FlightEntity> listFlightEntity, List<Location> locationList) {
+        return listFlightEntity.stream().map(i -> convertFlightEntityToDTO(i, locationList)).collect(Collectors.toList());
     }
 
     // Hàm convert FlightSchedule sang FlightScheduleResponseDTO
