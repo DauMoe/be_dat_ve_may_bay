@@ -10,7 +10,6 @@ public class MailUtil {
 
     public  static String getSiteURL(HttpServletRequest request, String path) {
         String siteURL = request.getRequestURL().toString();
-        System.out.println("quang " + siteURL);
         return siteURL.replace(path, "");
     }
 
