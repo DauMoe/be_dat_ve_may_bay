@@ -150,7 +150,6 @@ public class UserController extends BaseController {
         content = content.replace("[[name]]", user.getUsername());
 
         String verifyURL = MailUtil.getSiteURL(request, "/create") + "/verify?code=" + user.getVerificationCode();
-        System.out.println(verifyURL);
         content = content.replace("[[URL]]", verifyURL);
 
         help.setText(content, true);

@@ -61,7 +61,6 @@ public class UserService extends BaseService {
         user.setRole(false); // User role
         user.setUid(UUID.randomUUID().toString());
         encodePassword(user);
-        System.out.println(user.getPassword());
         String randomCode = RandomString.make(64);
         user.setVerificationCode(randomCode);
         userRepository.save(user);

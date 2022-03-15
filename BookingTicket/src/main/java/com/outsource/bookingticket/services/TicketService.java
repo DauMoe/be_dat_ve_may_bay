@@ -39,6 +39,6 @@ public class TicketService extends BaseService {
         logService.saveLogAfterUpdate(flightScheduleOld, flightScheduleNew, token);
 
         // Trả về thông báo thay đổi thành công
-        return ResponseEntity.ok(Helper.createSucessCommon(MessageUtil.FLIGHT_UPDATED_SUCCESS));
+        return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.FLIGHT_UPDATED_SUCCESS));
     }
 }
