@@ -4,11 +4,7 @@ import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.jwt.JwtTokenProvider;
-import com.outsource.bookingticket.repositories.FlightLogRepository;
-import com.outsource.bookingticket.repositories.FlightRepository;
-import com.outsource.bookingticket.repositories.FlightScheduleRepository;
-import com.outsource.bookingticket.repositories.TicketRepository;
-import com.outsource.bookingticket.repositories.UserRepository;
+import com.outsource.bookingticket.repositories.*;
 import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,6 +31,8 @@ public class BaseService {
     @Autowired protected FlightScheduleRepository flightScheduleRepository;
 
     @Autowired protected EntityManager entityManager;
+
+    @Autowired protected LocationRepository locationRepository;
 
     @Autowired protected JwtTokenProvider jwtTokenProvider;
 
