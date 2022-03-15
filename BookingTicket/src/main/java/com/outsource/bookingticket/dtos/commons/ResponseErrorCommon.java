@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseCommon {
+public class ResponseErrorCommon {
     private Integer code;
-    private Object result;
+    private Object description;
 }
