@@ -1,6 +1,6 @@
 package com.outsource.bookingticket.exception;
 
-import com.outsource.bookingticket.dtos.commons.ResponseCommon;
+import com.outsource.bookingticket.dtos.commons.ResponseErrorCommon;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +15,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ErrorException.class)
     public ResponseEntity<?> errorException(ErrorException error, WebRequest request) {
-        ResponseCommon response = new ResponseCommon(
+        ResponseErrorCommon response = new ResponseErrorCommon(
                 HttpStatus.BAD_REQUEST.value(),
                 error.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
