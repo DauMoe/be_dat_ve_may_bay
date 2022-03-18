@@ -43,14 +43,14 @@ public class ForgotPasswordController extends BaseController {
         if (result != null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There has error!");
-            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
         UserEntity user = userService.getUserByPasswordResetToken(passwordDTO.getToken());
         if (user == null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There has error!");
-            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
         responseCommon.setCode(200);

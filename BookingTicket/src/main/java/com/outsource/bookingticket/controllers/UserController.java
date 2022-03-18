@@ -84,7 +84,7 @@ public class UserController extends BaseController {
         if (userService.exitUserByEmail(signupRequest.getEmail())) {
             responseCommon.setCode(204);
             responseCommon.setResult("There has error!");
-            return new ResponseEntity<>(responseCommon, HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
         UserEntity userEntity = new UserEntity();
@@ -121,7 +121,7 @@ public class UserController extends BaseController {
         if (user == null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There were an error");
-            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
         String token = RandomString.make(64);

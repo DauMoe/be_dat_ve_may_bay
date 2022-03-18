@@ -19,7 +19,7 @@ public class JwtAuthorityEntryPoint implements AuthenticationEntryPoint, Seriali
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
         final String expired = (String) request.getAttribute("expired");
         if (expired!=null){
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,expired);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, expired);
         }else{
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Invalid Login details");
         }

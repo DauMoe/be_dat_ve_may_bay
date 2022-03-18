@@ -21,8 +21,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         UserEntity user = userRepo.getUserByEmailOrUsername(username);
 
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
+        if (user == null || !user.isEnabled()) {
+            throw new UsernameNotFoundException("User not found " + username);
         }
 
         return new CustomUserDetails(user);
