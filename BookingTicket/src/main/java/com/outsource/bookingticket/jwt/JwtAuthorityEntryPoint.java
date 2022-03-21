@@ -21,15 +21,16 @@ public class JwtAuthorityEntryPoint implements AuthenticationEntryPoint, Seriali
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
         ObjectMapper objecMapper = new ObjectMapper();
         ResponseCommon responseCommon = new ResponseCommon();
-        responseCommon.setCode(401);
+        responseCommon.setCode(403);
         final String expired = (String) request.getAttribute("expired");
         response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(200);
         if (expired!=null){
             responseCommon.setResult(expired);
-            response.sendError(HttpServletResponse.SC_OK, objecMapper.writeValueAsString(responseCommon));
+            response.getWriter().write(objecMapper.writeValueAsString(responseCommon));
         }else{
             responseCommon.setResult("Invalid Login details");
-            response.sendError(HttpServletResponse.SC_OK, objecMapper.writeValueAsString(responseCommon));
+            response.getWriter().write(objecMapper.writeValueAsString(responseCommon));
         }
     }
 }
