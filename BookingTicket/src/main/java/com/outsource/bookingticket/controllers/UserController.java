@@ -44,6 +44,7 @@ public class UserController extends BaseController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
@@ -79,6 +80,7 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/create", produces = "application/json")
     public ResponseEntity<?> createUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
         ResponseCommon responseCommon = new ResponseCommon();
@@ -102,6 +104,7 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(value = "/verify", produces = "application/json")
     public ResponseEntity<?> verifyAccount(@RequestParam(name = "code") String code) {
         boolean verified = userService.verifyCode(code);
@@ -114,6 +117,7 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/password-reset-token", produces = "application/json")
     public ResponseEntity<?> resetPasswordToken(HttpServletRequest request, @RequestBody PasswordResetDTO passwordResetDTO) throws MessagingException, UnsupportedEncodingException {
         UserEntity user = userService.getUserByEmail(passwordResetDTO.getEmail());
