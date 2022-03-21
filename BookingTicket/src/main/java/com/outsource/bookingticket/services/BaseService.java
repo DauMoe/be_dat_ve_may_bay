@@ -84,6 +84,7 @@ public class BaseService {
         throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_NOT_FOUND_EX);
     }
 
+    // Hàm cắt chuỗi token để loại bỏ 7 ký tự đầu tiền của token (Bearer ).
     protected String getTokenFromHeader(String tokenHeader) {
         return tokenHeader.substring(7);
     }

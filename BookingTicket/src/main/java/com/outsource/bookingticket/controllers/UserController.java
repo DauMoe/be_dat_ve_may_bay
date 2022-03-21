@@ -44,6 +44,7 @@ public class UserController extends BaseController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
@@ -70,6 +71,7 @@ public class UserController extends BaseController {
         userDTO.setUserId(customUserDetails.getUser().getId());
         userDTO.setToken(jwt);
         userDTO.setRole(roles.get(0));
+        userDTO.setUsername(customUserDetails.getUser().getUsername());
 
         ResponseCommon responseCommon = new ResponseCommon();
         responseCommon.setCode(200);
@@ -78,13 +80,14 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/create", produces = "application/json")
     public ResponseEntity<?> createUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
         ResponseCommon responseCommon = new ResponseCommon();
         if (userService.exitUserByEmail(signupRequest.getEmail())) {
             responseCommon.setCode(204);
             responseCommon.setResult("There has error!");
-            return new ResponseEntity<>(responseCommon, HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
         UserEntity userEntity = new UserEntity();
@@ -101,6 +104,7 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(value = "/verify", produces = "application/json")
     public ResponseEntity<?> verifyAccount(@RequestParam(name = "code") String code) {
         boolean verified = userService.verifyCode(code);
@@ -113,6 +117,7 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/password-reset-token", produces = "application/json")
     public ResponseEntity<?> resetPasswordToken(HttpServletRequest request, @RequestBody PasswordResetDTO passwordResetDTO) throws MessagingException, UnsupportedEncodingException {
         UserEntity user = userService.getUserByEmail(passwordResetDTO.getEmail());
@@ -121,7 +126,7 @@ public class UserController extends BaseController {
         if (user == null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There were an error");
-            return new ResponseEntity<>(responseCommon, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
         String token = RandomString.make(64);
