@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.config;
 
+import com.outsource.bookingticket.jwt.JwtAccessDeniedHandler;
 import com.outsource.bookingticket.jwt.JwtAuthenticationFilter;
 import com.outsource.bookingticket.jwt.JwtAuthorityEntryPoint;
 import com.outsource.bookingticket.jwt.UserDetailsServiceImpl;
@@ -30,6 +31,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private JwtAuthorityEntryPoint jwtAuthorityEntryPoint;
+
+    @Autowired
+    private JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -64,11 +68,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .antMatchers("/api/user/**").permitAll()
-                .antMatchers("/api/forgot/**").permitAll()
+                .antMatchers("/api/forgot/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthorityEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
