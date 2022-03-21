@@ -70,6 +70,7 @@ public class UserController extends BaseController {
         userDTO.setUserId(customUserDetails.getUser().getId());
         userDTO.setToken(jwt);
         userDTO.setRole(roles.get(0));
+        userDTO.setUsername(customUserDetails.getUser().getUsername());
 
         ResponseCommon responseCommon = new ResponseCommon();
         responseCommon.setCode(200);
