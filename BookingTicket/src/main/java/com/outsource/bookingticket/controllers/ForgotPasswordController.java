@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/forgot")
 public class ForgotPasswordController extends BaseController {
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(value = "/reset-password")
     public String getPageResetPassword(@RequestParam String token) {
         if (StringUtils.isNoneEmpty(token)) {
@@ -35,7 +36,7 @@ public class ForgotPasswordController extends BaseController {
         return "error/404.html";
     }
 
-
+    @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/save-password", produces = "application/json")
     public ResponseEntity<?> savePassword(@RequestBody PasswordResetTokenDTO passwordDTO) throws PasswordResetTokenNotFoundException {
         String result = userService.validatePasswordResetToken(passwordDTO.getToken());
