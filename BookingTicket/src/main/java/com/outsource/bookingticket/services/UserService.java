@@ -46,41 +46,50 @@ public class UserService extends BaseService {
         PasswordResetToken passwordReset = passwordResetTokenRepository.findByUserId(user.getId());
 
         if (passwordReset != null) {
+            // Nếu có passwordReset set lại thời hạn token
             passwordReset.setExpiryDate(new Date(System.currentTimeMillis() + Constants.EXPIRATION_DATE));
             passwordReset.setToken(token);
         } else {
+            // Nếu không có passwordReset thì tạo cái mới
             passwordReset = new PasswordResetToken(token, user);
             passwordReset.setExpiryDate(new Date(System.currentTimeMillis() + Constants.EXPIRATION_DATE));
         }
-
+        // Lưu vào database
         passwordResetTokenRepository.save(passwordReset);
     }
 
+    // Hàm đăng kí user
     public void registerUser(UserEntity user) {
+        // Để user chưa được kích hoạt
         user.setEnabled(false);
         user.setRole(false); // User role
         user.setUid(UUID.randomUUID().toString());
         encodePassword(user);
+        // Tạo ra 1 token để xác thực ở email
         String randomCode = RandomString.make(64);
         user.setVerificationCode(randomCode);
+
+        // Lưu user vào database
         userRepository.save(user);
     }
 
     public boolean verifyCode(String verificationCode) {
         UserEntity user = userRepository.getUserByVerificationCode(verificationCode);
-
+        // Nếu user đã được kích hoạt
         if (user == null || user.isEnabled()) {
             return false;
         }
         else {
+            // Nếu user chưa được kích hoạt
             userRepository.enable(user.getId());
             return true;
         }
     }
 
     public String validatePasswordResetToken(String token) {
+        // Lấy token lên
         final PasswordResetToken passToken = passwordResetTokenRepository.findByToken(token);
-
+        // Kiểm tra token còn tồn tại và còn hạn hay không
         return !isTokenFound(passToken) ? "invalidToken"
                 : isTokenExpired(passToken) ? "expired"
                 : null;
