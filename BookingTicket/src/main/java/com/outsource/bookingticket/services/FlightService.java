@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class FlightService extends BaseService {
 
-    // Hàm lấy thông tin chuyến bay theo thời gian
+    // Hàm lấy thông tin chuyến bay
     public ResponseEntity<?> getListFlight() {
         // Lấy hết thông tin chuyến bay
         List<FlightEntity> listFlight = flightRepository.findAll();
@@ -110,8 +110,11 @@ public class FlightService extends BaseService {
     }
 
     public ResponseEntity<?> getAllFlightSchedule() {
+        // Gọi hàm tìm kiếm tất cả lịch trình bay
         List<FlightSchedule> flightSchedule = flightScheduleRepository.findAll();
+        // Kiểm tra xem danh sách vừa lấy có rỗng hay không
         if (!CollectionUtils.isEmpty(flightSchedule)) {
+            // Trường hợp không rỗng, sẽ trả về danh sách lịch trình bay, trường hợp rỗng sẽ trả về thông báo lỗi
             List<FlightScheduleResponseDTO> listScheduleResult = convertFlightScheduleToListDTO(flightSchedule);
             return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listScheduleResult)));
         } else throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_IS_EMPTY);
