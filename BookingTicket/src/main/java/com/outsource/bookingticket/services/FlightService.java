@@ -188,6 +188,7 @@ public class FlightService extends BaseService {
         return locationDTO;
     }
 
+    // Hàm lọc địa điểm trong danh sách địa điểm theo ID của địa điểm
     private Location getLocationById(Integer locationId, List<Location> locationList) {
         Optional<Location> location = locationList.stream().filter(i -> i.getLocationId().equals(locationId)).findFirst();
         return location.orElseGet(Location::new);
