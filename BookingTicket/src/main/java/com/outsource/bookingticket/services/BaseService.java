@@ -39,6 +39,7 @@ public class BaseService {
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
         try {
+            // Format dạng ngày/tháng/năm để trả về
             Date date = new SimpleDateFormat("dd/MM/yyyy").parse(dateTimeString);
             return date.toInstant()
                     .atZone(ZoneId.systemDefault())
@@ -50,6 +51,7 @@ public class BaseService {
     }
 
     protected String convertLocalDatetimeToString(LocalDateTime dateTime) {
+        // Hàm format định dạng ngày/tháng/năm giờ:phút:giây
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         return dateTime.format(formatter);
     }

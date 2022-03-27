@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/ticket")
 public class TicketController extends BaseController {
 
+    // API thay đổi chuyến bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/update")
     ResponseEntity<?> updateFlight(@RequestHeader("Authorization") String token,
