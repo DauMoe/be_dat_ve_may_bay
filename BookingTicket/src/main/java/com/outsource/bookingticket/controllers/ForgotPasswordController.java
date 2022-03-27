@@ -19,9 +19,10 @@ public class ForgotPasswordController extends BaseController {
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(value = "/reset-password")
     public String getPageResetPassword(@RequestParam String token) {
+        // Kiểm tra token trong url ở gmail
         if (StringUtils.isNoneEmpty(token)) {
             String result = userService.validatePasswordResetToken(token);
-
+            // Nếu không tồn tại hoặc hết hạn trả ra trang lỗi
             if (result != null) {
                 return "error/404.html";
             }
@@ -30,7 +31,7 @@ public class ForgotPasswordController extends BaseController {
             if (user == null) {
                 return "error/404.html";
             }
-
+            // Trả về trang để người dùng đổi mật khẩu
             return "password-reset.html";
         }
         return "error/404.html";
@@ -39,15 +40,18 @@ public class ForgotPasswordController extends BaseController {
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/save-password", produces = "application/json")
     public ResponseEntity<?> savePassword(@RequestBody PasswordResetTokenDTO passwordDTO) throws PasswordResetTokenNotFoundException {
+        // Kiểm tra token
         String result = userService.validatePasswordResetToken(passwordDTO.getToken());
         ResponseCommon responseCommon = new ResponseCommon();
+        // Nếu token k có hoặc hét hạn trả lỗi
         if (result != null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There has error!");
             return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
-
+        // Lấy user theo token
         UserEntity user = userService.getUserByPasswordResetToken(passwordDTO.getToken());
+        // Nếu không tồn tại trả về lỗi
         if (user == null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There has error!");

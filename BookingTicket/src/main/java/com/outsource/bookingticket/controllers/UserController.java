@@ -47,7 +47,7 @@ public class UserController extends BaseController {
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-
+        // Validate username and password using spring authenticate
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -72,7 +72,7 @@ public class UserController extends BaseController {
         userDTO.setToken(jwt);
         userDTO.setRole(roles.get(0));
         userDTO.setUsername(customUserDetails.getUser().getUsername());
-
+        // Tạo response trả dữ liệu cho phía client
         ResponseCommon responseCommon = new ResponseCommon();
         responseCommon.setCode(200);
         responseCommon.setResult(userDTO);
@@ -83,7 +83,9 @@ public class UserController extends BaseController {
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/create", produces = "application/json")
     public ResponseEntity<?> createUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
+        // đăng ký người dùng
         ResponseCommon responseCommon = new ResponseCommon();
+        // Gọi tới hàm kiểm tra email hợp và tồn tại không
         if (userService.exitUserByEmail(signupRequest.getEmail())) {
             responseCommon.setCode(204);
             responseCommon.setResult("There has error!");
@@ -94,8 +96,9 @@ public class UserController extends BaseController {
         userEntity.setUsername(signupRequest.getUsername());
         userEntity.setEmail(signupRequest.getEmail());
         userEntity.setPassword(signupRequest.getPassword());
-
+        // Gọi hàm tạo user
         userService.registerUser(userEntity);
+        // Gọi hàm gửi mail để xác thực tài khoản người dùng
         sendVerificationEmail(request, userEntity);
 
         responseCommon.setCode(200);
@@ -107,6 +110,7 @@ public class UserController extends BaseController {
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(value = "/verify", produces = "application/json")
     public ResponseEntity<?> verifyAccount(@RequestParam(name = "code") String code) {
+        // Dùng để xác thực token ở email, gọi tới hàm xác thực
         boolean verified = userService.verifyCode(code);
         String result = verified ? "Congratulations! Your account has been verified." : "Your account was already verified, or the verification code is invalid";
 
@@ -117,21 +121,23 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
+    // Sử dụng để tạo email gửi URL để lấy page đổi mật khẩu
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(value = "/password-reset-token", produces = "application/json")
     public ResponseEntity<?> resetPasswordToken(HttpServletRequest request, @RequestBody PasswordResetDTO passwordResetDTO) throws MessagingException, UnsupportedEncodingException {
         UserEntity user = userService.getUserByEmail(passwordResetDTO.getEmail());
         ResponseCommon responseCommon = new ResponseCommon();
-
+        // Nếu user k tồn tại
         if (user == null) {
             responseCommon.setCode(404);
             responseCommon.setResult("There were an error");
             return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 
+        // tạo ra PasswordResetToken
         String token = RandomString.make(64);
         userService.createPasswordResetTokenForUser(token, user);
-
+        // Gửi URL vào email
         sendURLPasswordResetToken(request, token, user);
         responseCommon.setCode(200);
         responseCommon.setResult("Your link reset password has been send. Please check your e-mail.");
