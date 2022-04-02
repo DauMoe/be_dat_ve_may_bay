@@ -130,7 +130,7 @@ public class UserController extends BaseController {
         // Nếu user k tồn tại
         if (user == null) {
             responseCommon.setCode(404);
-            responseCommon.setResult("There were an error");
+            responseCommon.setResult("Your email does not exist");
             return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
 

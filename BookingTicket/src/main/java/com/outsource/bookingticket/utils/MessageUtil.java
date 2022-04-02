@@ -15,4 +15,5 @@ public class MessageUtil {
     public static final String NOT_HAVE_ANY_TICKET = "Không tồn tại vé";
     public static final String TICKET_NOT_FOUND = "Không tìm thấy vé của bạn";
 
+    public static final String USER_NOT_FOUND = "Không tìm thấy thông tin người dùng";
 }
