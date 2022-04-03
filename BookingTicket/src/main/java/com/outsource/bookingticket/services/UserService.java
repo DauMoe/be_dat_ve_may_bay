@@ -138,11 +138,11 @@ public class UserService extends BaseService {
         if (userInDB == null) {
             throw new ErrorException(MessageUtil.USER_NOT_FOUND);
         }
-        // Kiểm tra có cập nhật password ko
-        if (userInForm.getPassword() != null && !userInForm.getPassword().isEmpty()) {
-            userInDB.setPassword(userInForm.getPassword());
-            encodePassword(userInDB);
-        }
+        // Kiểm tra có cập nhật password ko -- Không dùng nữa
+//        if (userInForm.getPassword() != null && !userInForm.getPassword().isEmpty()) {
+//            userInDB.setPassword(userInForm.getPassword());
+//            encodePassword(userInDB);
+//        }
         // Cập nhật thông tin
         userInDB.setDateOfBirth(userInForm.getDateOfBirth());
         userInDB.setGender(userInForm.getGender());

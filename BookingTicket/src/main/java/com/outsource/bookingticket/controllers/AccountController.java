@@ -61,7 +61,7 @@ public class AccountController extends BaseController {
             responseCommon.setResult("Mật khẩu xác nhận không hợp lệ");
             return new ResponseEntity<>(responseCommon, HttpStatus.OK);
         }
-        // Kiểm tra mật khẩu cũ có đúng ko
+        // Kiểm tra mật khẩu cũ có đúng ko mới cho đổi
         if (userService.checkIfValidOldPassword(loggerUser.getUser(), password.getOldPassword())) {
             userService.changePassword(loggerUser.getUser(), password.getNewPassword());
             responseCommon.setResult("Đổi mật khẩu thành công");
