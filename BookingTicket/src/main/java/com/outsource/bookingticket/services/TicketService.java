@@ -1,8 +1,12 @@
 package com.outsource.bookingticket.services;
 
-import com.outsource.bookingticket.dtos.FlightUpdateRequestDTO;
+import com.outsource.bookingticket.dtos.*;
+import com.outsource.bookingticket.entities.airplane.Airplane;
+import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
+import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.entities.ticket.Ticket;
+import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -13,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +80,91 @@ public class TicketService extends BaseService {
 
         // Kiểm tra nếu vé tồn tại thì trả về response cho phía client. Nếu không tồn tại thì trả về lỗi
         if (ticket.isPresent()) {
-            return ResponseEntity.ok(Helper.createSuccessCommon(ticket.get()));
+            // Tìm người đặt mua vé
+            Optional<UserEntity> user = userRepository.findUserEntityById(ticket.get().getUid());
+            // Tìm kiếm lịch trình chuyến bay
+            Optional<FlightSchedule> flightSchedule =
+                    flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticket.get().getFlightScheduleId());
+            // Kiểm tra tồn tại thông tin người dùng và lịch trình chuyến bay
+            if (user.isPresent() && flightSchedule.isPresent()) {
+                // Tìm kiếm thông tin chuyến bay
+                Optional<FlightEntity> flightEntity =
+                        flightRepository.findFlightEntityByFlightNo(flightSchedule.get().getFlightNo());
+                List<FlightEntity> flightList = Collections.singletonList(flightEntity.get());
+                // Lấy hết địa điểm bay
+                List<Location> locationList = getAllLocationByFlight(flightList);
+                // Lấy ra thông tin địa điểm đến
+                Location locationTo = filterLocation(locationList, flightEntity.get().getToAirportId());
+                // Lấy ra thông tin địa điểm xuất phát
+                Location locationFrom = filterLocation(locationList, flightEntity.get().getFromAirportId());
+                // Tìm kiếm tên máy bay
+                Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
+
+                // Gán thông tin trả về
+                TicketDTO ticketDTO = mapToTicketDTO(ticket.get(), user.get(), flightSchedule.get(), flightEntity.get(),
+                        locationTo, locationFrom, airplane.get());
+                return ResponseEntity.ok(Helper.createSuccessCommon(ticketDTO));
+            }
+            // Trả về thông tin lỗi nếu có lỗi xảy ra
+            throw new ErrorException(MessageUtil.SOME_ERRORS);
         } else throw new ErrorException(MessageUtil.TICKET_NOT_FOUND);
+    }
+
+    // Hàm lọc Location theo ID
+    private Location filterLocation(List<Location> locationList, Integer locationId) {
+        return locationList.stream().filter(l -> l.getLocationId().equals(locationId)).findFirst().orElse(null);
+    }
+
+    private TicketDTO mapToTicketDTO(Ticket ticket, UserEntity user, FlightSchedule flightSchedule,
+                                     FlightEntity flightEntity, Location locationTo, Location locationFrom,
+                                     Airplane airplane) {
+        TicketDTO ticketDTO = new TicketDTO();
+        ticketDTO.setTicketId(ticket.getTicketId());
+        ticketDTO.setSeatNumber(ticket.getSeatNumber());
+        ticketDTO.setPrice(ticket.getPrice());
+        ticketDTO.setBookingState(ticket.getBookingState().name());
+        ticketDTO.setAirplaneName(airplane.getAirplaneName());
+        ticketDTO.setFlightSchedule(convertFlightScheduleToDTO(flightSchedule));
+        ticketDTO.setFlightDTO(convertFlightEntityToDTO(flightEntity, locationTo, locationFrom));
+        ticketDTO.setUserDetailDTO(mapUserToUserDetailDTO(user));
+        return ticketDTO;
+    }
+
+    // Hàm convert FlightSchedule sang FlightScheduleResponseDTO
+    private TicketDTO.FlightScheduleDTO convertFlightScheduleToDTO(FlightSchedule flightSchedule) {
+        TicketDTO.FlightScheduleDTO responseDTO = new TicketDTO.FlightScheduleDTO();
+        responseDTO.setStartTime(convertLocalDatetimeToString(flightSchedule.getStartTime()));
+        responseDTO.setEndTime(convertLocalDatetimeToString(flightSchedule.getEndTime()));
+        responseDTO.setAvailableSeat(flightSchedule.getAvailableSeat());
+
+        return responseDTO;
+    }
+
+    // Hàm convert FlightEntity sang FlightResponseDTO
+    private FlightResponseDTO convertFlightEntityToDTO(FlightEntity flightEntity, Location locationTo, Location locationFrom) {
+        FlightResponseDTO responseDTO = new FlightResponseDTO();
+        responseDTO.setFlightNo(flightEntity.getFlightNo());
+        responseDTO.setFlightId(flightEntity.getFlightId());
+        responseDTO.setAirplaneId(flightEntity.getAirplaneId());
+        responseDTO.setFromAirport(mapLocation(locationFrom));
+        responseDTO.setToAirport(mapLocation(locationTo));
+        return responseDTO;
+    }
+
+    // Hàm chuyển Location sang LocationDTO để trả về
+    private LocationDTO mapLocation(Location location) {
+        LocationDTO locationDTO = new LocationDTO();
+        locationDTO.setLocationId(location.getLocationId());
+        locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
+        locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
+        return locationDTO;
+    }
+
+    private UserDetailDTO mapUserToUserDetailDTO(UserEntity user) {
+        UserDetailDTO userDetailDTO = new UserDetailDTO();
+        userDetailDTO.setUsername(user.getUsername());
+        userDetailDTO.setEmail(user.getEmail());
+        userDetailDTO.setPhone(user.getPhone());
+        return userDetailDTO;
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 @Transactional
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
@@ -29,4 +31,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
     @Query("UPDATE UserEntity u SET u.password = ?2 WHERE u.id =?1")
     @Modifying
     int updatePassword(Integer id, String password);
+
+    Optional<UserEntity> findUserEntityById(Integer id);
 }
