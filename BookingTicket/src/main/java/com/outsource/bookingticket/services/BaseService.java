@@ -1,6 +1,8 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
+import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.jwt.JwtTokenProvider;
@@ -14,9 +16,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class BaseService {
 
@@ -34,11 +34,14 @@ public class BaseService {
 
     @Autowired protected LocationRepository locationRepository;
 
+    @Autowired protected AirplaneRepository airplaneRepository;
+
     @Autowired protected JwtTokenProvider jwtTokenProvider;
 
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
         try {
+            // Format dạng ngày/tháng/năm để trả về
             Date date = new SimpleDateFormat("dd/MM/yyyy").parse(dateTimeString);
             return date.toInstant()
                     .atZone(ZoneId.systemDefault())
@@ -50,6 +53,7 @@ public class BaseService {
     }
 
     protected String convertLocalDatetimeToString(LocalDateTime dateTime) {
+        // Hàm format định dạng ngày/tháng/năm giờ:phút:giây
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         return dateTime.format(formatter);
     }
@@ -87,5 +91,16 @@ public class BaseService {
     // Hàm cắt chuỗi token để loại bỏ 7 ký tự đầu tiền của token (Bearer ).
     protected String getTokenFromHeader(String tokenHeader) {
         return tokenHeader.substring(7);
+    }
+
+    // Lấy địa điểm bay theo FlightEntity
+    protected List<Location> getAllLocationByFlight(List<FlightEntity> listFlight) {
+        // Lấy ID của tất cả địa điểm trong danh sách chuyến bay
+        Set<Integer> listLocationId = new HashSet<>();
+        listFlight.forEach(i -> listLocationId.add(i.getFromAirportId()));
+        listFlight.forEach(i -> listLocationId.add(i.getToAirportId()));
+
+        // Lấy hết địa điểm bay
+        return locationRepository.findLocationsByLocationIdIn(listLocationId);
     }
 }

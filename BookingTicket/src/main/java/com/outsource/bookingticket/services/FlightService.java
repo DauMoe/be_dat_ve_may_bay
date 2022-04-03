@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class FlightService extends BaseService {
 
-    // Hàm lấy thông tin chuyến bay theo thời gian
+    // Hàm lấy thông tin chuyến bay
     public ResponseEntity<?> getListFlight() {
         // Lấy hết thông tin chuyến bay
         List<FlightEntity> listFlight = flightRepository.findAll();
@@ -110,8 +110,11 @@ public class FlightService extends BaseService {
     }
 
     public ResponseEntity<?> getAllFlightSchedule() {
+        // Gọi hàm tìm kiếm tất cả lịch trình bay
         List<FlightSchedule> flightSchedule = flightScheduleRepository.findAll();
+        // Kiểm tra xem danh sách vừa lấy có rỗng hay không
         if (!CollectionUtils.isEmpty(flightSchedule)) {
+            // Trường hợp không rỗng, sẽ trả về danh sách lịch trình bay, trường hợp rỗng sẽ trả về thông báo lỗi
             List<FlightScheduleResponseDTO> listScheduleResult = convertFlightScheduleToListDTO(flightSchedule);
             return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listScheduleResult)));
         } else throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_IS_EMPTY);
@@ -165,17 +168,6 @@ public class FlightService extends BaseService {
         return responseDTO;
     }
 
-    // Lấy địa điểm bay theo FlightEntity
-    private List<Location> getAllLocationByFlight(List<FlightEntity> listFlight) {
-        // Lấy ID của tất cả địa điểm trong danh sách chuyến bay
-        Set<Integer> listLocationId = new HashSet<>();
-        listFlight.forEach(i -> listLocationId.add(i.getFromAirportId()));
-        listFlight.forEach(i -> listLocationId.add(i.getToAirportId()));
-
-        // Lấy hết địa điểm bay
-        return locationRepository.findLocationsByLocationIdIn(listLocationId);
-    }
-
     // Hàm chuyển Location sang LocationDTO để trả về
     private LocationDTO mapLocation(Location location) {
         LocationDTO locationDTO = new LocationDTO();
@@ -185,6 +177,7 @@ public class FlightService extends BaseService {
         return locationDTO;
     }
 
+    // Hàm lọc địa điểm trong danh sách địa điểm theo ID của địa điểm
     private Location getLocationById(Integer locationId, List<Location> locationList) {
         Optional<Location> location = locationList.stream().filter(i -> i.getLocationId().equals(locationId)).findFirst();
         return location.orElseGet(Location::new);

@@ -29,14 +29,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
+            // Lấy jwt token khi có request đi qua filter
             String jwt = getJwtFromRequest(request);
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt, request)) {
+                //Vì tích hợp id vô token lên cần lấy id ra
                 Integer userId = tokenProvider.getUserIdFromJWT(jwt);
-
-                UserDetails userDetails = userDetailsService.loadUserById(userId);
+                // Tìm user theo id và convert thành UserDetails
+                UserDetails userDetails = userDetailsService.loadUserById(userId); // để thực hiện Authen
 
                 if (userDetails != null) {
+                    // Nếu người dùng hợp lệ, set thông tin cho Security Context
                     UsernamePasswordAuthenticationToken
                             authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
                             userDetails
@@ -55,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-
+        // Kiểm tra xem header Authorization có chứa thông tin jwt không
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
