@@ -20,4 +20,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 error.getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @ExceptionHandler(PasswordResetTokenNotFoundException.class)
+    public ResponseEntity<?> errorException(PasswordResetTokenNotFoundException error, WebRequest request) {
+        ResponseErrorCommon response = new ResponseErrorCommon(
+                HttpStatus.BAD_REQUEST.value(),
+                error.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

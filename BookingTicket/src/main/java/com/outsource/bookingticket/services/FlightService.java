@@ -168,17 +168,6 @@ public class FlightService extends BaseService {
         return responseDTO;
     }
 
-    // Lấy địa điểm bay theo FlightEntity
-    private List<Location> getAllLocationByFlight(List<FlightEntity> listFlight) {
-        // Lấy ID của tất cả địa điểm trong danh sách chuyến bay
-        Set<Integer> listLocationId = new HashSet<>();
-        listFlight.forEach(i -> listLocationId.add(i.getFromAirportId()));
-        listFlight.forEach(i -> listLocationId.add(i.getToAirportId()));
-
-        // Lấy hết địa điểm bay
-        return locationRepository.findLocationsByLocationIdIn(listLocationId);
-    }
-
     // Hàm chuyển Location sang LocationDTO để trả về
     private LocationDTO mapLocation(Location location) {
         LocationDTO locationDTO = new LocationDTO();

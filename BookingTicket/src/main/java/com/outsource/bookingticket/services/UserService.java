@@ -3,11 +3,14 @@ package com.outsource.bookingticket.services;
 import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.entities.users.PasswordResetToken;
 import com.outsource.bookingticket.entities.users.UserEntity;
+import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.exception.PasswordResetTokenNotFoundException;
 import com.outsource.bookingticket.repositories.PasswordResetTokenRepository;
+import com.outsource.bookingticket.utils.MessageUtil;
 import lombok.extern.log4j.Log4j2;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -101,11 +104,23 @@ public class UserService extends BaseService {
         return userRepository.findById(passwordResetToken.getUser().getId()).get();
     }
 
+    // Đổi mật khẩu người dùng
     public void changePassword(UserEntity user, String newPassword) {
-
+        System.out.println("Maajt khau moi " + newPassword );
         userRepository.updatePassword(user.getId(), passwordEncoder.encode(newPassword));
     }
 
+    public boolean checkIfValidOldPassword(UserEntity user, String oldPassword) {
+
+        passwordEncoder = new BCryptPasswordEncoder();
+        if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Xoá đối tượng password reset token
     public void deletePasswordResetToken(String token) throws PasswordResetTokenNotFoundException {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token);
 
@@ -114,6 +129,26 @@ public class UserService extends BaseService {
         }
 
         passwordResetTokenRepository.delete(passwordResetToken);
+    }
+
+    // Cập nhật thông tin người dùng
+    public UserEntity updateAccount(UserEntity userInForm) {
+        UserEntity userInDB = userRepository.getUserByEmail(userInForm.getEmail());
+        // Nếu k tìm thấy người dùng
+        if (userInDB == null) {
+            throw new ErrorException(MessageUtil.USER_NOT_FOUND);
+        }
+        // Kiểm tra có cập nhật password ko -- Không dùng nữa
+//        if (userInForm.getPassword() != null && !userInForm.getPassword().isEmpty()) {
+//            userInDB.setPassword(userInForm.getPassword());
+//            encodePassword(userInDB);
+//        }
+        // Cập nhật thông tin
+        userInDB.setDateOfBirth(userInForm.getDateOfBirth());
+        userInDB.setGender(userInForm.getGender());
+        userInDB.setPhone(userInForm.getPhone());
+
+        return userRepository.save(userInDB);
     }
 
     private static boolean validateEmail(String email) {
