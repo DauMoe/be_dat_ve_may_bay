@@ -6,6 +6,7 @@ import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.exception.ErrorException;
+import com.outsource.bookingticket.jwt.JwtTokenProvider;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,7 +18,7 @@ import java.util.Optional;
 public class BookingService extends BaseService {
 
     // Hàm đặt vé máy bay với tham số truyền vào là requestDto
-    public ResponseCommon bookingFlight(BookingRequestDto requestDto) {
+    public ResponseCommon bookingFlight(String token, BookingRequestDto requestDto) {
 
         // Kiểm tra requestDto có null không? nếu null trả ra lỗi
         if (Objects.nonNull(requestDto)) {
@@ -38,7 +39,7 @@ public class BookingService extends BaseService {
             ticket.setSeatNumber(requestDto.getSeatNumber());
             ticket.setPrice(requestDto.getPrice());
             ticket.setBookingState(BOOKINGSTATE.BOOKED);
-            ticket.setUid(1);
+            ticket.setUid(jwtTokenProvider.getUserIdFromJWT(getTokenFromHeader(token)));
             // Lưu dối tượng Ticket vào database.
             ticketRepository.save(ticket);
 
