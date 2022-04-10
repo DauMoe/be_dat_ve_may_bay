@@ -11,8 +11,9 @@ public class BookingController extends BaseController {
 
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping
-    public ResponseEntity<?> bookingFlight(@RequestBody BookingRequestDto requestDto){
-        ResponseCommon responseCommon = bookingService.bookingFlight(requestDto);
+    public ResponseEntity<?> bookingFlight(@RequestHeader("Authorization") String token,
+                                           @RequestBody BookingRequestDto requestDto) {
+        ResponseCommon responseCommon = bookingService.bookingFlight(token, requestDto);
         return ResponseEntity.ok(responseCommon);
     }
 }
