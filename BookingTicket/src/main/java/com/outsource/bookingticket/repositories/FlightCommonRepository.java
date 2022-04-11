@@ -56,4 +56,5 @@ public interface FlightCommonRepository extends JpaRepository<FlightCommon, Inte
             "f.airplane_id = a.airplane_id " +
             "where f.flight_no = ?1 ", nativeQuery = true)
     List<FlightCommon> findAllFlightByFlightNo(String flightNo);
+
 }

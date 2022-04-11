@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.controllers;
 
+import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +20,24 @@ public class AdminController extends BaseController {
         return flightService.getAllFlight(fromAirportId, toAirportId, flightNo);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/list-ticket")
+    ResponseEntity<?> getAllTicket(@RequestParam(value = "flight_schedule_id") Integer flightScheduleId) {
+        return ticketService.getAllTicketByScheduleId(flightScheduleId);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PutMapping(path = "/cancel-ticket")
+    public ResponseEntity<?> cancelTicket(@RequestParam("ticket_id") Integer ticketId){
+        ResponseCommon response = ticketService.cancelTicket(ticketId);
+        return ResponseEntity.ok(response);
+    }
+
     // API khoá chuyến bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/lock-flight/{flight_id}")
     ResponseEntity<?> getAllFlight(@PathVariable("flight_id") Integer flightId) {
         return flightService.updateFlightState(flightId);
     }
+
 }
