@@ -25,10 +25,10 @@ public class FlightCommonDTO {
     private LocationDTO toAirport;
 
     @JsonProperty("start_time")
-    private LocalDateTime startTime;
+    private String startTime;
 
     @JsonProperty("end_time")
-    private LocalDateTime endTime;
+    private String endTime;
 
     @JsonProperty("available_seat")
     private Integer availableSeat;

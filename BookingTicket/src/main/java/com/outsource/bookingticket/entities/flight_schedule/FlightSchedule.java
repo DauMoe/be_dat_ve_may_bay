@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.entities.flight_schedule;
 
+import com.outsource.bookingticket.entities.enums.FLIGHTSTATE;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,5 +27,7 @@ public class FlightSchedule {
     private String flightNo;
     @Column(name = "available_seat")
     private Integer availableSeat;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "flight_state")
+    private FLIGHTSTATE flightState;
 }
