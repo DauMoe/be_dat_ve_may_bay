@@ -9,20 +9,13 @@ import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
-import com.outsource.bookingticket.utils.MailUtil;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import static com.outsource.bookingticket.utils.Helper.sendMailCommon;
 
 @Service
 @Transactional
@@ -87,13 +80,12 @@ public class BookingService extends BaseService {
 
         content = content.replace("[[name]]", user.getUsername());
         content = content.replace("[[flightNo]]", schedule.getFlightNo());
-        content = content.replace("[[start]]", schedule.getStartTime().toString());
-        content = content.replace("[[end]]", schedule.getEndTime().toString());
+        content = content.replace("[[start]]", convertLocalDatetimeToString(schedule.getStartTime()));
+        content = content.replace("[[end]]", convertLocalDatetimeToString(schedule.getEndTime()));
         content = content.replace("[[seatNumber]]", ticket.getSeatNumber());
 
         String[] values = new String[]{user.getEmail()};
         Helper.sendMailCommon(values, subject, content);
 
     }
-
 }
