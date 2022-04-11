@@ -4,6 +4,9 @@ import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import java.io.UnsupportedEncodingException;
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController extends BaseController {
@@ -28,6 +31,13 @@ public class AdminController extends BaseController {
     public ResponseEntity<?> cancelTicket(@RequestParam("ticket_id") Integer ticketId){
         ResponseCommon response = ticketService.cancelTicket(ticketId);
         return ResponseEntity.ok(response);
+    }
+
+    // API khoá chuyến bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PutMapping(path = "/lock-flight/{flight_id}")
+    ResponseEntity<?> getAllFlight(@PathVariable("flight_id") Integer flightId) {
+        return flightService.updateFlightState(flightId);
     }
 
 }

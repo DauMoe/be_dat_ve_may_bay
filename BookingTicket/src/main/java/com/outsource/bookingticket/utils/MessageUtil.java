@@ -16,4 +16,6 @@ public class MessageUtil {
     public static final String TICKET_NOT_FOUND = "Không tìm thấy vé của bạn";
     public static final String SOME_ERRORS = "Có lỗi xảy ra!";
     public static final String USER_NOT_FOUND = "Không tìm thấy thông tin người dùng";
+    public static final String FILL_SEARCH_AGAIN = "Nhập lại để tìm kiếm";
+    public static final String LOCK_SUCCESS = "Khoá chuyến bay thành công";
 }
