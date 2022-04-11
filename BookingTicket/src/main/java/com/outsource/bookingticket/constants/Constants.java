@@ -54,4 +54,14 @@ public class Constants {
     public static final String BOOKING_SUCCESS = "Booking vé thành công. Thông tin chi tiết vé đã được gửi qua email của bạn.";
 
     public static final String SEAT_UNAVAILABLE = "Booking không thành công. Số lượng vé của chuyến bay đã hết.";
+
+    // Huỷ chuyến bay
+    public static final String FLIGHT_CANCELED_SUBJECT = "Thông báo huỷ chuyến bay";
+
+    public static final String FLIGHT_CANCELED_CONTENT= "Dear [[name]],<br>Your tickets have been canceled " +
+            "<br><h3>Your flight ticket details:</h3>" +
+            "<br>FULL NAME: [[name]]" +
+            "<br>FLIGHT NO: [[flightNo]]" +
+            "<br>SEAT NUMBER: [[seatNumber]]" +
+            "<br>So sorry. Hope to see you again!";
 }

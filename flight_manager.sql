@@ -233,3 +233,10 @@ LOCK TABLES `ticket` WRITE;
 /*!40000 ALTER TABLE `ticket` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ticket` ENABLE KEYS */;
 UNLOCK TABLES;
+
+/* Query for add column to table*/
+/* Chạy câu này nếu update lỗi "You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column" */
+SET SQL_SAFE_UPDATES = 0;
+/* QUERY */
+ALTER TABLE flight_schedule ADD(flight_state VARCHAR(10));
+UPDATE flight_schedule SET flight_state = 'FLIGHT_ON';
