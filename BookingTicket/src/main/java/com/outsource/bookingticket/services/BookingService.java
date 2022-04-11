@@ -1,27 +1,41 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.BookingRequestDto;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.ticket.Ticket;
+import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
-import com.outsource.bookingticket.jwt.JwtTokenProvider;
+import com.outsource.bookingticket.utils.Helper;
+import com.outsource.bookingticket.utils.MailUtil;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.outsource.bookingticket.utils.Helper.sendMailCommon;
 
 @Service
 @Transactional
 public class BookingService extends BaseService {
 
     // Hàm đặt vé máy bay với tham số truyền vào là requestDto
-    public ResponseCommon bookingFlight(String token, BookingRequestDto requestDto) {
+    public ResponseCommon bookingFlight(String token, BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
+
+        Integer userId = jwtTokenProvider.getUserIdFromJWT(getTokenFromHeader(token));
 
         // Kiểm tra requestDto có null không? nếu null trả ra lỗi
         if (Objects.nonNull(requestDto)) {
+            UserEntity user = userRepository.findById(userId).orElseThrow(() -> new ErrorException("Invalid User"));
             // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
             Optional<FlightSchedule> flightSchedule = flightScheduleRepository.findById(requestDto.getFlightScheduleId());
             // Kiểm tra flightSchedule có rỗng hay không? nếu có trả ra lỗi
@@ -33,13 +47,18 @@ public class BookingService extends BaseService {
             if (Objects.nonNull(ticketExist)
                     && ticketExist.getBookingState().equals(BOOKINGSTATE.BOOKED))
                 throw new ErrorException("Số Ghế Đã Được Đặt");
+
+            //Kiểm tra vé còn hay đã hết.
+            Integer seatAvailable = flightSchedule.get().getAvailableSeat();
+            if (seatAvailable <= 0) throw new ErrorException(Constants.SEAT_UNAVAILABLE);
+
             // Khởi tạo 1 đối tượng của Ticket để set dữ liệu cho đối tượng đó. Dữ liệu được lấy từ tham số truyền vào
             Ticket ticket = new Ticket();
             ticket.setFlightScheduleId(flightSchedule.get().getFlightScheduleId());
             ticket.setSeatNumber(requestDto.getSeatNumber());
             ticket.setPrice(requestDto.getPrice());
             ticket.setBookingState(BOOKINGSTATE.BOOKED);
-            ticket.setUid(jwtTokenProvider.getUserIdFromJWT(getTokenFromHeader(token)));
+            ticket.setUid(userId);
             // Lưu dối tượng Ticket vào database.
             ticketRepository.save(ticket);
 
@@ -48,13 +67,33 @@ public class BookingService extends BaseService {
             // Cập nhật thông tin vào database
             flightScheduleRepository.saveAndFlush(flightSchedule.get());
 
+            sendBookingSuccessEmail(user, ticket, flightSchedule.get());
 
-        } else throw new ErrorException("INVALID_REQUEST");
+
+        } else throw new ErrorException("Invalid Request");
 
         // Trả về các thông tin cho phía client.
         ResponseCommon responseCommon = new ResponseCommon();
         responseCommon.setCode(200);
-        responseCommon.setResult("Booking Vé Thành Công");
+        responseCommon.setResult(Constants.BOOKING_SUCCESS);
         return responseCommon;
     }
+
+    private void sendBookingSuccessEmail(UserEntity user, Ticket ticket, FlightSchedule schedule)
+            throws UnsupportedEncodingException, MessagingException {
+
+        String subject = Constants.BOOKING_SUCCESS_SUBJECT;
+        String content = Constants.BOOKING_SUCCESS_CONTENT;
+
+        content = content.replace("[[name]]", user.getUsername());
+        content = content.replace("[[flightNo]]", schedule.getFlightNo());
+        content = content.replace("[[start]]", schedule.getStartTime().toString());
+        content = content.replace("[[end]]", schedule.getEndTime().toString());
+        content = content.replace("[[seatNumber]]", ticket.getSeatNumber());
+
+        String[] values = new String[]{user.getEmail()};
+        Helper.sendMailCommon(values, subject, content);
+
+    }
+
 }
