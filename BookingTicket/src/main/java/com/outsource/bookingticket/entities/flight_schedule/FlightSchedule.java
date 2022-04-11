@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name = "flight_schedule")
+@Entity
+@Table(name = "flight_schedule")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
