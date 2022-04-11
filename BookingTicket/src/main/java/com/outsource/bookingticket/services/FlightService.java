@@ -3,6 +3,7 @@ package com.outsource.bookingticket.services;
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.FlightScheduleResponseDTO;
 import com.outsource.bookingticket.dtos.LocationDTO;
+import com.outsource.bookingticket.entities.common.FlightCommon;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
@@ -118,6 +119,16 @@ public class FlightService extends BaseService {
             List<FlightScheduleResponseDTO> listScheduleResult = convertFlightScheduleToListDTO(flightSchedule);
             return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listScheduleResult)));
         } else throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_IS_EMPTY);
+    }
+
+    // Lấy hết thông tin chuyến bay (cho quản lý)
+    public ResponseEntity<?> getAllFlight(Integer fromAiportId, Integer toAiportId, String flightNo) {
+        // Gọi hàm lấy hết thông tin chuyến bay
+        List<FlightCommon> flightCommonList = new ArrayList<>();
+        if (Objects.isNull(fromAiportId) && Objects.isNull(toAiportId) && Objects.isNull(flightNo)) {
+            flightCommonList = flightCommonRepository.findAllFlight();
+        }
+        return ResponseEntity.ok(flightCommonList);
     }
 
     private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startDate, LocalDateTime endDate) {
