@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
@@ -7,10 +8,16 @@ import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.jwt.JwtTokenProvider;
 import com.outsource.bookingticket.repositories.*;
+import com.outsource.bookingticket.utils.MailUtil;
 import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -105,4 +112,5 @@ public class BaseService {
         // Lấy hết địa điểm bay
         return locationRepository.findLocationsByLocationIdIn(listLocationId);
     }
+
 }

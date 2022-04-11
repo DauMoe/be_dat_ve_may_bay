@@ -38,4 +38,20 @@ public class Constants {
     public static final String RESET_PASSWORD_WEB_CONTENT ="Hi [[name]],<br> Someone has requested to reset your password with our project. "
             + "If it were not you, please ignore otherwise please click on the link below to set a new password: <br>"
             + "<a href=\"[[URL]]\">Click this link to Reset Password</a><br>Thank you!";
+
+    //Booking Success
+    public static final String BOOKING_SUCCESS_SUBJECT = "Flight ticket information";
+
+    public static final String BOOKING_SUCCESS_CONTENT= "Dear [[name]],<br>Tickets have been booked successfully" +
+                                                        "<br><h3>Your flight ticket details:</h3>" +
+                                                        "<br>FULL NAME: [[name]]" +
+                                                        "<br>FLIGHT NO: [[flightNo]]" +
+                                                        "<br>START TIME: [[start]]" +
+                                                        "<br>END TIME: [[end]]" +
+                                                        "<br>SEAT NUMBER: [[seatNumber]]" +
+                                                        "<br>Thank you. See you again later!";
+
+    public static final String BOOKING_SUCCESS = "Booking vé thành công. Thông tin chi tiết vé đã được gửi qua email của bạn.";
+
+    public static final String SEAT_UNAVAILABLE = "Booking không thành công. Số lượng vé của chuyến bay đã hết.";
 }
