@@ -1,7 +1,12 @@
 package com.outsource.bookingticket.services;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.outsource.bookingticket.dtos.*;
+import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.airplane.Airplane;
+import com.outsource.bookingticket.entities.common.FlightCommon;
+import com.outsource.bookingticket.entities.common.TicketCommon;
+import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
@@ -110,9 +115,75 @@ public class TicketService extends BaseService {
         } else throw new ErrorException(MessageUtil.TICKET_NOT_FOUND);
     }
 
+    public ResponseEntity<?> getAllTicketByScheduleId(Integer scheduleId){
+        List<TicketCommon> ticketCommons = ticketCommonRepository.findTicketByFlightScheduleId(scheduleId);
+        List<TicketResponseDTO> ticketResponseDTOS =
+        ticketCommons.stream().map(f ->
+           mapToTicketCommon(f)
+        ).collect(Collectors.toList());
+
+        return  ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(ticketResponseDTOS)));
+    }
+
     // Hàm lọc Location theo ID
     private Location filterLocation(List<Location> locationList, Integer locationId) {
         return locationList.stream().filter(l -> l.getLocationId().equals(locationId)).findFirst().orElse(null);
+    }
+
+    private TicketResponseDTO mapToTicketCommon(TicketCommon ticketCommon){
+        TicketResponseDTO dto = new TicketResponseDTO();
+        dto.setTicketId(ticketCommon.getTicketId());
+        dto.setSeatNumber(ticketCommon.getSeatNumber());
+        dto.setPrice(ticketCommon.getPrice());
+        dto.setBookingState(ticketCommon.getBookingState());
+        dto.setAirplaneName(ticketCommon.getAirplaneName());
+        dto.setStartTime(convertLocalDatetimeToString(ticketCommon.getStartTime()));
+        dto.setEndTime(convertLocalDatetimeToString(ticketCommon.getEndTime()));
+        dto.setAvailableSeat(ticketCommon.getAvailableSeat());
+        dto.setFlightNo(ticketCommon.getFlightNo());
+        dto.setUsername(ticketCommon.getUsername());
+
+        // Tìm kiếm lịch trình chuyến bay
+        Optional<FlightSchedule> flightSchedule =
+                flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticketCommon.getFlightScheduleId());
+        // Tìm kiếm thông tin chuyến bay
+        Optional<FlightEntity> flightEntity =
+                flightRepository.findFlightEntityByFlightNo(flightSchedule.get().getFlightNo());
+        List<FlightEntity> flightList = Collections.singletonList(flightEntity.get());
+        // Lấy hết địa điểm bay
+        List<Location> locationList = getAllLocationByFlight(flightList);
+        // Lấy ra thông tin địa điểm đến
+        Location locationTo = filterLocation(locationList, flightEntity.get().getToAirportId());
+        // Lấy ra thông tin địa điểm xuất phát
+        Location locationFrom = filterLocation(locationList, flightEntity.get().getFromAirportId());
+        // Tìm kiếm tên máy bay
+        Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
+
+        dto.setFromAirport(locationFrom);
+        dto.setToAirport(locationTo);
+
+        return dto;
+    }
+
+    public ResponseCommon cancelTicket(Integer ticketId){
+
+        // Hàm tìm thông tin vé theo Id của vé
+        Optional<Ticket> ticket = ticketRepository.findById(ticketId);
+        // Kiểm tra vé tìm được có phải rỗng hay không? nếu rỗng trả về lỗi.
+        if (ticket.isEmpty()) throw new ErrorException("Không Tìm Thấy Vé");
+        // Kiểm tra vé đó đã bị hủy từ trước hay chưa? nếu đã bị hủy từ trước rồi thì trả về lỗi
+        if (ticket.get().getBookingState().equals(BOOKINGSTATE.CANCELED)) throw new ErrorException("Vé Đã Bị Hủy");
+        // Thay đổi trạng thái vé từ BOOKED sang CANCELED
+        ticket.get().setBookingState(BOOKINGSTATE.CANCELED);
+        // Cập nhật thông tin vé vào database
+        ticketRepository.saveAndFlush(ticket.get());
+
+        // Trả về các thông tin cho phía client.
+        ResponseCommon response = new ResponseCommon();
+        response.setCode(200);
+        response.setResult("Hủy Vé Thành Công");
+
+        return response;
     }
 
     private TicketDTO mapToTicketDTO(Ticket ticket, UserEntity user, FlightSchedule flightSchedule,
@@ -167,4 +238,5 @@ public class TicketService extends BaseService {
         userDetailDTO.setPhone(user.getPhone());
         return userDetailDTO;
     }
+
 }

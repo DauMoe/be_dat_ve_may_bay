@@ -16,4 +16,5 @@ public interface FlightCommonRepository extends JpaRepository<FlightCommon, Inte
             "join airplane a on " +
             "f.airplane_id = a.airplane_id", nativeQuery = true)
     List<FlightCommon> findAllFlight();
+
 }
