@@ -22,7 +22,7 @@ public class AdminController extends BaseController {
     // API khoá chuyến bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/lock-flight/{flight_id}")
-    ResponseEntity<?> getAllFlight(@PathVariable("flight_id") Integer flightId) throws MessagingException, UnsupportedEncodingException {
+    ResponseEntity<?> getAllFlight(@PathVariable("flight_id") Integer flightId) {
         return flightService.updateFlightState(flightId);
     }
 }
