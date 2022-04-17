@@ -20,12 +20,14 @@ public class AdminController extends BaseController {
         return flightService.getAllFlight(fromAirportId, toAirportId, flightNo);
     }
 
+    // API lấy hết danh sách thông tin vé theo schedule ID
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/list-ticket")
     ResponseEntity<?> getAllTicket(@RequestParam(value = "flight_schedule_id") Integer flightScheduleId) {
         return ticketService.getAllTicketByScheduleId(flightScheduleId);
     }
 
+    // API cancel vé theo ID của vé
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/cancel-ticket")
     public ResponseEntity<?> cancelTicket(@RequestParam("ticket_id") Integer ticketId){

@@ -115,6 +115,7 @@ public class TicketService extends BaseService {
         } else throw new ErrorException(MessageUtil.TICKET_NOT_FOUND);
     }
 
+    // Hàm lấy toàn bộ thông tin vé của 1 schedule
     public ResponseEntity<?> getAllTicketByScheduleId(Integer scheduleId){
         List<TicketCommon> ticketCommons = ticketCommonRepository.findTicketByFlightScheduleId(scheduleId);
         List<TicketResponseDTO> ticketResponseDTOS =

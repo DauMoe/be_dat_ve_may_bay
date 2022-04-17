@@ -60,6 +60,7 @@ public class BookingService extends BaseService {
             // Cập nhật thông tin vào database
             flightScheduleRepository.saveAndFlush(flightSchedule.get());
 
+            // Gọi hàm sendBookingSuccessEmail() để gửi thông tin vé về mail
             sendBookingSuccessEmail(user, ticket, flightSchedule.get());
 
 
@@ -72,6 +73,7 @@ public class BookingService extends BaseService {
         return responseCommon;
     }
 
+    // Hàm thực hiện gửi thông tin vé về mail
     private void sendBookingSuccessEmail(UserEntity user, Ticket ticket, FlightSchedule schedule)
             throws UnsupportedEncodingException, MessagingException {
 
