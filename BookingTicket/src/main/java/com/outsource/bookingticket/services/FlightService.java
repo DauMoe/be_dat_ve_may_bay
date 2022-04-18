@@ -163,7 +163,7 @@ public class FlightService extends BaseService {
         // Gán dữ liệu để trả về
         List<FlightCommonDTO> flightCommonDTOList = convertFlightCommonToListDTO(flightCommonList, locationList);
         // Trả về dữ liệu thành công
-        return ResponseEntity.ok(flightCommonDTOList);
+        return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(flightCommonDTOList)));
     }
 
     // Hàm khoá chuyến bay
