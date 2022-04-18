@@ -68,8 +68,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/user/**").permitAll()
                 .antMatchers("/api/forgot/**").permitAll()
+                .antMatchers("/api/account/**").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/flight/**").permitAll()
-                .antMatchers("/api/account/**").hasRole("USER")
+                .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
@@ -87,6 +88,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers("/images/**", "/js/**", "/webjars/**");
+        web.ignoring().antMatchers("/BookingTicket/images/**", "/js/**", "/webjars/**");
     }
 }

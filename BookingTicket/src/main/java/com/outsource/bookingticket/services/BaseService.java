@@ -47,6 +47,8 @@ public class BaseService {
 
     @Autowired protected TicketCommonRepository ticketCommonRepository;
 
+    @Autowired protected FlightNewsRepository flightNewsRepository;
+
     @Autowired protected JwtTokenProvider jwtTokenProvider;
 
     // Hàm format date từ String sang LocalDatetime
