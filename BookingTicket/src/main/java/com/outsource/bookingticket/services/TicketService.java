@@ -117,13 +117,15 @@ public class TicketService extends BaseService {
 
     // Hàm lấy toàn bộ thông tin vé của 1 schedule
     public ResponseEntity<?> getAllTicketByScheduleId(Integer scheduleId){
+        // Tìm kiếm tất cả vé theo lịch trình bay
         List<TicketCommon> ticketCommons = ticketCommonRepository.findTicketByFlightScheduleId(scheduleId);
-        List<TicketResponseDTO> ticketResponseDTOS =
-        ticketCommons.stream().map(f ->
-           mapToTicketCommon(f)
-        ).collect(Collectors.toList());
+        // Hàm chuyển danh sách thông tin ticket sang danh sách TicketResponseDTO
+        List<TicketResponseDTO> ticketResponseDTOS = ticketCommons.stream()
+                .map(this::mapToTicketCommon)
+                .collect(Collectors.toList());
 
-        return  ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(ticketResponseDTOS)));
+        // Trả về dữ liệu cần tìm
+        return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(ticketResponseDTOS)));
     }
 
     // Hàm lọc Location theo ID
@@ -131,8 +133,11 @@ public class TicketService extends BaseService {
         return locationList.stream().filter(l -> l.getLocationId().equals(locationId)).findFirst().orElse(null);
     }
 
+    // Chuyến dữ liệu từ TicketCommon sang TicketResponseDTO
     private TicketResponseDTO mapToTicketCommon(TicketCommon ticketCommon){
+        // Khởi tạo đối tượng TicketResponseDTO
         TicketResponseDTO dto = new TicketResponseDTO();
+        // Gán các giá trị thuộc tính
         dto.setTicketId(ticketCommon.getTicketId());
         dto.setSeatNumber(ticketCommon.getSeatNumber());
         dto.setPrice(ticketCommon.getPrice());
@@ -157,12 +162,11 @@ public class TicketService extends BaseService {
         Location locationTo = filterLocation(locationList, flightEntity.get().getToAirportId());
         // Lấy ra thông tin địa điểm xuất phát
         Location locationFrom = filterLocation(locationList, flightEntity.get().getFromAirportId());
-        // Tìm kiếm tên máy bay
-        Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
 
         dto.setFromAirport(locationFrom);
         dto.setToAirport(locationTo);
 
+        // Trả về dữ liệu
         return dto;
     }
 
