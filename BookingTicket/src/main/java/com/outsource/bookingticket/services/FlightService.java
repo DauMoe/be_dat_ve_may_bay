@@ -1,6 +1,5 @@
 package com.outsource.bookingticket.services;
 
-import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.FlightCommonDTO;
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.FlightScheduleResponseDTO;
@@ -12,7 +11,6 @@ import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.entities.ticket.Ticket;
-import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -20,13 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.mail.MessagingException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -133,45 +129,67 @@ public class FlightService extends BaseService {
     public ResponseEntity<?> getAllFlight(Integer fromAirportId, Integer toAirportId, String flightNo) {
         // Gọi hàm lấy hết thông tin chuyến bay
         List<FlightCommon> flightCommonList;
+        // Xử lý lấy ra danh sách chuyến bay
+        // Nếu không có điều kiện sẽ lấy hết danh sách
         if (Objects.isNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlight();
-        } else if (Objects.nonNull(fromAirportId) && Objects.nonNull(toAirportId) && Objects.isNull(flightNo)){
+        // Lấy danh sách chuyến bay theo địa điểm đến và đi
+        } else if (Objects.nonNull(fromAirportId) && Objects.nonNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlightByLocation(fromAirportId, toAirportId);
-        } else if (Objects.nonNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(flightNo)){
+        // Lấy danh sách chuyến bay theo địa điểm bắt đầu
+        } else if (Objects.nonNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlightByFromLocation(fromAirportId);
-        } else if (Objects.isNull(fromAirportId) && Objects.nonNull(toAirportId) && Objects.isNull(flightNo)){
+        // Lấy danh sách chuyến bay theo địa điểm đến
+        } else if (Objects.isNull(fromAirportId) && Objects.nonNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlightByToLocation(toAirportId);
+        // Lấy danh sách chuyến bay theo mã chuyến bay
         } else if (Objects.isNull(fromAirportId) && Objects.isNull(toAirportId)) {
             flightCommonList = flightCommonRepository.findAllFlightByFlightNo(flightNo);
+        // Lấy danh sách chuyến bay theo địa điểm đến, đi và mã chuyến bay
         } else if (Objects.nonNull(fromAirportId) && Objects.nonNull(toAirportId)) {
             flightCommonList = flightCommonRepository.findAllFlightByLocationAndFlightNo(fromAirportId, toAirportId, flightNo);
+        // Trả về lỗi nếu tìm kiếm sai
         } else throw new ErrorException(MessageUtil.FILL_SEARCH_AGAIN);
 
+        // Danh sách mã địa điểm đến và đi
         Set<Integer> locationIdList = new HashSet<>();
         flightCommonList.forEach(i -> {
             locationIdList.add(i.getToAirportId());
             locationIdList.add(i.getFromAirportId());
         });
+        // Lấy hết các thông tin về địa điểm theo danh sách mã địa điểm
         List<Location> locationList = locationRepository.findLocationsByLocationIdIn(locationIdList);
 
+        // Gán dữ liệu để trả về
         List<FlightCommonDTO> flightCommonDTOList = convertFlightCommonToListDTO(flightCommonList, locationList);
-        return ResponseEntity.ok(flightCommonDTOList);
+        // Trả về dữ liệu thành công
+        return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(flightCommonDTOList)));
     }
 
+    // Hàm khoá chuyến bay
     public ResponseEntity<?> updateFlightState(Integer flightId) {
+        // Tìm kiếm chuyến bay theo mã chuyến bay
         Optional<FlightEntity> flightEntityOp = flightRepository.findFlightEntityByFlightId(flightId);
+        // Kiểm tra nếu rỗng trả ra lỗi
         if (flightEntityOp.isEmpty()) {
             throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
         }
+        // Lấy dữ liệu chuyến bay
         FlightEntity flightEntity = flightEntityOp.get();
+        // Lấy danh sách lịch trình bay theo mã chuyến bay
         List<FlightSchedule> flightScheduleList = flightScheduleRepository.findFlightSchedulesByFlightNo(flightEntity.getFlightNo());
+        // Lấy hết vé theo mã chuyến bay
         List<Ticket> tickets = ticketRepository.findTicketByFlightNoAndState(flightEntity.getFlightNo());
+        // Kiểm tra danh sách vé không rỗng thì sẽ huỷ hết các vé này
         if (!CollectionUtils.isEmpty(tickets)) {
             tickets.forEach(t -> t.setBookingState(BOOKINGSTATE.CANCELED));
             ticketRepository.saveAll(tickets);
         }
+        // Thay đổi trạng thái chuyến bay sang huỷ
         flightScheduleList.forEach(i -> i.setFlightState(FLIGHTSTATE.FLIGHT_OFF));
+        // Lưu vào hệ thống dữ liệu
         flightScheduleRepository.saveAll(flightScheduleList);
+        // Trả về khoá chuyến bay thành công
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.LOCK_SUCCESS));
     }
 
@@ -278,19 +296,5 @@ public class FlightService extends BaseService {
     // Hàm convert danh sách FlightCommon sang danh sách FlightCommonDTO
     private List<FlightCommonDTO> convertFlightCommonToListDTO(List<FlightCommon> flightCommonList, List<Location> locationList) {
         return flightCommonList.stream().map(i -> convertToFlightCommonDTO(i, locationList)).collect(Collectors.toList());
-    }
-
-    private void sendFlightCanceledEmail(UserEntity user, String flightNo)
-            throws UnsupportedEncodingException, MessagingException {
-
-        String subject = Constants.FLIGHT_CANCELED_SUBJECT;
-        String content = Constants.FLIGHT_CANCELED_CONTENT;
-
-        content = content.replace("[[name]]", user.getUsername());
-        content = content.replace("[[flightNo]]", flightNo);
-
-        String[] values = new String[]{user.getEmail()};
-        Helper.sendMailCommon(values, subject, content);
-
     }
 }
