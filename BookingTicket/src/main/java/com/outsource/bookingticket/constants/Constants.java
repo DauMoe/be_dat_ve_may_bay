@@ -4,6 +4,8 @@ import java.util.regex.Pattern;
 
 public class Constants {
 
+    public static final int FLIGHT_NEWS_PER_PAGE = 5;
+
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =  Pattern.compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     public static final String MAIL_FROM = "truongnv2026@gmail.com";
