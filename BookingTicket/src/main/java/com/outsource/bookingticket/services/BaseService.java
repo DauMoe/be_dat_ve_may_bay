@@ -51,6 +51,8 @@ public class BaseService {
 
     @Autowired protected JwtTokenProvider jwtTokenProvider;
 
+    @Autowired protected ClientRepository clientRepository;
+
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
         try {
