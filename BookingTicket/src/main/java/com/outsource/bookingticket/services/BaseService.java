@@ -73,6 +73,12 @@ public class BaseService {
         return dateTime.format(formatter);
     }
 
+    protected String convertLocalDatetimeToHourString(LocalDateTime dateTime) {
+        // Hàm format định dạng ngày/tháng/năm giờ:phút:giây
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        return dateTime.format(formatter);
+    }
+
     // Hàm lấy thông tin chuyến bay
     protected Ticket getTicket(Integer ticketId) {
         // Kiểm tra ID vé bay không rỗng sẽ tìm kiếm; nếu rỗng sẽ trả ra thông báo lỗi

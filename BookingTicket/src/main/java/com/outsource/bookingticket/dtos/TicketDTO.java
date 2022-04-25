@@ -15,17 +15,17 @@ public class TicketDTO {
     private Integer ticketId;
     @JsonProperty("seat_number")
     private String seatNumber;
-    private Long price;
+    private PriceDTO price;
     @JsonProperty("booking_state")
     private String bookingState;
+    @JsonProperty("ticket_type")
+    private String ticketType;
     @JsonProperty("airplane_name")
     private String airplaneName;
     @JsonProperty("flight_schedule")
     private FlightScheduleDTO flightSchedule;
     @JsonProperty("flight_detail")
-    private FlightResponseDTO flightDTO;
-    @JsonProperty("user_detail")
-    private UserDetailDTO userDetailDTO;
+    private FlightDetailDTO flightDTO;
 
     @Data
     public static class FlightScheduleDTO {
@@ -35,5 +35,27 @@ public class TicketDTO {
         private String endTime;
         @JsonProperty("available_seat")
         private Integer availableSeat;
+    }
+
+    @Data
+    public static class FlightDetailDTO {
+        @JsonProperty("flight_id")
+        private Integer flightId;
+        @JsonProperty("flight_no")
+        private String flightNo;
+        @JsonProperty("from_airport")
+        private LocationDTO fromAirport;
+        @JsonProperty("to_airport")
+        private LocationDTO toAirport;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class PriceDTO {
+        @JsonProperty("ticket_price")
+        private Long ticketPrice;
+        private Long tax;
+        @JsonProperty("total_price")
+        private Long totalPrice;
     }
 }

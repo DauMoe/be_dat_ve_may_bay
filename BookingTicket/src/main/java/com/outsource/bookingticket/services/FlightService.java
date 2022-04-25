@@ -144,8 +144,8 @@ public class FlightService extends BaseService {
         responseDTO.setFlightNo(flightEntity.getFlightNo());
         responseDTO.setFlightId(flightEntity.getFlightId());
         responseDTO.setWeightPackage(flightEntity.getWeightPackage());
-        responseDTO.setStartTime(convertLocalDatetimeToString(flightEntity.getStartTime()));
-        responseDTO.setEndTime(convertLocalDatetimeToString(flightEntity.getEndTime()));
+        responseDTO.setStartTime(convertLocalDatetimeToHourString(flightEntity.getStartTime()));
+        responseDTO.setEndTime(convertLocalDatetimeToHourString(flightEntity.getEndTime()));
         responseDTO.setPrice(flightEntity.getPrice());
         responseDTO.setFlightScheduleId(flightEntity.getFlightScheduleId());
         responseDTO.setTicketId(flightEntity.getTicketId());
