@@ -6,15 +6,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+import java.time.LocalDateTime;
+
 @Data
-public class FlightResponseDTO {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class FlightCommonDTO {
     private Integer flightId;
 
     @JsonProperty("flight_no")
     private String flightNo;
+
+    @JsonProperty("from_airport")
+    private LocationDTO fromAirport;
+
+    @JsonProperty("to_airport")
+    private LocationDTO toAirport;
 
     @JsonProperty("start_time")
     private String startTime;
@@ -22,19 +30,11 @@ public class FlightResponseDTO {
     @JsonProperty("end_time")
     private String endTime;
 
-    @JsonProperty("weight_package")
-    private Integer weightPackage;
+    @JsonProperty("available_seat")
+    private Integer availableSeat;
 
-    private Long price;
+    @JsonProperty("airplane_name")
+    private String airplaneName;
 
-    @JsonProperty("flight_schedule_id")
-    private Integer flightScheduleId;
 
-    @JsonProperty("ticket_id")
-    private Integer ticketId;
-
-    private String brand;
-
-    @JsonProperty("link_image_brand")
-    private String linkImageBrand;
 }

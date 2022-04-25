@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
@@ -7,10 +8,16 @@ import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.jwt.JwtTokenProvider;
 import com.outsource.bookingticket.repositories.*;
+import com.outsource.bookingticket.utils.MailUtil;
 import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -36,7 +43,17 @@ public class BaseService {
 
     @Autowired protected AirplaneRepository airplaneRepository;
 
+    @Autowired protected FlightCommonRepository flightCommonRepository;
+
+    @Autowired protected TicketCommonRepository ticketCommonRepository;
+
+    @Autowired protected FlightNewsRepository flightNewsRepository;
+
+    @Autowired protected FlightTicketRepository flightTicketRepository;
+
     @Autowired protected JwtTokenProvider jwtTokenProvider;
+
+    @Autowired protected ClientRepository clientRepository;
 
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
@@ -54,7 +71,13 @@ public class BaseService {
 
     protected String convertLocalDatetimeToString(LocalDateTime dateTime) {
         // Hàm format định dạng ngày/tháng/năm giờ:phút:giây
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return dateTime.format(formatter);
+    }
+
+    protected String convertLocalDatetimeToHourString(LocalDateTime dateTime) {
+        // Hàm format định dạng ngày/tháng/năm giờ:phút:giây
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return dateTime.format(formatter);
     }
 
@@ -103,4 +126,5 @@ public class BaseService {
         // Lấy hết địa điểm bay
         return locationRepository.findLocationsByLocationIdIn(listLocationId);
     }
+
 }

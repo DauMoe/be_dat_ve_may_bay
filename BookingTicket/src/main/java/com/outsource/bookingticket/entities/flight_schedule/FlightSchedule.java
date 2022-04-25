@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.entities.flight_schedule;
 
+import com.outsource.bookingticket.entities.enums.FLIGHTSTATE;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name = "flight_schedule")
+@Entity
+@Table(name = "flight_schedule")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -25,5 +27,7 @@ public class FlightSchedule {
     private String flightNo;
     @Column(name = "available_seat")
     private Integer availableSeat;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "flight_state")
+    private FLIGHTSTATE flightState;
 }
