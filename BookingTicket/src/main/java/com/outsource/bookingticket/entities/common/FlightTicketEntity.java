@@ -42,4 +42,13 @@ public class FlightTicketEntity implements Serializable {
     @Id
     @Column(name = "ticket_id")
     private Integer ticketId;
+
+    @Id
+    @Column(name = "airplane_id")
+    private Integer airplaneId;
+
+    private String brand;
+
+    @Column(name = "link_img_brand")
+    private String linkImgBrand;
 }

@@ -144,11 +144,13 @@ public class FlightService extends BaseService {
         responseDTO.setFlightNo(flightEntity.getFlightNo());
         responseDTO.setFlightId(flightEntity.getFlightId());
         responseDTO.setWeightPackage(flightEntity.getWeightPackage());
-        responseDTO.setStartTime(convertLocalDatetimeToString(flightEntity.getStartTime()));
-        responseDTO.setEndTime(convertLocalDatetimeToString(flightEntity.getEndTime()));
+        responseDTO.setStartTime(convertLocalDatetimeToHourString(flightEntity.getStartTime()));
+        responseDTO.setEndTime(convertLocalDatetimeToHourString(flightEntity.getEndTime()));
         responseDTO.setPrice(flightEntity.getPrice());
         responseDTO.setFlightScheduleId(flightEntity.getFlightScheduleId());
         responseDTO.setTicketId(flightEntity.getTicketId());
+        responseDTO.setBrand(flightEntity.getBrand());
+        responseDTO.setLinkImageBrand(flightEntity.getLinkImgBrand());
         return responseDTO;
     }
 
@@ -172,18 +174,6 @@ public class FlightService extends BaseService {
         return listFlightEntity.stream().map(this::convertFlightEntityToDTO).collect(Collectors.toList());
     }
 
-    // Hàm convert FlightSchedule sang FlightScheduleResponseDTO
-    private FlightScheduleResponseDTO convertFlightScheduleToDTO(FlightSchedule flightSchedule) {
-        FlightScheduleResponseDTO responseDTO = new FlightScheduleResponseDTO();
-        responseDTO.setFlightScheduleId(flightSchedule.getFlightScheduleId());
-        responseDTO.setStartTime(convertLocalDatetimeToString(flightSchedule.getStartTime()));
-        responseDTO.setEndTime(convertLocalDatetimeToString(flightSchedule.getEndTime()));
-        responseDTO.setAvailableSeat(flightSchedule.getAvailableSeat());
-        responseDTO.setFlightNo(flightSchedule.getFlightNo());
-
-        return responseDTO;
-    }
-
     private FlightCommonDTO convertToFlightCommonDTO(FlightCommon flightCommon, List<Location> locationList) {
         Location toLocation = getLocationById(flightCommon.getToAirportId(), locationList);
         Location fromLocation = getLocationById(flightCommon.getFromAirportId(), locationList);
@@ -197,11 +187,6 @@ public class FlightService extends BaseService {
                 .availableSeat(flightCommon.getAvailableSeat())
                 .airplaneName(flightCommon.getAirplaneName())
                 .build();
-    }
-
-    // Hàm convert danh sách FlightSchedule sang danh sách FlightScheduleResponseDTO
-    private List<FlightScheduleResponseDTO> convertFlightScheduleToListDTO(List<FlightSchedule> listFlightSchedule) {
-        return listFlightSchedule.stream().map(this::convertFlightScheduleToDTO).collect(Collectors.toList());
     }
 
     // Hàm convert danh sách FlightCommon sang danh sách FlightCommonDTO
