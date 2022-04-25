@@ -22,4 +22,9 @@ public class Airplane implements Serializable {
     private String airplaneName;
 
     private Float capacity;
+
+    private String brand;
+
+    @Column(name = "link_img_brand")
+    private String linkImgBrand;
 }
