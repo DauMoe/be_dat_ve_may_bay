@@ -14,9 +14,8 @@ public class BookingController extends BaseController {
 
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(path = "/create")
-    public ResponseEntity<?> bookingFlight(@RequestHeader("Authorization") String token,
-                                           @RequestBody BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
-        ResponseCommon responseCommon = bookingService.bookingFlight(token, requestDto);
+    public ResponseEntity<?> bookingFlight(@RequestBody BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
+        ResponseCommon responseCommon = bookingService.bookingFlight(requestDto);
         return ResponseEntity.ok(responseCommon);
     }
 
