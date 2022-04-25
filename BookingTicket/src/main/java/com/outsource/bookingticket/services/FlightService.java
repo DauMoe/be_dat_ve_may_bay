@@ -32,31 +32,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class FlightService extends BaseService {
 
-    // Hàm lấy thông tin chuyến bay theo ID chuyến bay
-    public ResponseEntity<?> getDetailFlight(Integer flightId) {
-        // Kiểm tra ID chuyến bay có rỗng không, nếu rỗng trả ra thông báo lỗi
-        if (Objects.nonNull(flightId)) {
-            // Tìm kiếm chuyến bay theo ID
-            Optional<FlightEntity> flightEntity = flightRepository.findFlightEntityByFlightId(flightId);
-            // Tồn tại thông tin chuyến bay
-            if (flightEntity.isPresent()) {
-                List<FlightSchedule> flightSchedulesFilter;
-                // Tìm kiếm lịch trình chuyến bay theo mã chuyến bay
-                List<FlightSchedule> flightSchedules =
-                        flightScheduleRepository.findFlightSchedulesByFlightNo(flightEntity.get().getFlightNo());
-                // Kiểm tra danh sách sau khi tìm kiếm theo ngày có dữ liệu hay không, nếu không có trả ra thông báo lỗi
-                if (!CollectionUtils.isEmpty(flightSchedules)) {
-                    // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
-                    List<FlightScheduleResponseDTO> listFlightResult = convertFlightScheduleToListDTO(flightSchedules);
-                    // Trả về kết quả thành công
-                    return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResult)));
-                } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
-            }
-        }
-        // Trả về thông báo lỗi
-        throw new ErrorException(MessageUtil.FLIGHT_NOT_FOUND_EX);
-    }
-
     // Hàm tìm kiếm chuyến bay theo vị trí khởi hành, kết thúc hoặc mã chuyến bay
     public ResponseEntity<?> searchFlight(Integer fromAirportId, Integer toAirportId, String startTime, String endTime) {
         // Kiểm tra nếu các biến truyền vào đều null thì sẽ trả ra thông báo lỗi
@@ -82,17 +57,6 @@ public class FlightService extends BaseService {
                         new ArrayList<>(listFlightResponseTo), new ArrayList<>(listFlightToResponseReturn)));
             } else return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResponseTo)));
         } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
-    }
-
-    public ResponseEntity<?> getAllFlightSchedule() {
-        // Gọi hàm tìm kiếm tất cả lịch trình bay
-        List<FlightSchedule> flightSchedule = flightScheduleRepository.findAll();
-        // Kiểm tra xem danh sách vừa lấy có rỗng hay không
-        if (!CollectionUtils.isEmpty(flightSchedule)) {
-            // Trường hợp không rỗng, sẽ trả về danh sách lịch trình bay, trường hợp rỗng sẽ trả về thông báo lỗi
-            List<FlightScheduleResponseDTO> listScheduleResult = convertFlightScheduleToListDTO(flightSchedule);
-            return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listScheduleResult)));
-        } else throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_IS_EMPTY);
     }
 
     // Lấy hết thông tin chuyến bay (cho quản lý)
