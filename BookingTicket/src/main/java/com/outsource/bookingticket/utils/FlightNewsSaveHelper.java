@@ -17,7 +17,11 @@ public class FlightNewsSaveHelper {
 
     public static void setMainImageName(MultipartFile mainImageFile, FlightNews flightNews) {
         if (!mainImageFile.isEmpty()) {
-            String fileName = StringUtils.cleanPath(mainImageFile.getOriginalFilename());
+            String fileNameTemp = mainImageFile.getOriginalFilename();
+            if (fileNameTemp.contains(" ")) {
+                fileNameTemp = replaceSpaceFileName(fileNameTemp);
+            }
+            String fileName = StringUtils.cleanPath(fileNameTemp);
             flightNews.setMainImage(fileName);
         }
     }
@@ -31,6 +35,11 @@ public class FlightNewsSaveHelper {
         for (int count = 0; count < imageIDs.length; count++) {
             Integer id = Integer.parseInt(imageIDs[count]);
             String name = imageNames[count];
+
+            if (name.contains(" ")) {
+                name = replaceSpaceFileName(name);
+            }
+
             images.add(new FlightNewsImage(id, name, flightNews));
         }
 
@@ -44,6 +53,9 @@ public class FlightNewsSaveHelper {
                     String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
 
                     if (!flightNews.containsImageName(fileName)) { // Check image exit
+                        if (fileName.contains(" ")) {
+                            fileName = replaceSpaceFileName(fileName);
+                        }
                         flightNews.addExtraImage(fileName);
                     }
                 }
@@ -53,7 +65,11 @@ public class FlightNewsSaveHelper {
 
     public static void saveUploadImages(MultipartFile mainImage, List<MultipartFile> extraImage, FlightNews flightNews) throws IOException {
         if (!mainImage.isEmpty()) {
-            String fileName = StringUtils.cleanPath(mainImage.getOriginalFilename());
+            String fileNameTemp = mainImage.getOriginalFilename();
+            if (fileNameTemp.contains(" ")) {
+                fileNameTemp = replaceSpaceFileName(fileNameTemp);
+            }
+            String fileName = StringUtils.cleanPath(fileNameTemp);
             String uploadDir = "BookingTicket/images/flight-news-image/" + flightNews.getFlightNewsId();
 
             FileUploadUtil.cleanDir(uploadDir);
@@ -66,7 +82,12 @@ public class FlightNewsSaveHelper {
             for (MultipartFile multipartFile : extraImage) {
                 if (multipartFile.isEmpty()) continue;
 
-                String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+                String fileNameTemp = multipartFile.getOriginalFilename();
+                if (fileNameTemp.contains(" ")) {
+                    fileNameTemp = replaceSpaceFileName(fileNameTemp);
+                }
+
+                String fileName = StringUtils.cleanPath(fileNameTemp);
                 FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
             }
         }
@@ -94,5 +115,9 @@ public class FlightNewsSaveHelper {
             e.printStackTrace();
             System.out.println("Could not list directory: " + dir);
         }
+    }
+
+    private static String replaceSpaceFileName(String fileName) {
+        return fileName.replaceAll("\\s+", "");
     }
 }
