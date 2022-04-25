@@ -12,9 +12,7 @@ public class BookingRequestDto {
     private String namePassenger;
     private String phoneNumber;
     private String email;
-    private Integer flightScheduleIdTo;
-    private Integer flightScheduleIdBack;
-    private Long priceTo;
-    private Long priceBack;
+    private Integer ticketIdTo;
+    private Integer ticketIdBack;
 
 }
