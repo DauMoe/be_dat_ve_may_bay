@@ -1,7 +1,5 @@
 package com.outsource.bookingticket.entities.common;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.outsource.bookingticket.dtos.LocationDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

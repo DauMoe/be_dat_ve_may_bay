@@ -20,8 +20,8 @@ public class TicketDTO {
     private String bookingState;
     @JsonProperty("ticket_type")
     private String ticketType;
-    @JsonProperty("airplane_name")
-    private String airplaneName;
+    @JsonProperty("airplane_detail")
+    private AirplaneDTO airplaneDTO;
     @JsonProperty("flight_schedule")
     private FlightScheduleDTO flightSchedule;
     @JsonProperty("flight_detail")
@@ -58,4 +58,5 @@ public class TicketDTO {
         @JsonProperty("total_price")
         private Long totalPrice;
     }
+
 }

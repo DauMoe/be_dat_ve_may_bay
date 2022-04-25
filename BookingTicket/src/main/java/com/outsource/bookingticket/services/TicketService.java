@@ -1,10 +1,8 @@
 package com.outsource.bookingticket.services;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.outsource.bookingticket.dtos.*;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.airplane.Airplane;
-import com.outsource.bookingticket.entities.common.FlightCommon;
 import com.outsource.bookingticket.entities.common.TicketCommon;
 import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import com.outsource.bookingticket.entities.enums.TICKETTYPE;
@@ -12,15 +10,12 @@ import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.entities.ticket.Ticket;
-import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -152,7 +147,7 @@ public class TicketService extends BaseService {
         ticketDTO.setTicketType(TICKETTYPE.getValue(ticket.getTicketType().name()).value);
         ticketDTO.setPrice(new TicketDTO.PriceDTO(ticket.getPrice(), tax, totalPrice));
         ticketDTO.setBookingState(ticket.getBookingState().name());
-        ticketDTO.setAirplaneName(airplane.getAirplaneName());
+        ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
         ticketDTO.setFlightSchedule(convertFlightScheduleToDTO(flightSchedule));
         ticketDTO.setFlightDTO(convertFlightEntityToDTO(flightEntity, locationTo, locationFrom));
         return ticketDTO;
