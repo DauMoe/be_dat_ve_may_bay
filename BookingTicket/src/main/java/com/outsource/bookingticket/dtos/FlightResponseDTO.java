@@ -16,12 +16,20 @@ public class FlightResponseDTO {
     @JsonProperty("flight_no")
     private String flightNo;
 
-    @JsonProperty("from_airport")
-    private LocationDTO fromAirport;
+    @JsonProperty("start_time")
+    private String startTime;
 
-    @JsonProperty("to_airport")
-    private LocationDTO toAirport;
+    @JsonProperty("end_time")
+    private String endTime;
 
-    @JsonProperty("airplane_id")
-    private Integer airplaneId;
+    @JsonProperty("weight_package")
+    private Integer weightPackage;
+
+    private Long price;
+
+    @JsonProperty("flight_schedule_id")
+    private Integer flightScheduleId;
+
+    @JsonProperty("ticket_id")
+    private Integer ticketId;
 }

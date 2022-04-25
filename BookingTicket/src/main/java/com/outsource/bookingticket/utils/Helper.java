@@ -30,6 +30,17 @@ public class Helper {
         return responseCommon;
     }
 
+    public static ResponseCommonList createSuccessToFromListCommon(List<Object> toList, List<Object> fromList) {
+        ResponseCommonList responseCommon = new ResponseCommonList();
+        CommonList commonList = new CommonList();
+        responseCommon.setCode(200);
+
+        commonList.setToList(toList);
+        commonList.setFromList(fromList);
+        responseCommon.setResult(commonList);
+        return responseCommon;
+    }
+
     public static void sendMailCommon(String[] addresses, String subject, String content) throws MessagingException, UnsupportedEncodingException {
         JavaMailSenderImpl mailSender = MailUtil.prepareMailSender();
 

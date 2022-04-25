@@ -221,9 +221,6 @@ public class TicketService extends BaseService {
         FlightResponseDTO responseDTO = new FlightResponseDTO();
         responseDTO.setFlightNo(flightEntity.getFlightNo());
         responseDTO.setFlightId(flightEntity.getFlightId());
-        responseDTO.setAirplaneId(flightEntity.getAirplaneId());
-        responseDTO.setFromAirport(mapLocation(locationFrom));
-        responseDTO.setToAirport(mapLocation(locationTo));
         return responseDTO;
     }
 

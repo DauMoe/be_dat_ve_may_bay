@@ -49,6 +49,8 @@ public class BaseService {
 
     @Autowired protected FlightNewsRepository flightNewsRepository;
 
+    @Autowired protected FlightTicketRepository flightTicketRepository;
+
     @Autowired protected JwtTokenProvider jwtTokenProvider;
 
     @Autowired protected ClientRepository clientRepository;
@@ -69,7 +71,7 @@ public class BaseService {
 
     protected String convertLocalDatetimeToString(LocalDateTime dateTime) {
         // Hàm format định dạng ngày/tháng/năm giờ:phút:giây
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         return dateTime.format(formatter);
     }
 
