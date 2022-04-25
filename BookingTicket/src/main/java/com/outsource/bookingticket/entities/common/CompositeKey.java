@@ -6,4 +6,5 @@ public class CompositeKey implements Serializable {
     private Integer flightId;
     private Integer flightScheduleId;
     private Integer ticketId;
+    private Integer airplaneId;
 }

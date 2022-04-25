@@ -32,4 +32,9 @@ public class FlightResponseDTO {
 
     @JsonProperty("ticket_id")
     private Integer ticketId;
+
+    private String brand;
+
+    @JsonProperty("link_image_brand")
+    private String linkImageBrand;
 }
