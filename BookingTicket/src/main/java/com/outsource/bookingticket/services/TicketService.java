@@ -144,7 +144,7 @@ public class TicketService extends BaseService {
         TicketDTO ticketDTO = new TicketDTO();
         ticketDTO.setTicketId(ticket.getTicketId());
         ticketDTO.setSeatNumber(ticket.getSeatNumber());
-        ticketDTO.setTicketType(TICKETTYPE.getValue(ticket.getTicketType().name()).value);
+        ticketDTO.setTicketType(ticket.getSeatNumber() + "_" + TICKETTYPE.getValue(ticket.getTicketType().name()).value);
         ticketDTO.setPrice(new TicketDTO.PriceDTO(ticket.getPrice(), tax, totalPrice));
         ticketDTO.setBookingState(ticket.getBookingState().name());
         ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
