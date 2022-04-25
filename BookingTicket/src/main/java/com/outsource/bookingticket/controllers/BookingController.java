@@ -18,11 +18,4 @@ public class BookingController extends BaseController {
         ResponseCommon responseCommon = bookingService.bookingFlight(requestDto);
         return ResponseEntity.ok(responseCommon);
     }
-
-    @CrossOrigin(maxAge = 3600, origins = "*")
-    @PutMapping(path = "/cancel")
-    public ResponseEntity<?> cancelTicket(@RequestParam("ticket_id") Integer ticketId){
-        ResponseCommon response = cancelBookingService.cancelTicket(ticketId);
-        return ResponseEntity.ok(response);
-    }
 }
