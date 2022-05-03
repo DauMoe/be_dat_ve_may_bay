@@ -3,6 +3,7 @@ package com.outsource.bookingticket.controllers;
 import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.EditFlightNewsDTO;
 import com.outsource.bookingticket.dtos.FlightNewsDTO;
+import com.outsource.bookingticket.dtos.LocationRequestDTO;
 import com.outsource.bookingticket.dtos.PagingFlightNews;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.flight_news.FlightNews;
@@ -17,10 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -32,9 +30,7 @@ public class AdminController extends BaseController {
     @GetMapping(path = "/list-flight")
     ResponseEntity<?> getAllFlight(@RequestParam(value = "from_airport", required = false) Integer fromAirportId,
                                    @RequestParam(value = "to_airport", required = false) Integer toAirportId,
-                                   @RequestParam(value = "flight_no", required = false) String flightNo,
-                                   @RequestParam(value = "start_date", required = false) String startDate,
-                                   @RequestParam(value = "end_date", required = false) String endDate) {
+                                   @RequestParam(value = "flight_no", required = false) String flightNo) {
         return flightService.getAllFlight(fromAirportId, toAirportId, flightNo);
     }
 
@@ -58,6 +54,19 @@ public class AdminController extends BaseController {
     @PutMapping(path = "/lock-flight/{flight_id}")
     ResponseEntity<?> getAllFlight(@PathVariable("flight_id") Integer flightId) {
         return flightService.updateFlightState(flightId);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/location-add")
+    ResponseEntity<?> addLocation(@RequestBody LocationRequestDTO locationRequestDTO) {
+        return locationService.addLocation(locationRequestDTO);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PutMapping(path = "/location-update/{location_id}")
+    ResponseEntity<?> addLocation(@PathVariable("location_id") Integer locationId,
+                                  @RequestBody LocationRequestDTO locationRequestDTO) {
+        return locationService.editLocation(locationId, locationRequestDTO);
     }
 
     /*************API Quản lý Tin Tức Chuyến Bay******************/
