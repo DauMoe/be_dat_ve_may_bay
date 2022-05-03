@@ -12,7 +12,7 @@ import java.util.Set;
 public interface LocationRepository extends JpaRepository<Location, Integer> {
     List<Location> findLocationsByLocationIdIn(Set<Integer> locationIds);
 
-    Optional<Location> findLocationByCountryName(String countryName);
+    Optional<Location> findFirstByCountryName(String countryName);
 
-    Location findLocationByOrderByLocationIdDesc();
+    Location findFirstByOrderByLocationIdDesc();
 }

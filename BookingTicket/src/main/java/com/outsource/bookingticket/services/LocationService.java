@@ -20,7 +20,7 @@ public class LocationService extends BaseService {
     public ResponseEntity<?> addLocation(LocationRequestDTO locationRequestDTO) {
         // Tìm kiếm thông tin quốc gia đã tồn tại ở bản ghi khác dưới DB chưa
         Optional<Location> existCountryOp =
-                locationRepository.findLocationByCountryName(locationRequestDTO.getCountryName());
+                locationRepository.findFirstByCountryName(locationRequestDTO.getCountryName());
         if (!StringUtils.hasLength(locationRequestDTO.getCityName()) ||
                 !StringUtils.hasLength(locationRequestDTO.getCountryName()) ||
                 !StringUtils.hasLength(locationRequestDTO.getAirportName())) {
@@ -46,7 +46,7 @@ public class LocationService extends BaseService {
 
             airportGeoRepository.save(newAirportGeo);
         } else {
-            Location lastCountry = locationRepository.findLocationByOrderByLocationIdDesc();
+            Location lastCountry = locationRepository.findFirstByOrderByLocationIdDesc();
             Location newLocation = Location.builder()
                     .countryCode(lastCountry.getCountryCode() + 1)
                     .countryName(locationRequestDTO.getCountryName())
@@ -69,7 +69,17 @@ public class LocationService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.INSERT_SUCCESS));
     }
 
-//    public ResponseEntity<?> editLocation(Integer locationId) {
-//
-//    }
+    public ResponseEntity<?> editLocation(Integer locationId, LocationRequestDTO locationRequestDTO) {
+        boolean isLocationUsedInFlight = checkLocationUsedInFlight(locationId);
+        if (!isLocationUsedInFlight) {
+            throw new ErrorException(MessageUtil.UPDATED_EXCEPTION);
+        }
+        Location updatedLocation = locationRepository.findById(locationId).orElseThrow(() -> {
+            throw new ErrorException(MessageUtil.UPDATED_EXCEPTION);
+        });
+        updatedLocation.setCityName(locationRequestDTO.getCityName());
+        updatedLocation.setCountryName(locationRequestDTO.getCountryName());
+        locationRepository.save(updatedLocation);
+        return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.UPDATED_SUCCESS));
+    }
 }
