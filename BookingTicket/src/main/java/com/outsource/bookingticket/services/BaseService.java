@@ -132,14 +132,19 @@ public class BaseService {
         return locationRepository.findLocationsByLocationIdIn(listLocationId);
     }
 
+    // Hàm kiểm tra địa điểm đã được sử dụng ở chuyến bay nào chưa
     protected boolean checkLocationUsedInFlight(Integer locationId) {
+        // Tìm hết các AirportGeo theo Id địa điểm
         List<AirportGeo> airportGeoList = airportGeoRepository.findAirportGeosByLocationId(locationId);
+        // Lọc các Id airportGeo theo danh sách vừa tìm được
         List<Integer> airportGeoIdList = airportGeoList
                 .stream()
                 .map(AirportGeo::getLocationId).distinct()
                 .collect(Collectors.toList());
+        // Tìm kiếm danh sách bay có địa điểm đi và đến trong danh sách airportGeo
         List<FlightEntity> flightEntityList =
                 flightRepository.findByFromAirportIdInOrToAirportIdIn(airportGeoIdList, airportGeoIdList);
+        // Kiểm tra danh sách này có rỗng hay không
         return CollectionUtils.isEmpty(flightEntityList);
     }
 }

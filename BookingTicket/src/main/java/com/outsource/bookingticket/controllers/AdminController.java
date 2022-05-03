@@ -11,8 +11,6 @@ import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.pojo.SignupRequest;
 import com.outsource.bookingticket.utils.FileUploadUtil;
 import com.outsource.bookingticket.utils.FlightNewsSaveHelper;
-import com.outsource.bookingticket.utils.Helper;
-import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
