@@ -6,6 +6,8 @@ import com.outsource.bookingticket.dtos.FlightNewsDTO;
 import com.outsource.bookingticket.dtos.PagingFlightNews;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.flight_news.FlightNews;
+import com.outsource.bookingticket.entities.users.UserEntity;
+import com.outsource.bookingticket.pojo.SignupRequest;
 import com.outsource.bookingticket.utils.FileUploadUtil;
 import com.outsource.bookingticket.utils.FlightNewsSaveHelper;
 import org.springframework.data.domain.Page;
@@ -13,7 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -185,5 +190,31 @@ public class AdminController extends BaseController {
         flightNews.setUpdateBy(flightNewsDTO.getUpdateBy());
 
         return flightNews;
+    }
+
+    // API Quản lý Account Admin
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(value = "/account/create", produces = "application/json")
+    public ResponseEntity<?> createUser(@RequestBody SignupRequest signupRequest) {
+        // đăng ký account
+        ResponseCommon responseCommon = new ResponseCommon();
+        // Gọi tới hàm kiểm tra email hợp và tồn tại không
+        if (userService.exitUserByEmail(signupRequest.getEmail())) {
+            responseCommon.setCode(204);
+            responseCommon.setResult("There has error!");
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+        }
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(signupRequest.getUsername());
+        userEntity.setEmail(signupRequest.getEmail());
+        userEntity.setPassword(signupRequest.getPassword());
+        // Gọi hàm tạo user
+        userService.registerUser(userEntity);
+
+        responseCommon.setCode(200);
+        responseCommon.setResult("Registration success");
+
+        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 }
