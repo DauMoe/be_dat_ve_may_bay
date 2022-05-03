@@ -2,7 +2,9 @@ package com.outsource.bookingticket.controllers;
 
 import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.UserDTO;
+import com.outsource.bookingticket.dtos.commons.CommonList;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
+import com.outsource.bookingticket.dtos.commons.ResponseCommonList;
 import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.jwt.CustomUserDetails;
 import com.outsource.bookingticket.jwt.JwtTokenProvider;
@@ -141,6 +143,25 @@ public class UserController extends BaseController {
         sendURLPasswordResetToken(request, token, user);
         responseCommon.setCode(200);
         responseCommon.setResult("Your link reset password has been send. Please check your e-mail.");
+        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(value = "/flight-news", produces = "application/json")
+    public ResponseEntity<?> listAllFlightNews() {
+        ResponseCommon responseCommonList = new ResponseCommon();
+
+        responseCommonList.setCode(200);
+        responseCommonList.setResult(flightNewsService.listAll());
+
+        return new ResponseEntity<>(responseCommonList, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/flight-news/get", produces = "application/json")
+    public ResponseEntity<?> getFlightNews(@RequestParam Integer id) {
+        ResponseCommon responseCommon = new ResponseCommon();
+        responseCommon.setCode(200);
+        responseCommon.setResult(flightNewsService.get(id));
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
