@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.constants.Constants;
+import com.outsource.bookingticket.entities.airport.AirportGeo;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
@@ -13,6 +14,7 @@ import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.util.CollectionUtils;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BaseService {
 
@@ -129,4 +132,14 @@ public class BaseService {
         return locationRepository.findLocationsByLocationIdIn(listLocationId);
     }
 
+    protected boolean checkLocationUsedInFlight(Integer locationId) {
+        List<AirportGeo> airportGeoList = airportGeoRepository.findAirportGeosByLocationId(locationId);
+        List<Integer> airportGeoIdList = airportGeoList
+                .stream()
+                .map(AirportGeo::getLocationId).distinct()
+                .collect(Collectors.toList());
+        List<FlightEntity> flightEntityList =
+                flightRepository.findByFromAirportIdInOrToAirportIdIn(airportGeoIdList, airportGeoIdList);
+        return CollectionUtils.isEmpty(flightEntityList);
+    }
 }

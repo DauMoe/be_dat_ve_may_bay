@@ -69,4 +69,7 @@ public class LocationService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.INSERT_SUCCESS));
     }
 
+//    public ResponseEntity<?> editLocation(Integer locationId) {
+//
+//    }
 }
