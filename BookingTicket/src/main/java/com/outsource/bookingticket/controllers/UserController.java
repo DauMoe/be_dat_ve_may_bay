@@ -107,19 +107,19 @@ public class UserController extends BaseController {
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
 
-    @CrossOrigin(maxAge = 3600, origins = "*")
-    @GetMapping(value = "/verify", produces = "application/json")
-    public ResponseEntity<?> verifyAccount(@RequestParam(name = "code") String code) {
-        // Dùng để xác thực token ở email, gọi tới hàm xác thực
-        boolean verified = userService.verifyCode(code);
-        String result = verified ? "Congratulations! Your account has been verified." : "Your account was already verified, or the verification code is invalid";
+//    @CrossOrigin(maxAge = 3600, origins = "*")
+//    @GetMapping(value = "/verify", produces = "application/json")
+//    public ResponseEntity<?> verifyAccount(@RequestParam(name = "code") String code) {
+//        // Dùng để xác thực token ở email, gọi tới hàm xác thực
+//        boolean verified = userService.verifyCode(code);
+//        String result = verified ? "Congratulations! Your account has been verified." : "Your account was already verified, or the verification code is invalid";
+//
+//        ResponseCommon responseCommon = new ResponseCommon();
+//        responseCommon.setCode(200);
+//        responseCommon.setResult(result);
 
-        ResponseCommon responseCommon = new ResponseCommon();
-        responseCommon.setCode(200);
-        responseCommon.setResult(result);
-
-        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
-    }
+//        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+//    }
 
     // Sử dụng để tạo email gửi URL để lấy page đổi mật khẩu
     @CrossOrigin(maxAge = 3600, origins = "*")
