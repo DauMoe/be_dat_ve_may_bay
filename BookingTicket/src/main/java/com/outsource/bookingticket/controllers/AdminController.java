@@ -25,7 +25,9 @@ public class AdminController extends BaseController {
     @GetMapping(path = "/list-flight")
     ResponseEntity<?> getAllFlight(@RequestParam(value = "from_airport", required = false) Integer fromAirportId,
                                    @RequestParam(value = "to_airport", required = false) Integer toAirportId,
-                                   @RequestParam(value = "flight_no", required = false) String flightNo) {
+                                   @RequestParam(value = "flight_no", required = false) String flightNo,
+                                   @RequestParam(value = "start_date", required = false) String startDate,
+                                   @RequestParam(value = "end_date", required = false) String endDate) {
         return flightService.getAllFlight(fromAirportId, toAirportId, flightNo);
     }
 

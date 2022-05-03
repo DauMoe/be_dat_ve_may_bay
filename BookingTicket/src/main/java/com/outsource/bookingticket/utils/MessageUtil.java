@@ -18,4 +18,6 @@ public class MessageUtil {
     public static final String USER_NOT_FOUND = "Không tìm thấy thông tin người dùng";
     public static final String FILL_SEARCH_AGAIN = "Nhập lại để tìm kiếm";
     public static final String LOCK_SUCCESS = "Khoá chuyến bay thành công";
+    public static final String INSERT_NOT_SUCCESS = "Thêm không thành công";
+    public static final String INSERT_SUCCESS = "Thêm thành công";
 }
