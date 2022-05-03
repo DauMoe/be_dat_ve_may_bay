@@ -50,8 +50,25 @@ public class Constants {
                                                         "<br>FLIGHT NO: [[flightNo]]" +
                                                         "<br>START TIME: [[start]]" +
                                                         "<br>END TIME: [[end]]" +
-                                                        "<br>SEAT NUMBER: [[seatNumber]]" +
+                                                        "<br>TOTAL PRICE: [[totalPrice]]" +
                                                         "<br>Thank you. See you again later!";
+
+    public static final String BOOKING_SUCCESS_CONTENT_KHU_HOI = "Dear [[name]],<br>Tickets have been booked successfully" +
+                                                                "<br><h3>Your flight ticket details:</h3>" +
+                                                                "<br><h4>VE CHIEU DI:</h4>" +
+                                                                "<br>FULL NAME: [[name]]" +
+                                                                "<br>FLIGHT NO: [[flightNo]]" +
+                                                                "<br>START TIME: [[start]]" +
+                                                                "<br>END TIME: [[end]]" +
+                                                                "<br>TOTAL PRICE: [[totalPrice]]" +
+
+                                                                "<br><h4>VE CHIEU VE:</h4>" +
+                                                                "<br>FULL NAME: [[name]]" +
+                                                                "<br>FLIGHT NO: [[flightNoVe]]" +
+                                                                "<br>START TIME: [[startVe]]" +
+                                                                "<br>END TIME: [[endVe]]" +
+                                                                "<br>TOTAL PRICE: [[totalPriceVe]]" +
+                                                                "<br>Thank you. See you again later!";
 
     public static final String BOOKING_SUCCESS = "Booking vé thành công. Thông tin chi tiết vé đã được gửi qua email của bạn.";
 

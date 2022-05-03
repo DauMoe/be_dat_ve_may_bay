@@ -3,9 +3,12 @@ package com.outsource.bookingticket.controllers;
 import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.EditFlightNewsDTO;
 import com.outsource.bookingticket.dtos.FlightNewsDTO;
+import com.outsource.bookingticket.dtos.LocationRequestDTO;
 import com.outsource.bookingticket.dtos.PagingFlightNews;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.flight_news.FlightNews;
+import com.outsource.bookingticket.entities.users.UserEntity;
+import com.outsource.bookingticket.pojo.SignupRequest;
 import com.outsource.bookingticket.utils.FileUploadUtil;
 import com.outsource.bookingticket.utils.FlightNewsSaveHelper;
 import org.springframework.data.domain.Page;
@@ -49,6 +52,19 @@ public class AdminController extends BaseController {
     @PutMapping(path = "/lock-flight/{flight_id}")
     ResponseEntity<?> getAllFlight(@PathVariable("flight_id") Integer flightId) {
         return flightService.updateFlightState(flightId);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/location-add")
+    ResponseEntity<?> addLocation(@RequestBody LocationRequestDTO locationRequestDTO) {
+        return locationService.addLocation(locationRequestDTO);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PutMapping(path = "/location-update/{location_id}")
+    ResponseEntity<?> addLocation(@PathVariable("location_id") Integer locationId,
+                                  @RequestBody LocationRequestDTO locationRequestDTO) {
+        return locationService.editLocation(locationId, locationRequestDTO);
     }
 
     /*************API Quản lý Tin Tức Chuyến Bay******************/
@@ -185,5 +201,38 @@ public class AdminController extends BaseController {
         flightNews.setUpdateBy(flightNewsDTO.getUpdateBy());
 
         return flightNews;
+    }
+
+    // API Quản lý Account Admin
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(value = "/account/create", produces = "application/json")
+    public ResponseEntity<?> createUser(@RequestBody SignupRequest signupRequest) {
+        // đăng ký account
+        ResponseCommon responseCommon = new ResponseCommon();
+        // Gọi tới hàm kiểm tra email hợp và tồn tại không
+        if (userService.exitUserByEmail(signupRequest.getEmail())) {
+            responseCommon.setCode(204);
+            responseCommon.setResult("There has error!");
+            return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+        }
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUsername(signupRequest.getUsername());
+        userEntity.setEmail(signupRequest.getEmail());
+        userEntity.setPassword(signupRequest.getPassword());
+        // Gọi hàm tạo user
+        userService.registerUser(userEntity);
+
+        responseCommon.setCode(200);
+        responseCommon.setResult("Registration success");
+
+        return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+    }
+
+    //API xóa location
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @DeleteMapping(value = "/location-delete/{location-id}")
+    public ResponseEntity<?> deleteLocation(@PathVariable(name = "location-id") Integer locationId){
+        return ResponseEntity.ok(locationService.deleteLocation(locationId));
     }
 }

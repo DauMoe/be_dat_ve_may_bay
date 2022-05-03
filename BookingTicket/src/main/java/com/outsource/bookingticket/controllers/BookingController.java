@@ -9,14 +9,13 @@ import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 @RestController
-@RequestMapping("/book/create")
+@RequestMapping("/book")
 public class BookingController extends BaseController {
 
     @CrossOrigin(maxAge = 3600, origins = "*")
-    @PostMapping
-    public ResponseEntity<?> bookingFlight(@RequestHeader("Authorization") String token,
-                                           @RequestBody BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
-        ResponseCommon responseCommon = bookingService.bookingFlight(token, requestDto);
+    @PostMapping(path = "/create")
+    public ResponseEntity<?> bookingFlight(@RequestBody BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
+        ResponseCommon responseCommon = bookingService.bookingFlight(requestDto);
         return ResponseEntity.ok(responseCommon);
     }
 }
