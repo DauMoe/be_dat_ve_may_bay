@@ -228,4 +228,11 @@ public class AdminController extends BaseController {
 
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
     }
+
+    //API xóa location
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @DeleteMapping(value = "/location-delete/{location-id}")
+    public ResponseEntity<?> deleteLocation(@PathVariable(name = "location-id") Integer locationId){
+        return ResponseEntity.ok(locationService.deleteLocation(locationId));
+    }
 }
