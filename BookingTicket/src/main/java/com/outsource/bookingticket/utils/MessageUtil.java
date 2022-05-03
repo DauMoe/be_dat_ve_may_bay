@@ -20,4 +20,9 @@ public class MessageUtil {
     public static final String LOCK_SUCCESS = "Khoá chuyến bay thành công";
     public static final String INSERT_NOT_SUCCESS = "Thêm không thành công";
     public static final String INSERT_SUCCESS = "Thêm thành công";
+    public static final String LOCATION_NOT_FOUND = "Không tìm thấy địa điểm";
+    public static final String DELETE_LOCATION_SUCCESS = "Xóa địa điểm thành công";
+    public static final String DELETE_LOCATION_NOT_SUCCESS = "Xóa địa điểm không thành công";
+
+
 }

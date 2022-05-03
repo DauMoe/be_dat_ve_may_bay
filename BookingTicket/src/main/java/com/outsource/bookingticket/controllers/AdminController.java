@@ -10,6 +10,8 @@ import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.pojo.SignupRequest;
 import com.outsource.bookingticket.utils.FileUploadUtil;
 import com.outsource.bookingticket.utils.FlightNewsSaveHelper;
+import com.outsource.bookingticket.utils.Helper;
+import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -218,5 +220,12 @@ public class AdminController extends BaseController {
         responseCommon.setResult("Registration success");
 
         return new ResponseEntity<>(responseCommon, HttpStatus.OK);
+    }
+
+    //API xóa location
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @DeleteMapping(value = "/location-delete/{location-id}")
+    public ResponseEntity<?> deleteLocation(@PathVariable(name = "location-id") Integer locationId){
+        return ResponseEntity.ok(locationService.deleteLocation(locationId));
     }
 }

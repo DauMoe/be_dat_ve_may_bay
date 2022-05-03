@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.LocationRequestDTO;
+import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.airport.AirportGeo;
 import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.exception.ErrorException;
@@ -72,4 +73,15 @@ public class LocationService extends BaseService {
 //    public ResponseEntity<?> editLocation(Integer locationId) {
 //
 //    }
+
+    public ResponseCommon deleteLocation(Integer locationId) {
+        if (checkLocationUsedInFlight(locationId)) {
+            Location location = locationRepository.findById(locationId)
+                    .orElseThrow(() -> new ErrorException(MessageUtil.LOCATION_NOT_FOUND));
+            locationRepository.delete(location);
+            return Helper.createSuccessCommon(MessageUtil.DELETE_LOCATION_SUCCESS);
+
+        } else throw new ErrorException(MessageUtil.DELETE_LOCATION_NOT_SUCCESS);
+    }
+
 }
