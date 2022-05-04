@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.LocationRequestDTO;
+import com.outsource.bookingticket.dtos.LocationResponseDTO;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.airport.AirportGeo;
 import com.outsource.bookingticket.entities.location.Location;
@@ -9,10 +10,12 @@ import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -107,5 +110,28 @@ public class LocationService extends BaseService {
         locationRepository.save(updatedLocation);
         // Trả về thay đổi thành công
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.UPDATED_SUCCESS));
+    }
+
+    public ResponseEntity<?> getAllLocation(String filter) {
+        List<Location> locationList;
+        if (Objects.isNull(filter)) {
+            locationList = locationRepository.findAll();
+        } else {
+            locationList = locationRepository.findLocationsByCityNameContaining(filter);
+        }
+        if (CollectionUtils.isEmpty(locationList)) {
+            throw new ErrorException(MessageUtil.LOCATION_NOT_FOUND);
+        }
+        Map<String, List<LocationResponseDTO.LocationDTO>> map = new HashMap<>();
+        locationList.forEach(i -> {
+            map.putIfAbsent(i.getCountryName(), new ArrayList<>());
+            if (map.containsKey(i.getCountryName())) {
+                map.get(i.getCountryName()).add(new LocationResponseDTO.LocationDTO(i.getLocationId(), i.getCityName()));
+            }
+        });
+        List<LocationResponseDTO> responseDTOList = map.keySet().stream()
+                .map(i -> new LocationResponseDTO(i, map.get(i)))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(responseDTOList)));
     }
 }
