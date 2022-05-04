@@ -112,16 +112,22 @@ public class LocationService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.UPDATED_SUCCESS));
     }
 
+    // Hàm lấy địa điểm
     public ResponseEntity<?> getAllLocation(String filter) {
+        // Khởi tạo danh sách chứa đia điểm lấy từ DB
         List<Location> locationList;
+        // Kiểm tra nếu lọc theo tên danh sách sẽ lấy hết địa điểm
         if (Objects.isNull(filter)) {
             locationList = locationRepository.findAll();
         } else {
+            // Lọc ra các địa điểm có tên giống với tên cần tìm
             locationList = locationRepository.findLocationsByCityNameContaining(filter);
         }
+        // Kiểm tra danh sách tìm kiếm rỗng sẽ trả về lỗi
         if (CollectionUtils.isEmpty(locationList)) {
             throw new ErrorException(MessageUtil.LOCATION_NOT_FOUND);
         }
+        // Gán giá trị để trả về
         Map<String, List<LocationResponseDTO.LocationDTO>> map = new HashMap<>();
         locationList.forEach(i -> {
             map.putIfAbsent(i.getCountryName(), new ArrayList<>());
@@ -132,6 +138,7 @@ public class LocationService extends BaseService {
         List<LocationResponseDTO> responseDTOList = map.keySet().stream()
                 .map(i -> new LocationResponseDTO(i, map.get(i)))
                 .collect(Collectors.toList());
+        // Trả về thành công
         return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(responseDTOList)));
     }
 }
