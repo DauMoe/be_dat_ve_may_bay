@@ -83,4 +83,6 @@ public class Constants {
             "<br>FLIGHT NO: [[flightNo]]" +
             "<br>SEAT NUMBER: [[seatNumber]]" +
             "<br>So sorry. Hope to see you again!";
+
+    public static final String EMAIL_NOT_VALID = "Email không đúng định dạng.";
 }
