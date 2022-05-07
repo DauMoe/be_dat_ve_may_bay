@@ -15,4 +15,6 @@ public interface LocationRepository extends JpaRepository<Location, Integer> {
     Optional<Location> findFirstByCountryName(String countryName);
 
     Location findFirstByOrderByLocationIdDesc();
+
+    List<Location> findLocationsByCityNameContaining(String cityName);
 }

@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 @Service
 @Transactional
@@ -26,6 +27,8 @@ public class BookingService extends BaseService {
 
         // Kiểm tra requestDto có null không? nếu null trả ra lỗi
         if (Objects.nonNull(requestDto)) {
+
+            if (!validateEmail(requestDto.getEmail())) throw new ErrorException(Constants.EMAIL_NOT_VALID);
 
             Ticket ticketTo = ticketRepository.findTicketByTicketId(requestDto.getTicketIdTo()).get();
             // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
@@ -172,5 +175,10 @@ public class BookingService extends BaseService {
     private Boolean checkAvailableSeat(Integer totalSeat){
         if (totalSeat <= 0) return true;
         else return false;
+    }
+
+    private static boolean validateEmail(String email) {
+        Matcher matcher = Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+        return matcher.find();
     }
 }
