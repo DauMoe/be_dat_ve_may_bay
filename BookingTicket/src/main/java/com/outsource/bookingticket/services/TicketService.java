@@ -10,6 +10,7 @@ import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.entities.ticket.Ticket;
+import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -51,9 +52,15 @@ public class TicketService extends BaseService {
                 // Tìm kiếm tên máy bay
                 Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
 
+                UserEntity user = null;
+
+                if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED) {
+                    user = userRepository.findUserEntityById(ticket.get().getUid()).get();
+                }
+
                 // Gán thông tin trả về
                 TicketDTO ticketDTO = mapToTicketDTO(ticket.get(), flightSchedule.get(), flightEntity.get(), locationTo,
-                        locationFrom, airplane.get());
+                        locationFrom, airplane.get(), user);
                 return ResponseEntity.ok(Helper.createSuccessCommon(ticketDTO));
             }
             // Trả về thông tin lỗi nếu có lỗi xảy ra
@@ -138,7 +145,7 @@ public class TicketService extends BaseService {
     }
 
     private TicketDTO mapToTicketDTO(Ticket ticket, FlightSchedule flightSchedule, FlightEntity flightEntity,
-                                     Location locationTo, Location locationFrom, Airplane airplane) {
+                                     Location locationTo, Location locationFrom, Airplane airplane, UserEntity user) {
         Long tax = ticket.getPrice() * 50 / 100;
         Long totalPrice = ticket.getPrice() + tax;
         TicketDTO ticketDTO = new TicketDTO();
@@ -150,6 +157,8 @@ public class TicketService extends BaseService {
         ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
         ticketDTO.setFlightSchedule(convertFlightScheduleToDTO(flightSchedule));
         ticketDTO.setFlightDTO(convertFlightEntityToDTO(flightEntity, locationTo, locationFrom));
+        ticketDTO.setUserDetailDTO(Objects.nonNull(user) ? mapUserToUserDetailDTO(user) : null);
+
         return ticketDTO;
     }
 
@@ -183,4 +192,12 @@ public class TicketService extends BaseService {
         return locationDTO;
     }
 
+    private UserDetailDTO mapUserToUserDetailDTO(UserEntity user) {
+        return UserDetailDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .phone(user.getPhone())
+                .build();
+    }
 }
