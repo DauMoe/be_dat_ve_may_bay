@@ -1,10 +1,7 @@
 package com.outsource.bookingticket.controllers;
 
 import com.outsource.bookingticket.constants.Constants;
-import com.outsource.bookingticket.dtos.EditFlightNewsDTO;
-import com.outsource.bookingticket.dtos.FlightNewsDTO;
-import com.outsource.bookingticket.dtos.LocationRequestDTO;
-import com.outsource.bookingticket.dtos.PagingFlightNews;
+import com.outsource.bookingticket.dtos.*;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.flight_news.FlightNews;
 import com.outsource.bookingticket.entities.users.UserEntity;
@@ -16,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @RestController
@@ -42,7 +41,7 @@ public class AdminController extends BaseController {
     // API cancel vé theo ID của vé
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/cancel-ticket")
-    public ResponseEntity<?> cancelTicket(@RequestParam("ticket_id") Integer ticketId) {
+    public ResponseEntity<?> cancelTicket(@RequestParam("ticket_id") Integer ticketId) throws UnsupportedEncodingException, MessagingException {
         ResponseCommon response = ticketService.cancelTicket(ticketId);
         return ResponseEntity.ok(response);
     }
@@ -234,5 +233,19 @@ public class AdminController extends BaseController {
     @DeleteMapping(value = "/location-delete/{location-id}")
     public ResponseEntity<?> deleteLocation(@PathVariable(name = "location-id") Integer locationId){
         return ResponseEntity.ok(locationService.deleteLocation(locationId));
+    }
+
+    // API đặt vé cho khách bởi admin
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/book/create")
+    public ResponseEntity<?> bookingFlight(@RequestBody BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
+        ResponseCommon responseCommon = bookingService.bookingFlight(requestDto);
+        return ResponseEntity.ok(responseCommon);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/{ticket_id}")
+    ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId) {
+        return ticketService.getDetailTicket(ticketId);
     }
 }
