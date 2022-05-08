@@ -134,7 +134,7 @@ public class TicketService extends BaseService {
         ticketRepository.saveAndFlush(ticket.get());
 
         // Lấy thông tin của khách hàng đã đặt vé
-        Passenger passenger = passengerRepository.getById(ticket.get().getUid());
+        Passenger passenger = clientRepository.getById(ticket.get().getUid());
         // Lấy FlightSchedula của vé
         FlightSchedule flightSchedule = flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticket.get().getFlightScheduleId()).get();
         // Gửi email tới người dùng
