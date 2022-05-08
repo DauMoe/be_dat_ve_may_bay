@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.*;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.airplane.Airplane;
@@ -11,7 +12,6 @@ import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
 import com.outsource.bookingticket.entities.ticket.Ticket;
 import com.outsource.bookingticket.entities.users.Passenger;
-import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -19,7 +19,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -124,7 +126,7 @@ public class TicketService extends BaseService {
         return dto;
     }
 
-    public ResponseCommon cancelTicket(Integer ticketId){
+    public ResponseCommon cancelTicket(Integer ticketId) throws UnsupportedEncodingException, MessagingException {
 
         // Hàm tìm thông tin vé theo Id của vé
         Optional<Ticket> ticket = ticketRepository.findById(ticketId);
@@ -136,6 +138,13 @@ public class TicketService extends BaseService {
         ticket.get().setBookingState(BOOKINGSTATE.CANCELED);
         // Cập nhật thông tin vé vào database
         ticketRepository.saveAndFlush(ticket.get());
+
+        // Lấy thông tin của khách hàng đã đặt vé
+        Passenger passenger = clientRepository.getById(ticket.get().getUid());
+        // Lấy FlightSchedula của vé
+        FlightSchedule flightSchedule = flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticket.get().getFlightScheduleId()).get();
+        // Gửi email tới người dùng
+        sendTicketCancelEmail(passenger, ticket.get(), flightSchedule);
 
         // Trả về các thông tin cho phía client.
         ResponseCommon response = new ResponseCommon();
@@ -200,5 +209,20 @@ public class TicketService extends BaseService {
                 .username(passenger.getFullName())
                 .phone(passenger.getPhoneNo())
                 .build();
+    }
+
+    // Hàm thực hiện gửi thông tin huỷ vé về mail
+    private void sendTicketCancelEmail(Passenger passenger, Ticket ticket, FlightSchedule schedule)
+            throws UnsupportedEncodingException, MessagingException {
+
+        String subject = Constants.FLIGHT_CANCELED_SUBJECT;
+        String content = Constants.FLIGHT_CANCELED_CONTENT;
+
+        content = content.replace("[[name]]", passenger.getFullName());
+        content = content.replace("[[flightNo]]", schedule.getFlightNo());
+        content = content.replace("[[seatNumber]]", ticket.getSeatNumber());
+
+        String[] values = new String[]{passenger.getEmail()};
+        Helper.sendMailCommon(values, subject, content);
     }
 }
