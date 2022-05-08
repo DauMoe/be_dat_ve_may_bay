@@ -60,8 +60,6 @@ public class BaseService {
 
     @Autowired protected AirportGeoRepository airportGeoRepository;
 
-    @Autowired protected PassengerRepository passengerRepository;
-
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
         try {
