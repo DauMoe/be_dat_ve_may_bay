@@ -4,6 +4,7 @@ import com.outsource.bookingticket.constants.Constants;
 import com.outsource.bookingticket.dtos.*;
 import com.outsource.bookingticket.dtos.commons.ResponseCommon;
 import com.outsource.bookingticket.entities.flight_news.FlightNews;
+import com.outsource.bookingticket.entities.users.Passenger;
 import com.outsource.bookingticket.entities.users.UserEntity;
 import com.outsource.bookingticket.pojo.SignupRequest;
 import com.outsource.bookingticket.utils.FileUploadUtil;
@@ -243,9 +244,18 @@ public class AdminController extends BaseController {
         return ResponseEntity.ok(responseCommon);
     }
 
+    // API lấy thông tin chi tiết của vé
     @CrossOrigin(maxAge = 3600, origins = "*")
-    @GetMapping(path = "/{ticket_id}")
+    @GetMapping(path = "/ticket/{ticket_id}")
     ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId) {
         return ticketService.getDetailTicket(ticketId);
+    }
+
+    // API sửa thông tin hành khách
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/passenger")
+    ResponseEntity<?> editPassenger(@RequestBody Passenger passenger) {
+        ResponseCommon responseCommon = passengerService.editPassenger(passenger);
+        return ResponseEntity.ok(responseCommon);
     }
 }
