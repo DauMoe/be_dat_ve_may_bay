@@ -26,6 +26,8 @@ public class TicketDTO {
     private FlightScheduleDTO flightSchedule;
     @JsonProperty("flight_detail")
     private FlightDetailDTO flightDTO;
+    @JsonProperty("user")
+    private UserDetailDTO userDetailDTO;
 
     @Data
     public static class FlightScheduleDTO {

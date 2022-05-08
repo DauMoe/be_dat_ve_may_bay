@@ -55,9 +55,15 @@ public class TicketService extends BaseService {
                 // Tìm kiếm tên máy bay
                 Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
 
+                Passenger passenger = null;
+
+                if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED) {
+                    passenger = clientRepository.findPassengerById(ticket.get().getUid());
+                }
+
                 // Gán thông tin trả về
                 TicketDTO ticketDTO = mapToTicketDTO(ticket.get(), flightSchedule.get(), flightEntity.get(), locationTo,
-                        locationFrom, airplane.get());
+                        locationFrom, airplane.get(), passenger);
                 return ResponseEntity.ok(Helper.createSuccessCommon(ticketDTO));
             }
             // Trả về thông tin lỗi nếu có lỗi xảy ra
@@ -149,7 +155,7 @@ public class TicketService extends BaseService {
     }
 
     private TicketDTO mapToTicketDTO(Ticket ticket, FlightSchedule flightSchedule, FlightEntity flightEntity,
-                                     Location locationTo, Location locationFrom, Airplane airplane) {
+                                     Location locationTo, Location locationFrom, Airplane airplane, Passenger passenger) {
         Long tax = ticket.getPrice() * 50 / 100;
         Long totalPrice = ticket.getPrice() + tax;
         TicketDTO ticketDTO = new TicketDTO();
@@ -161,6 +167,8 @@ public class TicketService extends BaseService {
         ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
         ticketDTO.setFlightSchedule(convertFlightScheduleToDTO(flightSchedule));
         ticketDTO.setFlightDTO(convertFlightEntityToDTO(flightEntity, locationTo, locationFrom));
+        ticketDTO.setUserDetailDTO(Objects.nonNull(passenger) ? mapPassengerToUserDetailDTO(passenger) : null);
+
         return ticketDTO;
     }
 
@@ -192,6 +200,15 @@ public class TicketService extends BaseService {
         locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
         locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
         return locationDTO;
+    }
+
+    private UserDetailDTO mapPassengerToUserDetailDTO(Passenger passenger) {
+        return UserDetailDTO.builder()
+                .id(passenger.getId())
+                .email(passenger.getEmail())
+                .username(passenger.getFullName())
+                .phone(passenger.getPhoneNo())
+                .build();
     }
 
     // Hàm thực hiện gửi thông tin huỷ vé về mail
