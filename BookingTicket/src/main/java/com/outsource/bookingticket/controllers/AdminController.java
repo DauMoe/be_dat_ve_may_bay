@@ -32,6 +32,13 @@ public class AdminController extends BaseController {
         return flightService.getAllFlight(fromAirportId, toAirportId, flightNo);
     }
 
+    // API lấy hết danh sách lịch trình bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/list-flight-schedule")
+    ResponseEntity<?> getAllFlightSchedule() {
+        return flightScheduleService.getAllFlightSchedule();
+    }
+
     // API lấy hết danh sách thông tin vé theo schedule ID
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/list-ticket")

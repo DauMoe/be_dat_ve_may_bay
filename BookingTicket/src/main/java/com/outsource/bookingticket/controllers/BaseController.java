@@ -15,4 +15,5 @@ public class BaseController {
     @Autowired protected FlightNewsService flightNewsService;
     @Autowired protected LocationService locationService;
     @Autowired protected PassengerService passengerService;
+    @Autowired protected FlightScheduleService flightScheduleService;
 }
