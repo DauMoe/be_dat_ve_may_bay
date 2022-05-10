@@ -132,16 +132,16 @@ public class TicketService extends BaseService {
         Optional<Ticket> ticket = ticketRepository.findById(ticketId);
         // Kiểm tra vé tìm được có phải rỗng hay không? nếu rỗng trả về lỗi.
         if (ticket.isEmpty()) throw new ErrorException("Không Tìm Thấy Vé");
-        // Kiểm tra vé đó đã bị hủy từ trước hay chưa? nếu đã bị hủy từ trước rồi thì trả về lỗi
-        if (ticket.get().getBookingState().equals(BOOKINGSTATE.CANCELED)) throw new ErrorException("Vé Đã Bị Hủy");
+        // Kiểm tra vé đó đã được đặt hay chưa hay chưa? nếu đã được đặt thì trả về lỗi
+        if (ticket.get().getBookingState().equals(BOOKINGSTATE.AVAILABLE)) throw new ErrorException("Vé Chưa Được Đặt Nên Không Thể Hủy");
         // Thay đổi trạng thái vé từ BOOKED sang CANCELED
-        ticket.get().setBookingState(BOOKINGSTATE.CANCELED);
+        ticket.get().setBookingState(BOOKINGSTATE.AVAILABLE);
         // Cập nhật thông tin vé vào database
         ticketRepository.saveAndFlush(ticket.get());
 
         // Lấy thông tin của khách hàng đã đặt vé
         Passenger passenger = clientRepository.getById(ticket.get().getUid());
-        // Lấy FlightSchedula của vé
+        // Lấy FlightSchedule của vé
         FlightSchedule flightSchedule = flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticket.get().getFlightScheduleId()).get();
         // Gửi email tới người dùng
         sendTicketCancelEmail(passenger, ticket.get(), flightSchedule);
