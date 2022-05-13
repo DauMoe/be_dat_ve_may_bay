@@ -59,14 +59,27 @@ public class LocationService extends BaseService {
             // Lấy thông tin bản ghi cuối cùng của địa điểm
             Location lastCountry = locationRepository.findFirstByOrderByLocationIdDesc();
             // Tạo đối tượng mới để lưu xuống DB
-            Location newLocation = Location.builder()
-                    .countryCode(lastCountry.getCountryCode() + 1)
-                    .countryName(locationRequestDTO.getCountryName())
-                    .longitude(lastCountry.getLongitude() + 1)
-                    .latitude(lastCountry.getLatitude() + 1)
-                    .cityId(lastCountry.getCityId() + 1)
-                    .cityName(locationRequestDTO.getCityName())
-                    .build();
+            Location newLocation;
+            if (Objects.nonNull(lastCountry)) {
+                newLocation = Location.builder()
+                        .countryCode(lastCountry.getCountryCode() + 1)
+                        .countryName(locationRequestDTO.getCountryName())
+                        .longitude(lastCountry.getLongitude() + 1)
+                        .latitude(lastCountry.getLatitude() + 1)
+                        .cityId(lastCountry.getCityId() + 1)
+                        .cityName(locationRequestDTO.getCityName())
+                        .build();
+            } else {
+                newLocation = Location.builder()
+                        .countryCode(1)
+                        .countryName(locationRequestDTO.getCountryName())
+                        .longitude(1L)
+                        .latitude(1F)
+                        .cityId(1)
+                        .cityName(locationRequestDTO.getCityName())
+                        .build();
+            }
+
             // Lưu xuống DB
             newLocation = locationRepository.save(newLocation);
             // Tạo đối tượng mới để lưu xuống DB
