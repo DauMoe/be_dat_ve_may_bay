@@ -23,6 +23,19 @@ public class LocationService extends BaseService {
 
     // Hàm thêm địa điểm mới
     public ResponseEntity<?> addLocation(LocationRequestDTO locationRequestDTO) {
+        Optional<Location> existLocationOp =
+                locationRepository.findLocationsByCountryNameAndCityName(
+                        locationRequestDTO.getCountryName(),
+                        locationRequestDTO.getCityName());
+        if (existLocationOp.isPresent()) {
+            Optional<AirportGeo> existAirportGeo =
+                    airportGeoRepository.findByAirportNameAndLocationId(
+                            locationRequestDTO.getAirportName(),
+                            existLocationOp.get().getLocationId());
+            if (existAirportGeo.isPresent()) {
+                throw new ErrorException(MessageUtil.INSERT_NOT_SUCCESS);
+            }
+        }
         // Tìm kiếm thông tin quốc gia đã tồn tại ở bản ghi khác dưới DB chưa
         Optional<Location> existCountryOp =
                 locationRepository.findFirstByCountryName(locationRequestDTO.getCountryName());
@@ -59,14 +72,27 @@ public class LocationService extends BaseService {
             // Lấy thông tin bản ghi cuối cùng của địa điểm
             Location lastCountry = locationRepository.findFirstByOrderByLocationIdDesc();
             // Tạo đối tượng mới để lưu xuống DB
-            Location newLocation = Location.builder()
-                    .countryCode(lastCountry.getCountryCode() + 1)
-                    .countryName(locationRequestDTO.getCountryName())
-                    .longitude(lastCountry.getLongitude() + 1)
-                    .latitude(lastCountry.getLatitude() + 1)
-                    .cityId(lastCountry.getCityId() + 1)
-                    .cityName(locationRequestDTO.getCityName())
-                    .build();
+            Location newLocation;
+            if (Objects.nonNull(lastCountry)) {
+                newLocation = Location.builder()
+                        .countryCode(lastCountry.getCountryCode() + 1)
+                        .countryName(locationRequestDTO.getCountryName())
+                        .longitude(lastCountry.getLongitude() + 1)
+                        .latitude(lastCountry.getLatitude() + 1)
+                        .cityId(lastCountry.getCityId() + 1)
+                        .cityName(locationRequestDTO.getCityName())
+                        .build();
+            } else {
+                newLocation = Location.builder()
+                        .countryCode(1)
+                        .countryName(locationRequestDTO.getCountryName())
+                        .longitude(1L)
+                        .latitude(1F)
+                        .cityId(1)
+                        .cityName(locationRequestDTO.getCityName())
+                        .build();
+            }
+
             // Lưu xuống DB
             newLocation = locationRepository.save(newLocation);
             // Tạo đối tượng mới để lưu xuống DB
