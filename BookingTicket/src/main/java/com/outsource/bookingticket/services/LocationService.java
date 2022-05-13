@@ -23,6 +23,19 @@ public class LocationService extends BaseService {
 
     // Hàm thêm địa điểm mới
     public ResponseEntity<?> addLocation(LocationRequestDTO locationRequestDTO) {
+        Optional<Location> existLocationOp =
+                locationRepository.findLocationsByCountryNameAndCityName(
+                        locationRequestDTO.getCountryName(),
+                        locationRequestDTO.getCityName());
+        if (existLocationOp.isPresent()) {
+            Optional<AirportGeo> existAirportGeo =
+                    airportGeoRepository.findByAirportNameAndLocationId(
+                            locationRequestDTO.getAirportName(),
+                            existLocationOp.get().getLocationId());
+            if (existAirportGeo.isPresent()) {
+                throw new ErrorException(MessageUtil.INSERT_NOT_SUCCESS);
+            }
+        }
         // Tìm kiếm thông tin quốc gia đã tồn tại ở bản ghi khác dưới DB chưa
         Optional<Location> existCountryOp =
                 locationRepository.findFirstByCountryName(locationRequestDTO.getCountryName());
