@@ -23,8 +23,8 @@ public class Ticket {
     @Column(name = "flight_schedule_id")
     private Integer flightScheduleId;
 
-    @Column(name = "seat_number")
-    private String seatNumber;
+    @Column(name = "row_seat")
+    private String rowSeat;
 
     @Column(name = "price")
     private Long price;

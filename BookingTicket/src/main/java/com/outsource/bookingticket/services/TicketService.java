@@ -98,7 +98,7 @@ public class TicketService extends BaseService {
         TicketResponseDTO dto = new TicketResponseDTO();
         // Gán các giá trị thuộc tính
         dto.setTicketId(ticketCommon.getTicketId());
-        dto.setSeatNumber(ticketCommon.getSeatNumber());
+        dto.setRowSeat(ticketCommon.getRowSeat());
         dto.setPrice(ticketCommon.getPrice());
         dto.setBookingState(ticketCommon.getBookingState());
         dto.setAirplaneName(ticketCommon.getAirplaneName());
@@ -162,8 +162,8 @@ public class TicketService extends BaseService {
                                      Integer totalAdult, Integer totalChildren, Integer totalBaby) {
         TicketDTO ticketDTO = new TicketDTO();
         ticketDTO.setTicketId(ticket.getTicketId());
-        ticketDTO.setSeatNumber(ticket.getSeatNumber());
-        ticketDTO.setTicketType(ticket.getSeatNumber() + "_" + TICKETTYPE.getValue(ticket.getTicketType().name()).value);
+        ticketDTO.setRowSeat(ticket.getRowSeat());
+        ticketDTO.setTicketType(ticket.getRowSeat() + "_" + TICKETTYPE.getValue(ticket.getTicketType().name()).value);
         ticketDTO.setPrice(mapPriceDTO(totalAdult, totalChildren, totalBaby, ticket.getPrice()));
         ticketDTO.setBookingState(ticket.getBookingState().name());
         ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
@@ -238,7 +238,7 @@ public class TicketService extends BaseService {
 
         content = content.replace("[[name]]", passenger.getFullName());
         content = content.replace("[[flightNo]]", schedule.getFlightNo());
-        content = content.replace("[[seatNumber]]", ticket.getSeatNumber());
+        content = content.replace("[[rowSeat]]", ticket.getRowSeat());
 
         String[] values = new String[]{passenger.getEmail()};
         Helper.sendMailCommon(values, subject, content);
