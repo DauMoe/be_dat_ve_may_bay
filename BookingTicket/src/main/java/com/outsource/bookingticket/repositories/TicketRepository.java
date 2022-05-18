@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 
-    Ticket findBySeatNumberAndFlightScheduleId(String seatNumber, Integer flightScheduleId);
+    Ticket findByRowSeatAndFlightScheduleId(String rowSeat, Integer flightScheduleId);
 
     Optional<Ticket> findTicketByTicketId(Integer ticketId);
 

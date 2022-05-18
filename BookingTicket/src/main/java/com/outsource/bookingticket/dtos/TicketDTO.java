@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class TicketDTO {
     @JsonProperty("ticket_id")
     private Integer ticketId;
-    @JsonProperty("seat_number")
-    private String seatNumber;
+    @JsonProperty("row_seat")
+    private String rowSeat;
     private PriceDTO price;
     @JsonProperty("booking_state")
     private String bookingState;
