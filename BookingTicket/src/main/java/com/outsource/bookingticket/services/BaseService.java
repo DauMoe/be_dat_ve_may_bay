@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.constants.Constants;
+import com.outsource.bookingticket.entities.airport.AirportGeo;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import com.outsource.bookingticket.entities.location.Location;
@@ -13,6 +14,7 @@ import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.util.CollectionUtils;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BaseService {
 
@@ -54,6 +57,8 @@ public class BaseService {
     @Autowired protected JwtTokenProvider jwtTokenProvider;
 
     @Autowired protected ClientRepository clientRepository;
+
+    @Autowired protected AirportGeoRepository airportGeoRepository;
 
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
@@ -127,4 +132,19 @@ public class BaseService {
         return locationRepository.findLocationsByLocationIdIn(listLocationId);
     }
 
+    // Hàm kiểm tra địa điểm đã được sử dụng ở chuyến bay nào chưa
+    protected boolean checkLocationUsedInFlight(Integer locationId) {
+        // Tìm hết các AirportGeo theo Id địa điểm
+        List<AirportGeo> airportGeoList = airportGeoRepository.findAirportGeosByLocationId(locationId);
+        // Lọc các Id airportGeo theo danh sách vừa tìm được
+        List<Integer> airportGeoIdList = airportGeoList
+                .stream()
+                .map(AirportGeo::getLocationId).distinct()
+                .collect(Collectors.toList());
+        // Tìm kiếm danh sách bay có địa điểm đi và đến trong danh sách airportGeo
+        List<FlightEntity> flightEntityList =
+                flightRepository.findByFromAirportIdInOrToAirportIdIn(airportGeoIdList, airportGeoIdList);
+        // Kiểm tra danh sách này có rỗng hay không
+        return CollectionUtils.isEmpty(flightEntityList);
+    }
 }

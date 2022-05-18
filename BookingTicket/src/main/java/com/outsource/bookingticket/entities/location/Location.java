@@ -1,12 +1,14 @@
 package com.outsource.bookingticket.entities.location;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
+@Builder
 @Table(name = "location")
 @Entity
 @AllArgsConstructor

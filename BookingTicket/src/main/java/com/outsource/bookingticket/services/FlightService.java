@@ -18,6 +18,7 @@ import com.outsource.bookingticket.utils.MessageUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -33,30 +34,46 @@ import java.util.stream.Collectors;
 public class FlightService extends BaseService {
 
     // Hàm tìm kiếm chuyến bay theo vị trí khởi hành, kết thúc hoặc mã chuyến bay
-    public ResponseEntity<?> searchFlight(Integer fromAirportId, Integer toAirportId, String startTime, String endTime) {
+    public ResponseEntity<?> searchFlight(Integer fromAirportId, Integer toAirportId, String startTime, String endTime,
+                                          Integer totalAdult, Integer totalChildren, Integer totalBaby) {
         // Kiểm tra nếu các biến truyền vào đều null thì sẽ trả ra thông báo lỗi
         if (Objects.isNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(startTime)) {
             throw new ErrorException(MessageUtil.FILL_TO_SEARCH);
         }
 
+        // Cộng tổng số người cần đặt vé
+        Integer totalPeople = totalAdult + totalChildren + totalBaby;
+
         // Gọi tới hàm tìm kiếm theo vị trí khởi hành, kết thúc hoặc mã chuyến bay
-        List<FlightTicketEntity> listFlightTo = searchListFlight(fromAirportId, toAirportId, startTime);
-        List<FlightResponseDTO> listFlightToResponseReturn = new ArrayList<>();
+        List<FlightTicketEntity> flightToList = searchListFlight(fromAirportId, toAirportId, startTime, totalPeople);
+        List<FlightResponseDTO> flightToResponseReturnList = new ArrayList<>();
 
         if (Objects.nonNull(endTime)) {
-            List<FlightTicketEntity> listFlightReturn = searchListFlight(toAirportId, fromAirportId, endTime);
-            listFlightToResponseReturn = convertFlightEntityToListDTO(listFlightReturn);
+            List<FlightTicketEntity> flightReturnList = searchListFlight(toAirportId, fromAirportId, endTime, totalPeople);
+            flightToResponseReturnList = convertFlightEntityToListDTO(flightReturnList);
         }
         // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
-        List<FlightResponseDTO> listFlightResponseTo = convertFlightEntityToListDTO(listFlightTo);
+        List<FlightResponseDTO> flightResponseToList = convertFlightEntityToListDTO(flightToList);
 
-        if (!CollectionUtils.isEmpty(listFlightResponseTo)) {
-            if (!CollectionUtils.isEmpty(listFlightToResponseReturn)) {
-                // Trả về kết quả thành công
+        // Nếu không tìm vé khứ hồi sẽ trả về danh sách vé 1 chiều
+        if (!StringUtils.hasLength(endTime)) {
+            // Danh sách trả về vé 1 chiều rỗng sẽ trả về lỗi, ngược lại sẽ trả về kết quả
+            if (CollectionUtils.isEmpty(flightResponseToList)) {
+                throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
+            } else {
+                return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(flightResponseToList)));
+            }
+        } else {
+            // Người dùng có tìm cả vé khứ hồi
+            // Nếu danh sách bay cả đi và về đều không có sẽ trả ra lỗi
+            if (CollectionUtils.isEmpty(flightResponseToList) && CollectionUtils.isEmpty(flightToResponseReturnList)) {
+                throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
+            } else {
+                // Trả về danh sách bay đi và danh sách bay về
                 return ResponseEntity.ok(Helper.createSuccessToFromListCommon(
-                        new ArrayList<>(listFlightResponseTo), new ArrayList<>(listFlightToResponseReturn)));
-            } else return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(listFlightResponseTo)));
-        } else throw new ErrorException(MessageUtil.NOT_HAVE_ANY_FLIGHT);
+                        new ArrayList<>(flightResponseToList), new ArrayList<>(flightToResponseReturnList)));
+            }
+        }
     }
 
     // Lấy hết thông tin chuyến bay (cho quản lý)
@@ -127,15 +144,21 @@ public class FlightService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.LOCK_SUCCESS));
     }
 
-    private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startDate, LocalDateTime endDate) {
-        // Lọc những lịch trình chuyến bay nằm trong thời gian tìm kiếm
-        return flightSchedule.getStartTime().toLocalDate().isEqual(startDate.toLocalDate()) &&
-                flightSchedule.getEndTime().toLocalDate().isEqual(endDate.toLocalDate());
+    // Hàm lấy danh sách gợi ý bay
+    public ResponseEntity<?> getSuggestionFlight() {
+        // Lấy gợi ý danh sách bay
+        List<FlightTicketEntity> flightSuggestionList = flightTicketRepository.findAllFlightSuggestion();
+
+        // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
+        List<FlightResponseDTO> flightSuggestionResponseList = convertFlightEntityToListDTO(flightSuggestionList);
+
+        // Trả về kết quả
+        return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(flightSuggestionResponseList)));
     }
 
     // Hàm tìm kiếm chuyến bay
-    private List<FlightTicketEntity> searchListFlight(Integer fromAirportId, Integer toAirportId, String time) {
-        return flightTicketRepository.findAllFlightByLocationAndTime(time, fromAirportId, toAirportId);
+    private List<FlightTicketEntity> searchListFlight(Integer fromAirportId, Integer toAirportId, String time, Integer totalPeople) {
+        return flightTicketRepository.findAllFlightByLocationAndTime(time, fromAirportId, toAirportId, totalPeople);
     }
 
     // Hàm convert FlightEntity sang FlightResponseDTO
@@ -170,8 +193,8 @@ public class FlightService extends BaseService {
     }
 
     // Hàm convert danh sách FlightEntity sang danh sách FlightResponseDTO
-    private List<FlightResponseDTO> convertFlightEntityToListDTO(List<FlightTicketEntity> listFlightEntity) {
-        return listFlightEntity.stream().map(this::convertFlightEntityToDTO).collect(Collectors.toList());
+    private List<FlightResponseDTO> convertFlightEntityToListDTO(List<FlightTicketEntity> flightEntityList) {
+        return flightEntityList.stream().map(this::convertFlightEntityToDTO).collect(Collectors.toList());
     }
 
     private FlightCommonDTO convertToFlightCommonDTO(FlightCommon flightCommon, List<Location> locationList) {

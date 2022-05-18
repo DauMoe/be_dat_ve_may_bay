@@ -64,8 +64,8 @@ public class UserService extends BaseService {
     // Hàm đăng kí user
     public void registerUser(UserEntity user) {
         // Để user chưa được kích hoạt
-        user.setEnabled(false);
-        user.setRole(false); // User role
+        user.setEnabled(true);
+        user.setRole(true); // User role
         user.setUid(UUID.randomUUID().toString());
         encodePassword(user);
         // Tạo ra 1 token để xác thực ở email
@@ -74,19 +74,6 @@ public class UserService extends BaseService {
 
         // Lưu user vào database
         userRepository.save(user);
-    }
-
-    public boolean verifyCode(String verificationCode) {
-        UserEntity user = userRepository.getUserByVerificationCode(verificationCode);
-        // Nếu user đã được kích hoạt
-        if (user == null || user.isEnabled()) {
-            return false;
-        }
-        else {
-            // Nếu user chưa được kích hoạt
-            userRepository.enable(user.getId());
-            return true;
-        }
     }
 
     public String validatePasswordResetToken(String token) {

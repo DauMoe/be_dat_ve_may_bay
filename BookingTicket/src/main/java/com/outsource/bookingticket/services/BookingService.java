@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
 
 @Service
 @Transactional
@@ -26,38 +27,37 @@ public class BookingService extends BaseService {
 
         // Kiểm tra requestDto có null không? nếu null trả ra lỗi
         if (Objects.nonNull(requestDto)) {
+
+            if (!validateEmail(requestDto.getEmail())) throw new ErrorException(Constants.EMAIL_NOT_VALID);
+
+            Ticket ticketTo = ticketRepository.findTicketByTicketId(requestDto.getTicketIdTo()).get();
             // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
-            FlightSchedule flightScheduleTo = saveSchedule(requestDto.getFlightScheduleIdTo());
+            FlightSchedule flightScheduleTo = saveSchedule(ticketTo.getFlightScheduleId());
             Passenger passenger = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
 
             if (checkAvailableSeat(flightScheduleTo.getAvailableSeat()))throw new ErrorException(Constants.SEAT_UNAVAILABLE);
 
-            if (requestDto.getFlightScheduleIdBack() !=  null){
-                FlightSchedule flightScheduleBack = saveSchedule(requestDto.getFlightScheduleIdBack());
+            if (requestDto.getTicketIdBack() !=  null){
+                Ticket ticketBack = ticketRepository.findTicketByTicketId(requestDto.getTicketIdBack()).get();
+                FlightSchedule flightScheduleBack = saveSchedule(ticketBack.getFlightScheduleId());
                 if (checkAvailableSeat(flightScheduleBack.getAvailableSeat()))throw new ErrorException(Constants.SEAT_UNAVAILABLE);
 
-                Ticket ticketTo = new Ticket();
-                ticketTo.setFlightScheduleId(flightScheduleTo.getFlightScheduleId());
-                ticketTo.setPrice(requestDto.getPriceTo());
                 ticketTo.setBookingState(BOOKINGSTATE.BOOKED);
                 Passenger passengerTo = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
                 ticketTo.setUid(passengerTo.getId());
                 // Lưu dối tượng Ticket vào database.
-                ticketRepository.save(ticketTo);
+                ticketRepository.saveAndFlush(ticketTo);
 
                 // Hàm cập nhật lại số lượng ghế còn trống trên chuyến bay đó.
                 flightScheduleTo.setAvailableSeat(flightScheduleTo.getAvailableSeat() - 1);
                 // Cập nhật thông tin vào database
                 flightScheduleRepository.saveAndFlush(flightScheduleTo);
 
-                Ticket ticketBack = new Ticket();
-                ticketBack.setFlightScheduleId(flightScheduleBack.getFlightScheduleId());
-                ticketBack.setPrice(requestDto.getPriceBack());
                 ticketBack.setBookingState(BOOKINGSTATE.BOOKED);
                 Passenger passengerBack = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
                 ticketBack.setUid(passengerBack.getId());
                 // Lưu dối tượng Ticket vào database.
-                ticketRepository.save(ticketBack);
+                ticketRepository.saveAndFlush(ticketBack);
 
                 // Hàm cập nhật lại số lượng ghế còn trống trên chuyến bay đó.
                 flightScheduleBack.setAvailableSeat(flightScheduleBack.getAvailableSeat() - 1);
@@ -75,13 +75,10 @@ public class BookingService extends BaseService {
             }
 
             // Khởi tạo 1 đối tượng của Ticket để set dữ liệu cho đối tượng đó. Dữ liệu được lấy từ tham số truyền vào
-            Ticket ticket = new Ticket();
-            ticket.setFlightScheduleId(flightScheduleTo.getFlightScheduleId());
-            ticket.setPrice(requestDto.getPriceTo());
-            ticket.setBookingState(BOOKINGSTATE.BOOKED);
-            ticket.setUid(passenger.getId());
+            ticketTo.setBookingState(BOOKINGSTATE.BOOKED);
+            ticketTo.setUid(passenger.getId());
             // Lưu dối tượng Ticket vào database.
-            ticketRepository.save(ticket);
+            ticketRepository.saveAndFlush(ticketTo);
 
             // Hàm cập nhật lại số lượng ghế còn trống trên chuyến bay đó.
             flightScheduleTo.setAvailableSeat(flightScheduleTo.getAvailableSeat() - 1);
@@ -89,7 +86,7 @@ public class BookingService extends BaseService {
             flightScheduleRepository.saveAndFlush(flightScheduleTo);
 
             // Gọi hàm sendBookingSuccessEmail() để gửi thông tin vé về mail
-            sendBookingSuccessEmail(passenger, ticket, flightScheduleTo);
+            sendBookingSuccessEmail(passenger, ticketTo, flightScheduleTo);
 
         } else throw new ErrorException("Invalid Request");
 
@@ -107,11 +104,14 @@ public class BookingService extends BaseService {
         String subject = Constants.BOOKING_SUCCESS_SUBJECT;
         String content = Constants.BOOKING_SUCCESS_CONTENT;
 
+        Long tax = ticket.getPrice() * 50 / 100;
+        Long totalPrice = ticket.getPrice() + tax;
+
         content = content.replace("[[name]]", passenger.getFullName());
         content = content.replace("[[flightNo]]", schedule.getFlightNo());
         content = content.replace("[[start]]", convertLocalDatetimeToString(schedule.getStartTime()));
         content = content.replace("[[end]]", convertLocalDatetimeToString(schedule.getEndTime()));
-        content = content.replace("[[totalPrice]]", ticket.getPrice().toString());
+        content = content.replace("[[totalPrice]]", totalPrice.toString());
 
         String[] values = new String[]{passenger.getEmail()};
         Helper.sendMailCommon(values, subject, content);
@@ -125,16 +125,22 @@ public class BookingService extends BaseService {
         String subject = Constants.BOOKING_SUCCESS_SUBJECT;
         String content = Constants.BOOKING_SUCCESS_CONTENT_KHU_HOI;
 
+        Long taxTo = ticketTo.getPrice() * 50 / 100;
+        Long totalPriceTo = ticketTo.getPrice() + taxTo;
+
+        Long taxBack = ticketBack.getPrice() * 50 / 100;
+        Long totalPriceBack = ticketBack.getPrice() + taxBack;
+
         content = content.replace("[[name]]", passenger.getFullName());
         content = content.replace("[[flightNo]]", scheduleTo.getFlightNo());
         content = content.replace("[[start]]", convertLocalDatetimeToString(scheduleTo.getStartTime()));
         content = content.replace("[[end]]", convertLocalDatetimeToString(scheduleTo.getEndTime()));
-        content = content.replace("[[totalPrice]]", ticketTo.getPrice().toString());
+        content = content.replace("[[totalPrice]]", totalPriceTo.toString());
 
         content = content.replace("[[flightNoVe]]", scheduleBack.getFlightNo());
         content = content.replace("[[startVe]]", convertLocalDatetimeToString(scheduleBack.getStartTime()));
         content = content.replace("[[endVe]]", convertLocalDatetimeToString(scheduleBack.getEndTime()));
-        content = content.replace("[[totalPriceVe]]", ticketBack.getPrice().toString());
+        content = content.replace("[[totalPriceVe]]", totalPriceBack.toString());
 
         String[] values = new String[]{passenger.getEmail()};
         Helper.sendMailCommon(values, subject, content);
@@ -169,5 +175,10 @@ public class BookingService extends BaseService {
     private Boolean checkAvailableSeat(Integer totalSeat){
         if (totalSeat <= 0) return true;
         else return false;
+    }
+
+    private static boolean validateEmail(String email) {
+        Matcher matcher = Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+        return matcher.find();
     }
 }
