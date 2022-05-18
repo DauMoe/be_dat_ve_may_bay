@@ -254,8 +254,11 @@ public class AdminController extends BaseController {
     // API lấy thông tin chi tiết của vé
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/ticket/{ticket_id}")
-    ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId) {
-        return ticketService.getDetailTicket(ticketId);
+    ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId,
+                                      @RequestParam(value = "adult", defaultValue = "1") Integer totalAdult,
+                                      @RequestParam(value = "children", defaultValue = "0") Integer totalChildren,
+                                      @RequestParam(value = "baby", defaultValue = "0") Integer totalBaby) {
+        return ticketService.getDetailTicket(ticketId, totalAdult, totalChildren, totalBaby);
     }
 
     // API sửa thông tin hành khách

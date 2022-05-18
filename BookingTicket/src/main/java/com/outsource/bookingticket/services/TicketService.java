@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class TicketService extends BaseService {
 
     // Hàm lấy ra thông tin chi tiết của 1 vé theo ID của vé
-    public ResponseEntity<?> getDetailTicket(Integer ticketId) {
+    public ResponseEntity<?> getDetailTicket(Integer ticketId, Integer totalAdult, Integer totalChildren, Integer totalBaby) {
         // Tìm kiếm vé theo ID của vé
         Optional<Ticket> ticket = ticketRepository.findTicketByTicketId(ticketId);
 
@@ -59,11 +59,14 @@ public class TicketService extends BaseService {
 
                 if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED) {
                     passenger = clientRepository.findPassengerById(ticket.get().getUid());
+                    totalAdult = ticket.get().getTotalAdult();
+                    totalChildren = ticket.get().getTotalChildren();
+                    totalBaby = ticket.get().getTotalBaby();
                 }
 
                 // Gán thông tin trả về
                 TicketDTO ticketDTO = mapToTicketDTO(ticket.get(), flightSchedule.get(), flightEntity.get(), locationTo,
-                        locationFrom, airplane.get(), passenger);
+                        locationFrom, airplane.get(), passenger, totalAdult, totalChildren, totalBaby);
                 return ResponseEntity.ok(Helper.createSuccessCommon(ticketDTO));
             }
             // Trả về thông tin lỗi nếu có lỗi xảy ra
@@ -155,14 +158,13 @@ public class TicketService extends BaseService {
     }
 
     private TicketDTO mapToTicketDTO(Ticket ticket, FlightSchedule flightSchedule, FlightEntity flightEntity,
-                                     Location locationTo, Location locationFrom, Airplane airplane, Passenger passenger) {
-        Long tax = ticket.getPrice() * 50 / 100;
-        Long totalPrice = ticket.getPrice() + tax;
+                                     Location locationTo, Location locationFrom, Airplane airplane, Passenger passenger,
+                                     Integer totalAdult, Integer totalChildren, Integer totalBaby) {
         TicketDTO ticketDTO = new TicketDTO();
         ticketDTO.setTicketId(ticket.getTicketId());
         ticketDTO.setSeatNumber(ticket.getSeatNumber());
         ticketDTO.setTicketType(ticket.getSeatNumber() + "_" + TICKETTYPE.getValue(ticket.getTicketType().name()).value);
-        ticketDTO.setPrice(new TicketDTO.PriceDTO(ticket.getPrice(), tax, totalPrice));
+        ticketDTO.setPrice(mapPriceDTO(totalAdult, totalChildren, totalBaby, ticket.getPrice()));
         ticketDTO.setBookingState(ticket.getBookingState().name());
         ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
         ticketDTO.setFlightSchedule(convertFlightScheduleToDTO(flightSchedule));
@@ -211,6 +213,22 @@ public class TicketService extends BaseService {
                 .build();
     }
 
+    private TicketDTO.PriceDTO mapPriceDTO(Integer totalAdult, Integer totalChildren, Integer totalBaby, Long price) {
+        long childrenPrice = price * 2/ 3;
+        long babyPrice = price / 2;
+        long totalPrice = price * totalAdult + totalChildren * childrenPrice + totalBaby * babyPrice;
+        long tax = totalPrice / 10;
+
+        TicketDTO.PriceDTO priceDTO = new TicketDTO.PriceDTO();
+        priceDTO.setAdultPrice(new DetailPriceDTO(totalAdult, price, totalAdult * price));
+        priceDTO.setChildrenPrice(totalChildren == 0 ? null : new DetailPriceDTO(totalChildren, childrenPrice, totalChildren * childrenPrice));
+        priceDTO.setBabyPrice(totalBaby == 0 ? null : new DetailPriceDTO(totalBaby, babyPrice, totalBaby * babyPrice));
+        priceDTO.setTax(tax);
+        priceDTO.setTotalPrice(totalPrice);
+
+        return priceDTO;
+    }
+
     // Hàm thực hiện gửi thông tin huỷ vé về mail
     private void sendTicketCancelEmail(Passenger passenger, Ticket ticket, FlightSchedule schedule)
             throws UnsupportedEncodingException, MessagingException {
@@ -225,4 +243,5 @@ public class TicketService extends BaseService {
         String[] values = new String[]{passenger.getEmail()};
         Helper.sendMailCommon(values, subject, content);
     }
+
 }

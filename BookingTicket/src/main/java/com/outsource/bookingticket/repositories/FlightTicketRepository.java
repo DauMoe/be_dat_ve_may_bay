@@ -24,10 +24,12 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicketEntity
             "ON f.airplane_id = a.airplane_id " +
             "WHERE fs.flight_state = 'FLIGHT_ON' " +
             "AND t.booking_state = 'AVAILABLE' " +
+            "AND fs.available_seat >= :totalPeople " +
             "AND f.from_airport_id = :from " +
             "AND f.to_airport_id = :to " +
             "AND fs.start_time LIKE :time% ", nativeQuery = true)
     List<FlightTicketEntity> findAllFlightByLocationAndTime(@Param("time") String time,
                                                            @Param("from") Integer fromAirport,
-                                                           @Param("to") Integer toAirport);
+                                                           @Param("to") Integer toAirport,
+                                                           @Param("totalPeople") Integer totalPeople);
 }

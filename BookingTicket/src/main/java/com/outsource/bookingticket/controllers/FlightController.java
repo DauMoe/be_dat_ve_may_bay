@@ -13,7 +13,10 @@ public class FlightController extends BaseController {
     ResponseEntity<?> searchFlight(@RequestParam(value = "from_airport") Integer fromAirportId,
                                    @RequestParam(value = "to_airport") Integer toAirportId,
                                    @RequestParam(value = "start_time") String startTime,
-                                   @RequestParam(value = "end_time", required = false) String endTime) {
-        return flightService.searchFlight(fromAirportId, toAirportId, startTime, endTime);
+                                   @RequestParam(value = "end_time", required = false) String endTime,
+                                   @RequestParam(value = "adult", defaultValue = "1") Integer totalAdult,
+                                   @RequestParam(value = "children", defaultValue = "0") Integer totalChildren,
+                                   @RequestParam(value = "baby", defaultValue = "0") Integer totalBaby) {
+        return flightService.searchFlight(fromAirportId, toAirportId, startTime, endTime, totalAdult, totalChildren, totalBaby);
     }
 }
