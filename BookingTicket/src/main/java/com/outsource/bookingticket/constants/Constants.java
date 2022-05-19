@@ -47,6 +47,9 @@ public class Constants {
     public static final String BOOKING_SUCCESS_CONTENT= "Dear [[name]],<br>Tickets have been booked successfully" +
                                                         "<br><h3>Your flight ticket details:</h3>" +
                                                         "<br>FULL NAME: [[name]]" +
+                                                        "<br>TOTAL ADULT: [[adult]]" +
+                                                        "<br>TOTAL CHILDREN: [[children]]" +
+                                                        "<br>TOTAL BABY: [[baby]]" +
                                                         "<br>FLIGHT NO: [[flightNo]]" +
                                                         "<br>START TIME: [[start]]" +
                                                         "<br>END TIME: [[end]]" +
@@ -57,6 +60,9 @@ public class Constants {
                                                                 "<br><h3>Your flight ticket details:</h3>" +
                                                                 "<br><h4>VE CHIEU DI:</h4>" +
                                                                 "<br>FULL NAME: [[name]]" +
+                                                                "<br>TOTAL ADULT: [[adult]]" +
+                                                                "<br>TOTAL CHILDREN: [[children]]" +
+                                                                "<br>TOTAL BABY: [[baby]]" +
                                                                 "<br>FLIGHT NO: [[flightNo]]" +
                                                                 "<br>START TIME: [[start]]" +
                                                                 "<br>END TIME: [[end]]" +
@@ -64,6 +70,9 @@ public class Constants {
 
                                                                 "<br><h4>VE CHIEU VE:</h4>" +
                                                                 "<br>FULL NAME: [[name]]" +
+                                                                "<br>TOTAL ADULT: [[adult]]" +
+                                                                "<br>TOTAL CHILDREN: [[children]]" +
+                                                                "<br>TOTAL BABY: [[baby]]" +
                                                                 "<br>FLIGHT NO: [[flightNoVe]]" +
                                                                 "<br>START TIME: [[startVe]]" +
                                                                 "<br>END TIME: [[endVe]]" +

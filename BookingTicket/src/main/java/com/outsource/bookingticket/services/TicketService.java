@@ -139,6 +139,10 @@ public class TicketService extends BaseService {
         if (ticket.get().getBookingState().equals(BOOKINGSTATE.AVAILABLE)) throw new ErrorException("Vé Chưa Được Đặt Nên Không Thể Hủy");
         // Thay đổi trạng thái vé từ BOOKED sang CANCELED
         ticket.get().setBookingState(BOOKINGSTATE.AVAILABLE);
+        ticket.get().setTotalAdult(0);
+        ticket.get().setTotalChildren(0);
+        ticket.get().setTotalBaby(0);
+        ticket.get().setTotalPrice(0L);
         // Cập nhật thông tin vé vào database
         ticketRepository.saveAndFlush(ticket.get());
 
