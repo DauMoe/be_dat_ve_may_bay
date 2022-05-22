@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -206,7 +208,7 @@ public class AdminController extends BaseController {
         flightNews.setCreatedTime(flightNewsDTO.getCreatedTime());
         flightNews.setUpdatedTime(flightNewsDTO.getUpdatedTime());
         flightNews.setUpdateBy(flightNewsDTO.getUpdateBy());
-
+        flightNews.setCreatedTime(LocalDateTime.now());
         return flightNews;
     }
 
@@ -248,6 +250,14 @@ public class AdminController extends BaseController {
     @PostMapping(path = "/book/create")
     public ResponseEntity<?> bookingFlight(@RequestBody BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
         ResponseCommon responseCommon = bookingService.bookingFlight(requestDto);
+        return ResponseEntity.ok(responseCommon);
+    }
+
+    // API tạo vé cho flight schedule
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/ticket/create")
+    ResponseEntity<?> createTicketForFlightSchedule(@RequestBody TicketCreateDTO ticketCreateDTO) {
+        ResponseCommon responseCommon = ticketService.createTicketsForFlightSchedule(ticketCreateDTO);
         return ResponseEntity.ok(responseCommon);
     }
 

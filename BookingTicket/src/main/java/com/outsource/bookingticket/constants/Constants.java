@@ -94,4 +94,8 @@ public class Constants {
             "<br>So sorry. Hope to see you again!";
 
     public static final String EMAIL_NOT_VALID = "Email không đúng định dạng.";
+
+    public static final String TICKET_CREATED_SUCCESS = "Tạo vé thành công!!!";
+
+    public static final String FLIGHT_SCHEDULE_NON_EXISTENT = "Flight schedule không tồn tại!!!";
 }

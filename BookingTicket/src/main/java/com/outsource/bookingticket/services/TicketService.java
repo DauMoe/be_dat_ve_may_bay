@@ -248,4 +248,105 @@ public class TicketService extends BaseService {
         Helper.sendMailCommon(values, subject, content);
     }
 
+    // Hàm tạo vé cho flight schedule
+    public ResponseCommon createTicketsForFlightSchedule(TicketCreateDTO ticketCreateDTO) {
+        if (Objects.nonNull(ticketCreateDTO)) {
+            Objects.requireNonNull(ticketCreateDTO.getFirstClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getBusinessClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getPremiumClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getEconomyClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getFlightScheduleId());
+
+            FlightSchedule flightSchedule = flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticketCreateDTO.getFlightScheduleId()).orElse(null);
+            if (flightSchedule == null) {
+                throw new ErrorException(Constants.FLIGHT_SCHEDULE_NON_EXISTENT);
+            }
+
+            Integer flightScheduleId = flightSchedule.getFlightScheduleId();
+            List<Ticket> tickets = new ArrayList<>();
+            // tạo vé cho loại vé FIRST_CLASS
+            int firstClassNumber =  ticketCreateDTO.getFirstClassNumber();
+            if (firstClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, firstClassNumber, TICKETTYPE.FIRST_CLASS, 7000L, 70);
+            }
+
+            // tạo vé cho loại vé BUSINESS_CLASS
+            int businessClassNumber = ticketCreateDTO.getBusinessClassNumber();
+            if (businessClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, businessClassNumber, TICKETTYPE.BUSINESS_CLASS, 6000L, 60);
+            }
+
+            // tạo vé cho loại vé PREMIUM_CLASS
+            int premiumClassNumber = ticketCreateDTO.getPremiumClassNumber();
+            if (premiumClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, premiumClassNumber, TICKETTYPE.PREMIUM_CLASS, 5000L, 50);
+            }
+
+            // tạo vé cho loại vé ECONOMY_CLASS
+            int economyClassNumber = ticketCreateDTO.getEconomyClassNumber();
+            if (economyClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, economyClassNumber, TICKETTYPE.ECONOMY_CLASS, 4000L, 40);
+            }
+
+            // Tạo tên seatRow cho từng vé theo fomart: [A-Z]d{2} => VD: A12
+            Random random = new Random();
+            String valueRow = null;
+            int number;
+            for (int i = 0; i < tickets.size(); i++) {
+                number = random.nextInt(90) + 10;
+                if (i % 6 == 0) {
+                    valueRow = "A" + number;
+                }
+                if (i % 6 == 1) {
+                    valueRow = "B" + number;
+                }
+                if (i % 6 == 2) {
+                    valueRow = "C" + number;
+                }
+                if (i % 6 == 3) {
+                    valueRow = "D" + number;
+                }
+                if (i % 6 == 4) {
+                    valueRow = "E" + number;
+                }
+                if (i % 6 == 5) {
+                    valueRow = "F" + number;
+                }
+
+                tickets.get(i).setRowSeat(valueRow);
+            }
+
+            // Lưu tất cả vé
+            ticketRepository.saveAll(tickets);
+        } else throw new ErrorException("Invalid Request");
+
+        ResponseCommon responseCommon = new ResponseCommon();
+        responseCommon.setCode(200);
+        responseCommon.setResult(Constants.TICKET_CREATED_SUCCESS);
+        return responseCommon;
+    }
+
+    // Hàm tạo từng chiếc vè và cho vào danh sách List<Ticket> tickets
+    private void addTicket(Integer flightScheduleId, List<Ticket> tickets, int classNumber, TICKETTYPE tickettype, long price, int weightPackage) {
+        Ticket ticket = null;
+        for (int i = 0; i < classNumber; i++) {
+            ticket = new Ticket();
+            ticket.setTicketType(tickettype);
+            ticket.setFlightScheduleId(flightScheduleId);
+            ticket.setWeightPackage(weightPackage);
+            ticket.setPrice(price);
+            ticket.setBookingState(BOOKINGSTATE.AVAILABLE);
+            ticket.setTotalAdult(0);
+            ticket.setTotalChildren(0);
+            ticket.setTotalBaby(0);
+            ticket.setTotalPrice(0L);
+            tickets.add(ticket);
+        }
+    }
+
+    public static void main(String[] args) {
+        Random random = new Random();
+        int num = random.nextInt(90) + 10;
+        System.out.println(num);
+    }
 }
