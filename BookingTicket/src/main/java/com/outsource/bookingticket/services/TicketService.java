@@ -343,10 +343,4 @@ public class TicketService extends BaseService {
             tickets.add(ticket);
         }
     }
-
-    public static void main(String[] args) {
-        Random random = new Random();
-        int num = random.nextInt(90) + 10;
-        System.out.println(num);
-    }
 }
