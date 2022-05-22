@@ -2,10 +2,10 @@ package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.FlightCommonDTO;
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
-import com.outsource.bookingticket.dtos.FlightScheduleResponseDTO;
 import com.outsource.bookingticket.dtos.LocationDTO;
 import com.outsource.bookingticket.entities.common.FlightCommon;
 import com.outsource.bookingticket.entities.common.FlightTicketEntity;
+import com.outsource.bookingticket.entities.common.PeopleEntity;
 import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import com.outsource.bookingticket.entities.enums.FLIGHTSTATE;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
@@ -20,12 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,6 +34,20 @@ public class FlightService extends BaseService {
         // Kiểm tra nếu các biến truyền vào đều null thì sẽ trả ra thông báo lỗi
         if (Objects.isNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(startTime)) {
             throw new ErrorException(MessageUtil.FILL_TO_SEARCH);
+        }
+        // Lọc ra những lịch trình có số ghế còn trống bằng 0
+        List<FlightSchedule> flightScheduleList = flightScheduleRepository.findByAvailableSeat(0);
+
+        // Kiểm tra nếu danh sách khác rỗng sẽ huỷ hết các vé chưa được đặt
+        if (!CollectionUtils.isEmpty(flightScheduleList)) {
+            List<Integer> flightScheduleIdToCancel = flightScheduleList.stream()
+                                                    .map(FlightSchedule::getFlightScheduleId)
+                                                    .collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(flightScheduleIdToCancel)) {
+                List<Ticket> ticketCancelList = ticketRepository.findByFlightScheduleIdIn(flightScheduleIdToCancel);
+                ticketCancelList.forEach(p -> p.setBookingState(BOOKINGSTATE.CANCELED));
+                ticketRepository.saveAll(ticketCancelList);
+            }
         }
 
         // Cộng tổng số người cần đặt vé
@@ -84,22 +93,22 @@ public class FlightService extends BaseService {
         // Nếu không có điều kiện sẽ lấy hết danh sách
         if (Objects.isNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlight();
-        // Lấy danh sách chuyến bay theo địa điểm đến và đi
+            // Lấy danh sách chuyến bay theo địa điểm đến và đi
         } else if (Objects.nonNull(fromAirportId) && Objects.nonNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlightByLocation(fromAirportId, toAirportId);
-        // Lấy danh sách chuyến bay theo địa điểm bắt đầu
+            // Lấy danh sách chuyến bay theo địa điểm bắt đầu
         } else if (Objects.nonNull(fromAirportId) && Objects.isNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlightByFromLocation(fromAirportId);
-        // Lấy danh sách chuyến bay theo địa điểm đến
+            // Lấy danh sách chuyến bay theo địa điểm đến
         } else if (Objects.isNull(fromAirportId) && Objects.nonNull(toAirportId) && Objects.isNull(flightNo)) {
             flightCommonList = flightCommonRepository.findAllFlightByToLocation(toAirportId);
-        // Lấy danh sách chuyến bay theo mã chuyến bay
+            // Lấy danh sách chuyến bay theo mã chuyến bay
         } else if (Objects.isNull(fromAirportId) && Objects.isNull(toAirportId)) {
             flightCommonList = flightCommonRepository.findAllFlightByFlightNo(flightNo);
-        // Lấy danh sách chuyến bay theo địa điểm đến, đi và mã chuyến bay
+            // Lấy danh sách chuyến bay theo địa điểm đến, đi và mã chuyến bay
         } else if (Objects.nonNull(fromAirportId) && Objects.nonNull(toAirportId)) {
             flightCommonList = flightCommonRepository.findAllFlightByLocationAndFlightNo(fromAirportId, toAirportId, flightNo);
-        // Trả về lỗi nếu tìm kiếm sai
+            // Trả về lỗi nếu tìm kiếm sai
         } else throw new ErrorException(MessageUtil.FILL_SEARCH_AGAIN);
 
         // Danh sách mã địa điểm đến và đi

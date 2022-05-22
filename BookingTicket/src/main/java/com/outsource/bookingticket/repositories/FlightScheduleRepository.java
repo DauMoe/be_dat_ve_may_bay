@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface FlightScheduleRepository extends JpaRepository<FlightSchedule, Integer> {
     List<FlightSchedule> findFlightSchedulesByFlightNo(String flightNo);
     Optional<FlightSchedule> findFlightSchedulesByFlightScheduleId(Integer flightScheduleId);
+
+    List<FlightSchedule> findByAvailableSeat(Integer availableSeat);
+
 }
