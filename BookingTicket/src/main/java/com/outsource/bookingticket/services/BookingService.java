@@ -54,8 +54,12 @@ public class BookingService extends BaseService {
                 ticketTo.setTotalPrice(totalPrice(requestDto.getTotalAdult(), requestDto.getTotalChildren(),
                         requestDto.getTotalBaby(), ticketTo.getPrice()));
 
-                // Hàm cập nhật lại số lượng ghế còn trống trên chuyến bay đó.
-                flightScheduleTo.setAvailableSeat(flightScheduleTo.getAvailableSeat() - 1);
+                Integer totalTicketTo = flightScheduleTo.getAvailableSeat() - requestDto.getTotalAdult() - requestDto.getTotalChildren() - requestDto.getTotalBaby();
+
+                if (checkAvailableSeat(totalTicketTo)) throw new ErrorException(Constants.SEAT_UNAVAILABLE);
+
+                flightScheduleTo.setAvailableSeat(totalTicketTo);
+
                 // Cập nhật thông tin vào database
                 flightScheduleRepository.saveAndFlush(flightScheduleTo);
 
@@ -69,7 +73,11 @@ public class BookingService extends BaseService {
                         requestDto.getTotalBaby(), ticketBack.getPrice()));
 
                 // Hàm cập nhật lại số lượng ghế còn trống trên chuyến bay đó.
-                flightScheduleBack.setAvailableSeat(flightScheduleBack.getAvailableSeat() - 1);
+                Integer totalTicketBack = flightScheduleBack.getAvailableSeat() - requestDto.getTotalAdult() - requestDto.getTotalChildren() - requestDto.getTotalBaby();
+
+                if (checkAvailableSeat(totalTicketBack)) throw new ErrorException(Constants.SEAT_UNAVAILABLE);
+
+                flightScheduleBack.setAvailableSeat(totalTicketTo);
 
                 if (Objects.nonNull(ticketBack) && Objects.nonNull(flightScheduleBack)) {
 
@@ -99,11 +107,16 @@ public class BookingService extends BaseService {
             ticketTo.setTotalBaby(requestDto.getTotalBaby());
             ticketTo.setTotalPrice(totalPrice(requestDto.getTotalAdult(), requestDto.getTotalChildren(),
                     requestDto.getTotalBaby(), ticketTo.getPrice()));
+
+            Integer totalTicketTo = flightScheduleTo.getAvailableSeat() - requestDto.getTotalAdult() - requestDto.getTotalChildren() - requestDto.getTotalBaby();
+
+            if (checkAvailableSeat(totalTicketTo)) throw new ErrorException(Constants.SEAT_UNAVAILABLE);
+
             // Lưu dối tượng Ticket vào database.
             ticketRepository.saveAndFlush(ticketTo);
 
             // Hàm cập nhật lại số lượng ghế còn trống trên chuyến bay đó.
-            flightScheduleTo.setAvailableSeat(flightScheduleTo.getAvailableSeat() - 1);
+            flightScheduleTo.setAvailableSeat(totalTicketTo);
             // Cập nhật thông tin vào database
             flightScheduleRepository.saveAndFlush(flightScheduleTo);
 
