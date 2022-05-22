@@ -77,7 +77,7 @@ public class BookingService extends BaseService {
 
                 if (checkAvailableSeat(totalTicketBack)) throw new ErrorException(Constants.SEAT_UNAVAILABLE);
 
-                flightScheduleBack.setAvailableSeat(totalTicketTo);
+                flightScheduleBack.setAvailableSeat(totalTicketBack);
 
                 if (Objects.nonNull(ticketBack) && Objects.nonNull(flightScheduleBack)) {
 
