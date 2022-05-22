@@ -3,7 +3,9 @@ package com.outsource.bookingticket.repositories;
 import com.outsource.bookingticket.entities.ticket.Ticket;
 import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +23,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
     @Query(value = "select t.* from ticket t join flight_schedule fs on t.flight_schedule_id = fs.flight_schedule_id " +
             "where fs.flight_no = ?1 and BOOKING_STATE = 'BOOKED'", nativeQuery = true)
     List<Ticket> findTicketByFlightNoAndState(String flightNo);
+
+    List<Ticket> findByFlightScheduleIdIn(List<Integer> ids);
 }

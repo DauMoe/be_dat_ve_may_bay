@@ -76,6 +76,24 @@ public class AdminController extends BaseController {
         return locationService.editLocation(locationId, locationRequestDTO);
     }
 
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/airplane")
+    public ResponseEntity<?> addFlight(@RequestBody AirplaneDTO airplaneDTO) {
+        return airplaneService.addAirplane(airplaneDTO);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/airplane")
+    public ResponseEntity<?> getAllFlight() {
+        return airplaneService.getAllAirplane();
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/add-schedule")
+    public ResponseEntity<?> addFlightSchedule(@RequestBody FlightRequestDTO flightRequestDTO) {
+        return flightScheduleService.addFlightSchedule(flightRequestDTO);
+    }
+
     /*************API Quản lý Tin Tức Chuyến Bay******************/
     // API cho lấy tất cả các tin tuc chuyến bay
     @CrossOrigin(maxAge = 3600, origins = "*")

@@ -12,4 +12,5 @@ public interface FlightRepository extends JpaRepository<FlightEntity, Integer> {
     Optional<FlightEntity> findFlightEntityByFlightId(Integer flightId);
     Optional<FlightEntity> findFlightEntityByFlightNo(String flightNo);
     List<FlightEntity> findByFromAirportIdInOrToAirportIdIn(List<Integer> airportGeoListFrom, List<Integer> airportGeoListTo);
+    List<FlightEntity> findAllByAirplaneId(Integer airplaneId);
 }
