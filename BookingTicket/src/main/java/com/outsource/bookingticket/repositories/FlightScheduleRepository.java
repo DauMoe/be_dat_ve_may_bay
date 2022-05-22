@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.repositories;
 
+import com.outsource.bookingticket.entities.enums.FLIGHTSTATE;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,5 +14,5 @@ public interface FlightScheduleRepository extends JpaRepository<FlightSchedule, 
     Optional<FlightSchedule> findFlightSchedulesByFlightScheduleId(Integer flightScheduleId);
 
     List<FlightSchedule> findByAvailableSeat(Integer availableSeat);
-
+    List<FlightSchedule> findAllByFlightNoInAndFlightState(List<String> flightNoList, FLIGHTSTATE flightState);
 }
