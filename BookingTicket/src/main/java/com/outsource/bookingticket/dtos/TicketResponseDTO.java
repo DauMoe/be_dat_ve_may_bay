@@ -17,7 +17,7 @@ public class TicketResponseDTO {
     private Integer ticketId;
     @JsonProperty("row_seat")
     private String rowSeat;
-    private Long price;
+    private String price;
     @JsonProperty("booking_state")
     private String bookingState;
     @JsonProperty("airplane_name")

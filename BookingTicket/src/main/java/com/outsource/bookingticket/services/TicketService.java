@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,7 +58,7 @@ public class TicketService extends BaseService {
                 Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
 
                 Passenger passenger = null;
-
+                // Nếu là vé đã được đặt thì sẽ trả về thông tin đã được đặt
                 if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED) {
                     passenger = clientRepository.findPassengerById(ticket.get().getUid());
                     totalAdult = ticket.get().getTotalAdult();
@@ -99,7 +101,7 @@ public class TicketService extends BaseService {
         // Gán các giá trị thuộc tính
         dto.setTicketId(ticketCommon.getTicketId());
         dto.setRowSeat(ticketCommon.getRowSeat());
-        dto.setPrice(ticketCommon.getPrice());
+        dto.setPrice(withLargeIntegers(ticketCommon.getPrice()));
         dto.setBookingState(ticketCommon.getBookingState());
         dto.setAirplaneName(ticketCommon.getAirplaneName());
         dto.setStartTime(convertLocalDatetimeToString(ticketCommon.getStartTime()));
@@ -225,11 +227,11 @@ public class TicketService extends BaseService {
         long tax = totalPrice / 10;
 
         TicketDTO.PriceDTO priceDTO = new TicketDTO.PriceDTO();
-        priceDTO.setAdultPrice(new DetailPriceDTO(totalAdult, price, totalAdult * price));
-        priceDTO.setChildrenPrice(totalChildren == 0 ? null : new DetailPriceDTO(totalChildren, childrenPrice, totalChildren * childrenPrice));
-        priceDTO.setBabyPrice(totalBaby == 0 ? null : new DetailPriceDTO(totalBaby, babyPrice, totalBaby * babyPrice));
-        priceDTO.setTax(tax);
-        priceDTO.setTotalPrice(totalPrice);
+        priceDTO.setAdultPrice(new DetailPriceDTO(totalAdult, withLargeIntegers(price), withLargeIntegers(totalAdult * price)));
+        priceDTO.setChildrenPrice(totalChildren == 0 ? null : new DetailPriceDTO(totalChildren, withLargeIntegers(childrenPrice), withLargeIntegers(totalChildren * childrenPrice)));
+        priceDTO.setBabyPrice(totalBaby == 0 ? null : new DetailPriceDTO(totalBaby, withLargeIntegers(babyPrice), withLargeIntegers(totalBaby * babyPrice)));
+        priceDTO.setTax(withLargeIntegers(tax));
+        priceDTO.setTotalPrice(withLargeIntegers(totalPrice + tax));
 
         return priceDTO;
     }
