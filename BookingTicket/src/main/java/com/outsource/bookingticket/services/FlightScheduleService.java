@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class FlightScheduleService extends BaseService {
 
+    // Lấy hết lịch trình bay
     public ResponseEntity<?> getAllFlightSchedule() {
         List<FlightSchedule> flightScheduleList = flightScheduleRepository.findAll();
         return ResponseEntity.ok(Helper.createSuccessListCommon(Collections.singletonList(flightScheduleList)));
@@ -31,15 +32,19 @@ public class FlightScheduleService extends BaseService {
 
     // API thêm lịch trình bay
     public ResponseEntity<?> addFlightSchedule(FlightRequestDTO flightRequestDTO) {
+        // Kiểm tra thông tin đầu vào
         validateFlightSchedule(flightRequestDTO);
+        // Tìm kiếm thông tin máy bay theo ID máy bay, nếu không có sẽ trả về lỗi
         Airplane airplane = airplaneRepository.findById(flightRequestDTO.getAirplaneId())
                 .orElseThrow(() -> new ErrorException(MessageUtil.AIRPLANE_IS_NOT_EXIST));
+        // Khởi tạo đối tượng FlightEntity và gán giá trị để lưu vào DB
         FlightEntity newFlight = FlightEntity.builder()
                 .flightNo(flightRequestDTO.getFlightNo())
                 .fromAirportId(flightRequestDTO.getFromAirportId())
                 .toAirportId(flightRequestDTO.getToAirportId())
                 .airplaneId(flightRequestDTO.getAirplaneId())
                 .build();
+        // Khởi tạo đối tượng FlightSchedule và gán giá trị để lưu vào DB
         FlightSchedule newSchedule = FlightSchedule.builder()
                 .startTime(convertStringToLocalDateTime(flightRequestDTO.getStartTime()))
                 .endTime(convertStringToLocalDateTime(flightRequestDTO.getEndTime()))
@@ -47,34 +52,45 @@ public class FlightScheduleService extends BaseService {
                 .availableSeat(airplane.getCapacity())
                 .flightState(FLIGHTSTATE.FLIGHT_ON)
                 .build();
+        // Gọi hàm lưu vào DB
         flightRepository.save(newFlight);
         flightScheduleRepository.save(newSchedule);
 
+        // Trả về thông báo thêm thành công
         return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.INSERT_SUCCESS));
     }
 
+    // Kiểm tra thông tin đầu vào xem lịch trình bay muốn thêm có trùng với lịch trình của cùng 1 máy bay trước đó không
     private void validateFlightSchedule(FlightRequestDTO flightRequestDTO) {
+        // Tìm kiếm xem máy bay có chuyến bay nào chưa
         List<FlightEntity> flightEntityList = flightRepository.findAllByAirplaneId(flightRequestDTO.getAirplaneId());
 
         if (!CollectionUtils.isEmpty(flightEntityList)) {
+            // Lấy danh sách mã chuyến bay
             List<String> flightNoList = flightEntityList
                                         .stream()
                                         .map(FlightEntity::getFlightNo)
                                         .collect(Collectors.toList());
+            // Tìm hết lịch trình bay của máy bay đó
             List<FlightSchedule> flightScheduleList = flightScheduleRepository
                     .findAllByFlightNoInAndFlightState(flightNoList, FLIGHTSTATE.FLIGHT_ON);
+            // Chuyển đổi thời gian để so sánh
             LocalDateTime startTimeConverted = convertStringToLocalDateTime(flightRequestDTO.getStartTime());
             LocalDateTime endTimeConverted = convertStringToLocalDateTime(flightRequestDTO.getEndTime());
+
+            // Lọc ra những lịch trình thoả mãn điều kiện
             List<FlightSchedule> filterScheduleList = flightScheduleList
                                                     .stream()
                                                     .filter(p -> filterByDate(p, startTimeConverted, endTimeConverted))
                                                     .collect(Collectors.toList());
+            // Trả về thông báo lỗi nếu như có lịch trình không thoả mãn điều kiện
             if (flightScheduleList.size() != filterScheduleList.size()) {
                 throw new ErrorException(MessageUtil.DATETIME_ERROR);
             }
         }
     }
 
+    // Kiểm tra thời gian thêm vào không được trùng với thời gian nào đã được thêm trước đó
     private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startTime, LocalDateTime endTime) {
         LocalDateTime scheduleStart = flightSchedule.getStartTime();
         LocalDateTime scheduleEnd = flightSchedule.getEndTime();

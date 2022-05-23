@@ -20,6 +20,7 @@ public class FlightController extends BaseController {
         return flightService.searchFlight(fromAirportId, toAirportId, startTime, endTime, totalAdult, totalChildren, totalBaby);
     }
 
+    // Gợi ý chuyến bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/suggestion")
     public ResponseEntity<?> getSuggestionFlight() {

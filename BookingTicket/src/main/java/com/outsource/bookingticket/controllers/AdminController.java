@@ -63,12 +63,14 @@ public class AdminController extends BaseController {
         return flightService.updateFlightState(flightId);
     }
 
+    // Thêm địa điểm
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(path = "/location-add")
     ResponseEntity<?> addLocation(@RequestBody LocationRequestDTO locationRequestDTO) {
         return locationService.addLocation(locationRequestDTO);
     }
 
+    // Thay đổi thông tin địa điểm
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/location-update/{location_id}")
     ResponseEntity<?> addLocation(@PathVariable("location_id") Integer locationId,
@@ -76,18 +78,21 @@ public class AdminController extends BaseController {
         return locationService.editLocation(locationId, locationRequestDTO);
     }
 
+    // Thêm máy bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(path = "/airplane")
     public ResponseEntity<?> addFlight(@RequestBody AirplaneDTO airplaneDTO) {
         return airplaneService.addAirplane(airplaneDTO);
     }
 
+    // Lấy hết danh sách thông tin máy bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/airplane")
     public ResponseEntity<?> getAllFlight() {
         return airplaneService.getAllAirplane();
     }
 
+    // Thêm lịch trình bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(path = "/add-schedule")
     public ResponseEntity<?> addFlightSchedule(@RequestBody FlightRequestDTO flightRequestDTO) {

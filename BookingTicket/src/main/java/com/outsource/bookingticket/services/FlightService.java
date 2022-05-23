@@ -43,6 +43,7 @@ public class FlightService extends BaseService {
             List<Integer> flightScheduleIdToCancel = flightScheduleList.stream()
                                                     .map(FlightSchedule::getFlightScheduleId)
                                                     .collect(Collectors.toList());
+            // Hàm huỷ các vé của lịch trình mà đã được đặt đủ hết số ghế
             if (!CollectionUtils.isEmpty(flightScheduleIdToCancel)) {
                 List<Ticket> ticketCancelList = ticketRepository.findByFlightScheduleIdIn(flightScheduleIdToCancel);
                 ticketCancelList.forEach(p -> p.setBookingState(BOOKINGSTATE.CANCELED));
@@ -155,7 +156,7 @@ public class FlightService extends BaseService {
 
     // Hàm lấy danh sách gợi ý bay
     public ResponseEntity<?> getSuggestionFlight() {
-        // Lấy gợi ý danh sách bay
+        // Lấy gợi ý danh sách bay, lấy 6 chuyến bay có giá rẻ nhất
         List<FlightTicketEntity> flightSuggestionList = flightTicketRepository.findAllFlightSuggestion();
 
         // Convert danh sách FlightEntity sang danh sách FlightScheduleResponseDTO
