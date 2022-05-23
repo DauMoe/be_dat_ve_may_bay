@@ -65,9 +65,9 @@ public class TicketDTO {
         private DetailPriceDTO childrenPrice;
         @JsonProperty("baby_price")
         private DetailPriceDTO babyPrice;
-        private Long tax;
+        private String tax;
         @JsonProperty("total_price")
-        private Long totalPrice;
+        private String totalPrice;
     }
 
 }

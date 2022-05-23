@@ -25,7 +25,7 @@ public class FlightResponseDTO {
     @JsonProperty("weight_package")
     private Integer weightPackage;
 
-    private Long price;
+    private String price;
 
     @JsonProperty("flight_schedule_id")
     private Integer flightScheduleId;
