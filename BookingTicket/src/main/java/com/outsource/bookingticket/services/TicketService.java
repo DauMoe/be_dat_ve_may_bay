@@ -270,25 +270,25 @@ public class TicketService extends BaseService {
             // tạo vé cho loại vé FIRST_CLASS
             int firstClassNumber =  ticketCreateDTO.getFirstClassNumber();
             if (firstClassNumber > 0) {
-                addTicket(flightScheduleId, tickets, firstClassNumber, TICKETTYPE.FIRST_CLASS, 7000L, 70);
+                addTicket(flightScheduleId, tickets, firstClassNumber, TICKETTYPE.FIRST_CLASS, 7000000L, 70);
             }
 
             // tạo vé cho loại vé BUSINESS_CLASS
             int businessClassNumber = ticketCreateDTO.getBusinessClassNumber();
             if (businessClassNumber > 0) {
-                addTicket(flightScheduleId, tickets, businessClassNumber, TICKETTYPE.BUSINESS_CLASS, 6000L, 60);
+                addTicket(flightScheduleId, tickets, businessClassNumber, TICKETTYPE.BUSINESS_CLASS, 3500000L, 60);
             }
 
             // tạo vé cho loại vé PREMIUM_CLASS
             int premiumClassNumber = ticketCreateDTO.getPremiumClassNumber();
             if (premiumClassNumber > 0) {
-                addTicket(flightScheduleId, tickets, premiumClassNumber, TICKETTYPE.PREMIUM_CLASS, 5000L, 50);
+                addTicket(flightScheduleId, tickets, premiumClassNumber, TICKETTYPE.PREMIUM_CLASS, 2000000L, 50);
             }
 
             // tạo vé cho loại vé ECONOMY_CLASS
             int economyClassNumber = ticketCreateDTO.getEconomyClassNumber();
             if (economyClassNumber > 0) {
-                addTicket(flightScheduleId, tickets, economyClassNumber, TICKETTYPE.ECONOMY_CLASS, 4000L, 40);
+                addTicket(flightScheduleId, tickets, economyClassNumber, TICKETTYPE.ECONOMY_CLASS, 1500000L, 40);
             }
 
             // Tạo tên seatRow cho từng vé theo fomart: [A-Z]d{2} => VD: A12
