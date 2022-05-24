@@ -1,5 +1,6 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.dtos.CreateScheduleResponseDTO;
 import com.outsource.bookingticket.dtos.FlightRequestDTO;
 import com.outsource.bookingticket.dtos.LocationRequestDTO;
 import com.outsource.bookingticket.entities.airplane.Airplane;
@@ -53,11 +54,11 @@ public class FlightScheduleService extends BaseService {
                 .flightState(FLIGHTSTATE.FLIGHT_ON)
                 .build();
         // Gọi hàm lưu vào DB
-        flightRepository.save(newFlight);
-        flightScheduleRepository.save(newSchedule);
+        newFlight = flightRepository.save(newFlight);
+        newSchedule = flightScheduleRepository.save(newSchedule);
 
         // Trả về thông báo thêm thành công
-        return ResponseEntity.ok(Helper.createSuccessCommon(MessageUtil.INSERT_SUCCESS));
+        return ResponseEntity.ok(Helper.createSuccessCommon(createScheduleResponseDTO(newFlight, newSchedule)));
     }
 
     // Kiểm tra thông tin đầu vào xem lịch trình bay muốn thêm có trùng với lịch trình của cùng 1 máy bay trước đó không
@@ -97,4 +98,19 @@ public class FlightScheduleService extends BaseService {
         return startTime.isBefore(endTime) && (endTime.isBefore(scheduleStart) || startTime.isAfter(scheduleEnd));
     }
 
+    private CreateScheduleResponseDTO createScheduleResponseDTO(FlightEntity flightEntity, FlightSchedule flightSchedule) {
+        CreateScheduleResponseDTO responseDTO = new CreateScheduleResponseDTO();
+        CreateScheduleResponseDTO.ScheduleResponseDTO scheduleResponseDTO = new CreateScheduleResponseDTO.ScheduleResponseDTO();
+
+        scheduleResponseDTO.setFlightId(flightEntity.getFlightId());
+        scheduleResponseDTO.setFlightNo(flightSchedule.getFlightNo());
+        scheduleResponseDTO.setFlightScheduleId(flightSchedule.getFlightScheduleId());
+        scheduleResponseDTO.setStartTime(convertLocalDatetimeToHourString(flightSchedule.getStartTime()));
+        scheduleResponseDTO.setEndTime(convertLocalDatetimeToHourString(flightSchedule.getEndTime()));
+
+        responseDTO.setFlightScheduleResponseDTO(scheduleResponseDTO);
+        responseDTO.setMessage(MessageUtil.INSERT_SUCCESS);
+
+        return responseDTO;
+    }
 }
