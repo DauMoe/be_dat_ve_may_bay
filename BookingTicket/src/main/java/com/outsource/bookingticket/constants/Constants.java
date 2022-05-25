@@ -47,6 +47,9 @@ public class Constants {
     public static final String BOOKING_SUCCESS_CONTENT= "Dear [[name]],<br>Tickets have been booked successfully" +
                                                         "<br><h3>Your flight ticket details:</h3>" +
                                                         "<br>FULL NAME: [[name]]" +
+                                                        "<br>TOTAL ADULT: [[adult]]" +
+                                                        "<br>TOTAL CHILDREN: [[children]]" +
+                                                        "<br>TOTAL BABY: [[baby]]" +
                                                         "<br>FLIGHT NO: [[flightNo]]" +
                                                         "<br>START TIME: [[start]]" +
                                                         "<br>END TIME: [[end]]" +
@@ -57,6 +60,9 @@ public class Constants {
                                                                 "<br><h3>Your flight ticket details:</h3>" +
                                                                 "<br><h4>VE CHIEU DI:</h4>" +
                                                                 "<br>FULL NAME: [[name]]" +
+                                                                "<br>TOTAL ADULT: [[adult]]" +
+                                                                "<br>TOTAL CHILDREN: [[children]]" +
+                                                                "<br>TOTAL BABY: [[baby]]" +
                                                                 "<br>FLIGHT NO: [[flightNo]]" +
                                                                 "<br>START TIME: [[start]]" +
                                                                 "<br>END TIME: [[end]]" +
@@ -64,6 +70,9 @@ public class Constants {
 
                                                                 "<br><h4>VE CHIEU VE:</h4>" +
                                                                 "<br>FULL NAME: [[name]]" +
+                                                                "<br>TOTAL ADULT: [[adult]]" +
+                                                                "<br>TOTAL CHILDREN: [[children]]" +
+                                                                "<br>TOTAL BABY: [[baby]]" +
                                                                 "<br>FLIGHT NO: [[flightNoVe]]" +
                                                                 "<br>START TIME: [[startVe]]" +
                                                                 "<br>END TIME: [[endVe]]" +
@@ -81,8 +90,12 @@ public class Constants {
             "<br><h3>Your flight ticket details:</h3>" +
             "<br>FULL NAME: [[name]]" +
             "<br>FLIGHT NO: [[flightNo]]" +
-            "<br>SEAT NUMBER: [[seatNumber]]" +
+            "<br>ROW SEAT: [[rowSeat]]" +
             "<br>So sorry. Hope to see you again!";
 
     public static final String EMAIL_NOT_VALID = "Email không đúng định dạng.";
+
+    public static final String TICKET_CREATED_SUCCESS = "Tạo vé thành công!!!";
+
+    public static final String FLIGHT_SCHEDULE_NON_EXISTENT = "Flight schedule không tồn tại!!!";
 }

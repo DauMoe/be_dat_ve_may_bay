@@ -1,6 +1,7 @@
 package com.outsource.bookingticket.entities.airplane;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class Airplane implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +23,7 @@ public class Airplane implements Serializable {
     @Column(name = "airplane_name")
     private String airplaneName;
 
-    private Float capacity;
+    private Integer capacity;
 
     private String brand;
 

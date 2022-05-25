@@ -23,8 +23,8 @@ public class Ticket {
     @Column(name = "flight_schedule_id")
     private Integer flightScheduleId;
 
-    @Column(name = "seat_number")
-    private String seatNumber;
+    @Column(name = "row_seat")
+    private String rowSeat;
 
     @Column(name = "price")
     private Long price;
@@ -42,4 +42,16 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     @Column(name = "booking_state")
     private BOOKINGSTATE bookingState;
+
+    @Column(name = "total_adult")
+    private Integer totalAdult;
+
+    @Column(name = "total_children")
+    private Integer totalChildren;
+
+    @Column(name = "total_baby")
+    private Integer totalBaby;
+
+    @Column(name = "total_price")
+    private Long totalPrice;
 }

@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -30,6 +32,13 @@ public class AdminController extends BaseController {
                                    @RequestParam(value = "to_airport", required = false) Integer toAirportId,
                                    @RequestParam(value = "flight_no", required = false) String flightNo) {
         return flightService.getAllFlight(fromAirportId, toAirportId, flightNo);
+    }
+
+    // API lấy hết danh sách lịch trình bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/list-flight-schedule")
+    ResponseEntity<?> getAllFlightSchedule() {
+        return flightScheduleService.getAllFlightSchedule();
     }
 
     // API lấy hết danh sách thông tin vé theo schedule ID
@@ -54,17 +63,40 @@ public class AdminController extends BaseController {
         return flightService.updateFlightState(flightId);
     }
 
+    // Thêm địa điểm
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(path = "/location-add")
     ResponseEntity<?> addLocation(@RequestBody LocationRequestDTO locationRequestDTO) {
         return locationService.addLocation(locationRequestDTO);
     }
 
+    // Thay đổi thông tin địa điểm
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/location-update/{location_id}")
     ResponseEntity<?> addLocation(@PathVariable("location_id") Integer locationId,
                                   @RequestBody LocationRequestDTO locationRequestDTO) {
         return locationService.editLocation(locationId, locationRequestDTO);
+    }
+
+    // Thêm máy bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/airplane")
+    public ResponseEntity<?> addFlight(@RequestBody AirplaneDTO airplaneDTO) {
+        return airplaneService.addAirplane(airplaneDTO);
+    }
+
+    // Lấy hết danh sách thông tin máy bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/airplane")
+    public ResponseEntity<?> getAllFlight() {
+        return airplaneService.getAllAirplane();
+    }
+
+    // Thêm lịch trình bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/add-schedule")
+    public ResponseEntity<?> addFlightSchedule(@RequestBody FlightRequestDTO flightRequestDTO) {
+        return flightScheduleService.addFlightSchedule(flightRequestDTO);
     }
 
     /*************API Quản lý Tin Tức Chuyến Bay******************/
@@ -199,7 +231,7 @@ public class AdminController extends BaseController {
         flightNews.setCreatedTime(flightNewsDTO.getCreatedTime());
         flightNews.setUpdatedTime(flightNewsDTO.getUpdatedTime());
         flightNews.setUpdateBy(flightNewsDTO.getUpdateBy());
-
+        flightNews.setCreatedTime(LocalDateTime.now());
         return flightNews;
     }
 
@@ -244,11 +276,22 @@ public class AdminController extends BaseController {
         return ResponseEntity.ok(responseCommon);
     }
 
+    // API tạo vé cho flight schedule
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/ticket/create")
+    ResponseEntity<?> createTicketForFlightSchedule(@RequestBody TicketCreateDTO ticketCreateDTO) {
+        ResponseCommon responseCommon = ticketService.createTicketsForFlightSchedule(ticketCreateDTO);
+        return ResponseEntity.ok(responseCommon);
+    }
+
     // API lấy thông tin chi tiết của vé
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/ticket/{ticket_id}")
-    ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId) {
-        return ticketService.getDetailTicket(ticketId);
+    ResponseEntity<?> getDetailTicket(@PathVariable("ticket_id") Integer ticketId,
+                                      @RequestParam(value = "adult", defaultValue = "1") Integer totalAdult,
+                                      @RequestParam(value = "children", defaultValue = "0") Integer totalChildren,
+                                      @RequestParam(value = "baby", defaultValue = "0") Integer totalBaby) {
+        return ticketService.getDetailTicket(ticketId, totalAdult, totalChildren, totalBaby);
     }
 
     // API sửa thông tin hành khách

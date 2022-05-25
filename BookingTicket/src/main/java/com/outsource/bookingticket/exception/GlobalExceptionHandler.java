@@ -28,4 +28,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 error.getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<?> npeException(NullPointerException error, WebRequest request) {
+        ResponseErrorCommon response = new ResponseErrorCommon(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid request");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

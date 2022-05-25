@@ -1,6 +1,8 @@
 package com.outsource.bookingticket.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class TicketDTO {
     @JsonProperty("ticket_id")
     private Integer ticketId;
-    @JsonProperty("seat_number")
-    private String seatNumber;
+    @JsonProperty("row_seat")
+    private String rowSeat;
     private PriceDTO price;
     @JsonProperty("booking_state")
     private String bookingState;
@@ -52,13 +54,20 @@ public class TicketDTO {
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonPropertyOrder({ "adult_price", "children_price", "baby_price", "tax", "total_price" })
     public static class PriceDTO {
-        @JsonProperty("ticket_price")
-        private Long ticketPrice;
-        private Long tax;
+        @JsonProperty("adult_price")
+        private DetailPriceDTO adultPrice;
+        @JsonProperty("children_price")
+        private DetailPriceDTO childrenPrice;
+        @JsonProperty("baby_price")
+        private DetailPriceDTO babyPrice;
+        private String tax;
         @JsonProperty("total_price")
-        private Long totalPrice;
+        private String totalPrice;
     }
 
 }
