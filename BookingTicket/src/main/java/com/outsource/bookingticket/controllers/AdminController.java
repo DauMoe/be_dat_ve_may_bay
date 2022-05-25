@@ -301,4 +301,11 @@ public class AdminController extends BaseController {
         ResponseCommon responseCommon = passengerService.editPassenger(passenger);
         return ResponseEntity.ok(responseCommon);
     }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/confirm-ticket")
+    public ResponseEntity<?> confirmBooking(@RequestParam("ticket_id") Integer ticketId) throws MessagingException, UnsupportedEncodingException {
+        ResponseCommon responseCommon = bookingService.bookingConfirm(ticketId);
+        return ResponseEntity.ok(responseCommon);
+    }
 }
