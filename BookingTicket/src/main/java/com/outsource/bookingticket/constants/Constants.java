@@ -98,4 +98,6 @@ public class Constants {
     public static final String TICKET_CREATED_SUCCESS = "Tạo vé thành công!!!";
 
     public static final String FLIGHT_SCHEDULE_NON_EXISTENT = "Flight schedule không tồn tại!!!";
+
+    public static final String CONFIRM_TICKET = "Hệ thống sẽ xác nhận và gửi thông tin chi tiết vé qua email của bạn.";
 }

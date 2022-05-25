@@ -32,7 +32,8 @@ public class BookingService extends BaseService {
             if (!validateEmail(requestDto.getEmail())) throw new ErrorException(Constants.EMAIL_NOT_VALID);
 
             Ticket ticketTo = ticketRepository.findTicketByTicketId(requestDto.getTicketIdTo()).get();
-            if (ticketTo.getBookingState().equals(BOOKINGSTATE.BOOKED)) throw new ErrorException(MessageUtil.EXIST_TICKET);
+            if (ticketTo.getBookingState().equals(BOOKINGSTATE.BOOKED))
+                throw new ErrorException(MessageUtil.EXIST_TICKET);
             // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
             FlightSchedule flightScheduleTo = saveSchedule(ticketTo.getFlightScheduleId());
             Passenger passenger = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
@@ -41,11 +42,12 @@ public class BookingService extends BaseService {
 
             if (requestDto.getTicketIdBack() !=  null){
                 Ticket ticketBack = ticketRepository.findTicketByTicketId(requestDto.getTicketIdBack()).get();
-                if (ticketBack.getBookingState().equals(BOOKINGSTATE.BOOKED)) throw new ErrorException(MessageUtil.EXIST_TICKET);
+                if (ticketBack.getBookingState().equals(BOOKINGSTATE.BOOKED))
+                    throw new ErrorException(MessageUtil.EXIST_TICKET);
                 FlightSchedule flightScheduleBack = saveSchedule(ticketBack.getFlightScheduleId());
                 if (checkAvailableSeat(flightScheduleBack.getAvailableSeat()))throw new ErrorException(Constants.SEAT_UNAVAILABLE);
 
-                ticketTo.setBookingState(BOOKINGSTATE.BOOKED);
+                ticketTo.setBookingState(BOOKINGSTATE.PENDING);
                 Passenger passengerTo = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
                 ticketTo.setUid(passengerTo.getId());
                 ticketTo.setTotalAdult(requestDto.getTotalAdult());
@@ -63,7 +65,7 @@ public class BookingService extends BaseService {
                 // Cập nhật thông tin vào database
                 flightScheduleRepository.saveAndFlush(flightScheduleTo);
 
-                ticketBack.setBookingState(BOOKINGSTATE.BOOKED);
+                ticketBack.setBookingState(BOOKINGSTATE.PENDING);
                 Passenger passengerBack = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
                 ticketBack.setUid(passengerBack.getId());
                 ticketBack.setTotalAdult(requestDto.getTotalAdult());
@@ -88,11 +90,11 @@ public class BookingService extends BaseService {
                     // Cập nhật thông tin vào database
                     flightScheduleBack = flightScheduleRepository.saveAndFlush(flightScheduleBack);
                     // Gọi hàm sendBookingSuccessEmail() để gửi thông tin vé về mail
-                    sendBookingSuccessEmailKhuHoi(passenger, ticketTo, ticketBack, flightScheduleTo, flightScheduleBack);
+//                    sendBookingSuccessEmailKhuHoi(passenger, ticketTo, ticketBack, flightScheduleTo, flightScheduleBack);
 
                     ResponseCommon responseCommon = new ResponseCommon();
                     responseCommon.setCode(200);
-                    responseCommon.setResult(Constants.BOOKING_SUCCESS);
+                    responseCommon.setResult(Constants.CONFIRM_TICKET);
                     return responseCommon;
 
                 }
@@ -100,7 +102,7 @@ public class BookingService extends BaseService {
             }
 
             // Khởi tạo 1 đối tượng của Ticket để set dữ liệu cho đối tượng đó. Dữ liệu được lấy từ tham số truyền vào
-            ticketTo.setBookingState(BOOKINGSTATE.BOOKED);
+            ticketTo.setBookingState(BOOKINGSTATE.PENDING);
             ticketTo.setUid(passenger.getId());
             ticketTo.setTotalAdult(requestDto.getTotalAdult());
             ticketTo.setTotalChildren(requestDto.getTotalChildren());
@@ -120,12 +122,30 @@ public class BookingService extends BaseService {
             // Cập nhật thông tin vào database
             flightScheduleRepository.saveAndFlush(flightScheduleTo);
 
-            // Gọi hàm sendBookingSuccessEmail() để gửi thông tin vé về mail
-            sendBookingSuccessEmail(passenger, ticketTo, flightScheduleTo);
-
         } else throw new ErrorException("Invalid Request");
 
         // Trả về các thông tin cho phía client.
+        ResponseCommon responseCommon = new ResponseCommon();
+        responseCommon.setCode(200);
+        responseCommon.setResult(Constants.CONFIRM_TICKET);
+        return responseCommon;
+    }
+
+    public ResponseCommon bookingConfirm (Integer ticketId) throws MessagingException, UnsupportedEncodingException {
+
+        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow( () -> new ErrorException(MessageUtil.TICKET_NOT_FOUND));
+        if (ticket.getBookingState().equals(BOOKINGSTATE.BOOKED))
+            throw new ErrorException(MessageUtil.EXIST_TICKET);
+        // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
+        FlightSchedule flightScheduleTo = saveSchedule(ticket.getFlightScheduleId());
+
+        Passenger passenger = clientRepository.findById(ticket.getUid()).orElseThrow( () -> new ErrorException(MessageUtil.USER_NOT_FOUND));
+        ticket.setBookingState(BOOKINGSTATE.BOOKED);
+        ticketRepository.saveAndFlush(ticket);
+
+        // Gọi hàm sendBookingSuccessEmail() để gửi thông tin vé về mail
+        sendBookingSuccessEmail(passenger, ticket, flightScheduleTo);
+
         ResponseCommon responseCommon = new ResponseCommon();
         responseCommon.setCode(200);
         responseCommon.setResult(Constants.BOOKING_SUCCESS);
