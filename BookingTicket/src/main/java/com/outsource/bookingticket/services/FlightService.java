@@ -5,7 +5,6 @@ import com.outsource.bookingticket.dtos.FlightResponseDTO;
 import com.outsource.bookingticket.dtos.LocationDTO;
 import com.outsource.bookingticket.entities.common.FlightCommon;
 import com.outsource.bookingticket.entities.common.FlightTicketEntity;
-import com.outsource.bookingticket.entities.common.PeopleEntity;
 import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
 import com.outsource.bookingticket.entities.enums.FLIGHTSTATE;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
@@ -185,15 +184,6 @@ public class FlightService extends BaseService {
         responseDTO.setBrand(flightEntity.getBrand());
         responseDTO.setLinkImageBrand(flightEntity.getLinkImgBrand());
         return responseDTO;
-    }
-
-    // Hàm chuyển Location sang LocationDTO để trả về
-    private LocationDTO mapLocation(Location location) {
-        LocationDTO locationDTO = new LocationDTO();
-        locationDTO.setLocationId(location.getLocationId());
-        locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
-        locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
-        return locationDTO;
     }
 
     // Hàm lọc địa điểm trong danh sách địa điểm theo ID của địa điểm
