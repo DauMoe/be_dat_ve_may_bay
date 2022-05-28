@@ -37,8 +37,11 @@ public class AdminController extends BaseController {
     // API lấy hết danh sách lịch trình bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/list-flight-schedule")
-    ResponseEntity<?> getAllFlightSchedule() {
-        return flightScheduleService.getAllFlightSchedule();
+    ResponseEntity<?> getAllFlightSchedule(@RequestParam(value = "start_time", required = false) String startTime,
+                                           @RequestParam(value = "end_time", required = false) String endTime,
+                                           @RequestParam(value = "from", required = false) Integer from,
+                                           @RequestParam(value = "to", required = false) Integer to) {
+        return flightScheduleService.getAllFlightSchedule(startTime, endTime, from, to);
     }
 
     // API lấy hết danh sách thông tin vé theo schedule ID

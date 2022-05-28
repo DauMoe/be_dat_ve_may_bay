@@ -62,15 +62,4 @@ public class AirplaneService extends BaseService {
         // Trả về hiển thị
         return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(resultList)));
     }
-
-    // Hàm gán giá trị thuộc tính của Airplane sang AirplaneDTO
-    private AirplaneDTO mapToAirplaneDTO(Airplane airplane) {
-        return AirplaneDTO.builder()
-                .airplaneId(airplane.getAirplaneId())
-                .airplaneName(airplane.getAirplaneName())
-                .capacity(airplane.getCapacity())
-                .brand(airplane.getBrand())
-                .linkImgBrand(airplane.getLinkImgBrand())
-                .build();
-    }
 }
