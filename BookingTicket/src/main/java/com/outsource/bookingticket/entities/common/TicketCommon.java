@@ -46,5 +46,5 @@ public class TicketCommon implements Serializable {
     private Integer airplaneId;
     @Column(name = "flight_schedule_id")
     private Integer flightScheduleId;
-    private String username;
+    private String fullname;
 }

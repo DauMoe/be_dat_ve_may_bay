@@ -108,7 +108,7 @@ public class TicketService extends BaseService {
         dto.setEndTime(convertLocalDatetimeToString(ticketCommon.getEndTime()));
         dto.setAvailableSeat(ticketCommon.getAvailableSeat());
         dto.setFlightNo(ticketCommon.getFlightNo());
-        dto.setUsername(ticketCommon.getUsername());
+        dto.setUsername(ticketCommon.getFullname());
 
         // Tìm kiếm lịch trình chuyến bay
         Optional<FlightSchedule> flightSchedule =
