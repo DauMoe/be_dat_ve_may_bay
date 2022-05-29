@@ -89,11 +89,6 @@ public class TicketService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(ticketResponseDTOS)));
     }
 
-    // Hàm lọc Location theo ID
-    private Location filterLocation(List<Location> locationList, Integer locationId) {
-        return locationList.stream().filter(l -> l.getLocationId().equals(locationId)).findFirst().orElse(null);
-    }
-
     // Chuyến dữ liệu từ TicketCommon sang TicketResponseDTO
     private TicketResponseDTO mapToTicketCommon(TicketCommon ticketCommon){
         // Khởi tạo đối tượng TicketResponseDTO
@@ -109,6 +104,8 @@ public class TicketService extends BaseService {
         dto.setAvailableSeat(ticketCommon.getAvailableSeat());
         dto.setFlightNo(ticketCommon.getFlightNo());
         dto.setUsername(ticketCommon.getFullname());
+        dto.setFlightId(ticketCommon.getFlightId());
+
 
         // Tìm kiếm lịch trình chuyến bay
         Optional<FlightSchedule> flightSchedule =
@@ -126,6 +123,7 @@ public class TicketService extends BaseService {
 
         dto.setFromAirport(locationFrom);
         dto.setToAirport(locationTo);
+        dto.setAirplaneId(ticketCommon.getAirplaneId());
 
         // Trả về dữ liệu
         return dto;
@@ -200,15 +198,6 @@ public class TicketService extends BaseService {
         responseDTO.setFromAirport(mapLocation(locationFrom));
 
         return responseDTO;
-    }
-
-    // Hàm chuyển Location sang LocationDTO để trả về
-    private LocationDTO mapLocation(Location location) {
-        LocationDTO locationDTO = new LocationDTO();
-        locationDTO.setLocationId(location.getLocationId());
-        locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
-        locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
-        return locationDTO;
     }
 
     private UserDetailDTO mapPassengerToUserDetailDTO(Passenger passenger) {

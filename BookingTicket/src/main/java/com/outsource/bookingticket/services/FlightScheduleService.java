@@ -1,12 +1,14 @@
 package com.outsource.bookingticket.services;
 
-import com.outsource.bookingticket.dtos.CreateScheduleResponseDTO;
-import com.outsource.bookingticket.dtos.FlightRequestDTO;
-import com.outsource.bookingticket.dtos.LocationRequestDTO;
+import com.outsource.bookingticket.dtos.*;
 import com.outsource.bookingticket.entities.airplane.Airplane;
 import com.outsource.bookingticket.entities.enums.FLIGHTSTATE;
+import com.outsource.bookingticket.entities.enums.TICKETTYPE;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.flight_schedule.FlightSchedule;
+import com.outsource.bookingticket.entities.flight_schedule.Schedule;
+import com.outsource.bookingticket.entities.location.Location;
+import com.outsource.bookingticket.entities.ticket.CountTicket;
 import com.outsource.bookingticket.exception.ErrorException;
 import com.outsource.bookingticket.utils.Helper;
 import com.outsource.bookingticket.utils.MessageUtil;
@@ -16,9 +18,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,9 +26,33 @@ import java.util.stream.Collectors;
 public class FlightScheduleService extends BaseService {
 
     // Lấy hết lịch trình bay
-    public ResponseEntity<?> getAllFlightSchedule() {
-        List<FlightSchedule> flightScheduleList = flightScheduleRepository.findAll();
-        return ResponseEntity.ok(Helper.createSuccessListCommon(Collections.singletonList(flightScheduleList)));
+    public ResponseEntity<?> getAllFlightSchedule(String startTime, String endTime, Integer from, Integer to) {
+        // Khởi tạo danh sách chứa ID địa điểm để tìm kiếm
+        Set<Integer> idLocationSet = new HashSet<>();
+        // Khởi tạo danh sách chứa ID máy bay để tìm kiếm
+        Set<Integer> idAirplaneSet = new HashSet<>();
+        // Lấy danh sách lịch trình
+        List<Schedule> schedulesList = getAllSchedule(startTime, endTime, from, to);
+
+        if (CollectionUtils.isEmpty(schedulesList)) {
+            throw new ErrorException(MessageUtil.FLIGHT_SCHEDULE_NOT_FOUND_EX);
+        }
+
+        schedulesList.forEach(s -> {
+            idLocationSet.add(s.getFromAirportId());
+            idLocationSet.add(s.getToAirportId());
+            idAirplaneSet.add(s.getAirplaneId());
+        });
+
+        List<Location> locationList = locationRepository.findLocationsByLocationIdIn(idLocationSet);
+
+        List<Airplane> airplaneList = airplaneRepository.findAllById(idAirplaneSet);
+
+        List<CountTicket> countTicketList = countTicketRepository.findAllGroupBySchedule();
+
+        List<ScheduleResponseDTO> responseDTOList = mapToScheduleResponseDTOs(schedulesList, locationList, countTicketList, airplaneList);
+
+        return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(responseDTOList)));
     }
 
     // API thêm lịch trình bay
@@ -61,6 +85,44 @@ public class FlightScheduleService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessCommon(createScheduleResponseDTO(newFlight, newSchedule)));
     }
 
+    // Hàm gán dữ liệu dạng danh sách để trả về
+    private List<ScheduleResponseDTO> mapToScheduleResponseDTOs(List<Schedule> scheduleList, List<Location> locationList,
+                                                                List<CountTicket> countTicketList, List<Airplane> airplaneList) {
+        return scheduleList.stream()
+                .map(s -> mapToScheduleResponseDTO(s, locationList, countTicketList, airplaneList))
+                .collect(Collectors.toList());
+    }
+
+    // Hàm gán dữ liệu để trả về
+    private ScheduleResponseDTO mapToScheduleResponseDTO(Schedule schedule, List<Location> locationList,
+                                                         List<CountTicket> countTicketList, List<Airplane> airplaneList) {
+        ScheduleResponseDTO responseDTO = new ScheduleResponseDTO();
+        Location fromLocation = filterLocation(locationList, schedule.getFromAirportId());
+        Location toLocation = filterLocation(locationList, schedule.getToAirportId());
+        Airplane airplane = filterAirplane(airplaneList, schedule.getAirplaneId());
+
+        responseDTO.setFlightScheduleId(schedule.getFlightScheduleId());
+        responseDTO.setStartTime(convertLocalDatetimeToString(schedule.getStartTime()));
+        responseDTO.setEndTime(convertLocalDatetimeToString(schedule.getEndTime()));
+        responseDTO.setFlightNo(schedule.getFlightNo());
+        responseDTO.setFromLocation(mapLocation(fromLocation));
+        responseDTO.setToLocation(mapLocation(toLocation));
+        responseDTO.setAirplaneDTO(mapToAirplaneDTO(airplane));
+        responseDTO.setTotalTicketFirstClass(
+                filterCountTicketByScheduleIdAndTicketType(countTicketList, schedule.getFlightScheduleId(), TICKETTYPE.FIRST_CLASS));
+        responseDTO.setTotalTicketBusinessClass(
+                filterCountTicketByScheduleIdAndTicketType(countTicketList, schedule.getFlightScheduleId(), TICKETTYPE.BUSINESS_CLASS)
+        );
+        responseDTO.setTotalTicketPremiumClass(
+                filterCountTicketByScheduleIdAndTicketType(countTicketList, schedule.getFlightScheduleId(), TICKETTYPE.PREMIUM_CLASS)
+        );
+        responseDTO.setTotalTicketEconomyClass(
+                filterCountTicketByScheduleIdAndTicketType(countTicketList, schedule.getFlightScheduleId(), TICKETTYPE.ECONOMY_CLASS)
+        );
+
+        return responseDTO;
+    }
+
     // Kiểm tra thông tin đầu vào xem lịch trình bay muốn thêm có trùng với lịch trình của cùng 1 máy bay trước đó không
     private void validateFlightSchedule(FlightRequestDTO flightRequestDTO) {
         // Tìm kiếm xem máy bay có chuyến bay nào chưa
@@ -91,6 +153,34 @@ public class FlightScheduleService extends BaseService {
         }
     }
 
+    // Hàm lấy danh sách lịch trình
+    private List<Schedule> getAllSchedule(String startTime, String endTime, Integer from, Integer to) {
+        List<Schedule> schedulesList;
+
+        // Kiểm tra nếu có thời gian truyền vào sẽ format đúng định dạng
+        if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
+            startTime = formatDateTime(startTime, false);
+            endTime = formatDateTime(endTime, true);
+        }
+
+        if (Objects.nonNull(startTime) && Objects.nonNull(endTime) && Objects.nonNull(from) && Objects.nonNull(to)) {
+            // Tìm kiếm danh sách lịch trình theo thời gian và địa điểm
+            schedulesList = scheduleRepository.findAllScheduleByTimeAndLocation(startTime, endTime, from, to);
+        } else {
+            // Tìm kiếm danh sách lịch trình theo thời gian
+            if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
+                schedulesList = scheduleRepository.findAllScheduleByTime(startTime, endTime);
+            // Tìm kiếm danh sách lịch trình theo địa điểm
+            } else if (Objects.nonNull(from) && Objects.nonNull(to)) {
+                schedulesList = scheduleRepository.findAllScheduleByLocation(from, to);
+            // Tìm kiếm tất cả danh sách địa điểm
+            } else {
+                schedulesList = scheduleRepository.findAllSchedule();
+            }
+        }
+        return schedulesList;
+    }
+
     // Kiểm tra thời gian thêm vào không được trùng với thời gian nào đã được thêm trước đó
     private boolean filterByDate(FlightSchedule flightSchedule, LocalDateTime startTime, LocalDateTime endTime) {
         LocalDateTime scheduleStart = flightSchedule.getStartTime();
@@ -98,6 +188,7 @@ public class FlightScheduleService extends BaseService {
         return startTime.isBefore(endTime) && (endTime.isBefore(scheduleStart) || startTime.isAfter(scheduleEnd));
     }
 
+    // Gán dữ liệu để trả về
     private CreateScheduleResponseDTO createScheduleResponseDTO(FlightEntity flightEntity, FlightSchedule flightSchedule) {
         CreateScheduleResponseDTO responseDTO = new CreateScheduleResponseDTO();
         CreateScheduleResponseDTO.ScheduleResponseDTO scheduleResponseDTO = new CreateScheduleResponseDTO.ScheduleResponseDTO();
@@ -112,5 +203,19 @@ public class FlightScheduleService extends BaseService {
         responseDTO.setMessage(MessageUtil.INSERT_SUCCESS);
 
         return responseDTO;
+    }
+
+    // Hàm lọc thông tin chuyến bay trong danh sách chuyến bay theo ID máy bay
+    private Airplane filterAirplane(List<Airplane> airplaneList, Integer airplaneId) {
+        return airplaneList.stream().filter(l -> l.getAirplaneId().equals(airplaneId)).findFirst().orElse(null);
+    }
+
+    // Hàm lọc ra số vé theo ID lich trình bay và từng loại vé
+    private Integer filterCountTicketByScheduleIdAndTicketType(List<CountTicket> countTicketList,
+                                                               Integer scheduleId, TICKETTYPE tickettype) {
+        Optional<CountTicket> countTicket = countTicketList.stream()
+                .filter(ticket -> ticket.getFlightScheduleId().equals(scheduleId) && ticket.getTicketType() == tickettype)
+                .findFirst();
+        return countTicket.isPresent() ? countTicket.get().getTotalTicket() : 0;
     }
 }

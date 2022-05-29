@@ -1,5 +1,8 @@
 package com.outsource.bookingticket.services;
 
+import com.outsource.bookingticket.dtos.AirplaneDTO;
+import com.outsource.bookingticket.dtos.LocationDTO;
+import com.outsource.bookingticket.entities.airplane.Airplane;
 import com.outsource.bookingticket.entities.airport.AirportGeo;
 import com.outsource.bookingticket.entities.flight.FlightEntity;
 import com.outsource.bookingticket.entities.location.Location;
@@ -17,10 +20,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BaseService {
@@ -70,6 +70,12 @@ public class BaseService {
     @Autowired
     protected AirportGeoRepository airportGeoRepository;
 
+    @Autowired
+    protected ScheduleRepository scheduleRepository;
+
+    @Autowired
+    protected CountTicketRepository countTicketRepository;
+
     // Hàm format date từ String sang LocalDatetime
     protected LocalDateTime convertStringToLocalDateTime(String dateTimeString) {
         try {
@@ -79,6 +85,19 @@ public class BaseService {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
         } catch (ParseException e) {
+            // Trả về lỗi nếu tham số truyền vào không đúng dạng
+            throw new ErrorException(MessageUtil.DATETIME_ERROR);
+        }
+    }
+
+    protected String formatDateTime(String dateTime, boolean isEndTime) {
+        try {
+            // Format dạng ngày/tháng/năm để trả về
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String dateTimeFormat = formatter2.format(formatter.parse(dateTime));
+            return isEndTime ? dateTimeFormat + " 23:59:59" : dateTimeFormat;
+        } catch (ErrorException e) {
             // Trả về lỗi nếu tham số truyền vào không đúng dạng
             throw new ErrorException(MessageUtil.DATETIME_ERROR);
         }
@@ -131,5 +150,30 @@ public class BaseService {
     protected static String withLargeIntegers(Long value) {
         DecimalFormat df = new DecimalFormat("###,###,###,###");
         return df.format(value).replaceAll(",", ".");
+    }
+
+    // Hàm lọc Location theo ID
+    protected Location filterLocation(List<Location> locationList, Integer locationId) {
+        return locationList.stream().filter(l -> l.getLocationId().equals(locationId)).findFirst().orElse(null);
+    }
+
+    // Hàm chuyển Location sang LocationDTO để trả về
+    protected LocationDTO mapLocation(Location location) {
+        LocationDTO locationDTO = new LocationDTO();
+        locationDTO.setLocationId(location.getLocationId());
+        locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
+        locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
+        return locationDTO;
+    }
+
+    // Hàm gán giá trị thuộc tính của Airplane sang AirplaneDTO
+    protected AirplaneDTO mapToAirplaneDTO(Airplane airplane) {
+        return AirplaneDTO.builder()
+                .airplaneId(airplane.getAirplaneId())
+                .airplaneName(airplane.getAirplaneName())
+                .capacity(airplane.getCapacity())
+                .brand(airplane.getBrand())
+                .linkImgBrand(airplane.getLinkImgBrand())
+                .build();
     }
 }
