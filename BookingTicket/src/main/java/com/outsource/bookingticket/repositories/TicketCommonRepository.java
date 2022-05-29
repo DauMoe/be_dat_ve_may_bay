@@ -10,8 +10,9 @@ import java.util.List;
 
 @Repository
 public interface TicketCommonRepository extends JpaRepository<TicketCommon, Integer> {
-    @Query(value = "select * from user u " +
-            "join ticket t on u.id = t.uid " +
+
+    @Query(value = "select * from passenger p " +
+            "join ticket t on p.id = t.uid " +
             "join flight_schedule fc on t.flight_schedule_id = fc.flight_schedule_id " +
             "join flight f on fc.flight_no = f.flight_no " +
             "join airport_geo a on f.from_airport_id = a.airport_geo_id " +
