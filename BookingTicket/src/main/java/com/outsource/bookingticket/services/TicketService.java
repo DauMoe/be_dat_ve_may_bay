@@ -143,7 +143,6 @@ public class TicketService extends BaseService {
         ticket.get().setTotalChildren(0);
         ticket.get().setTotalBaby(0);
         ticket.get().setTotalPrice(0L);
-        ticket.get().setUid(0);
         // Cập nhật thông tin vé vào database
         ticketRepository.saveAndFlush(ticket.get());
 
