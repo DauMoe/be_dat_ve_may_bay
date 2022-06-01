@@ -59,7 +59,8 @@ public class TicketService extends BaseService {
 
                 Passenger passenger = null;
                 // Nếu là vé đã được đặt thì sẽ trả về thông tin đã được đặt
-                if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED) {
+                if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED ||
+                        ticket.get().getBookingState() == BOOKINGSTATE.PENDING) {
                     passenger = clientRepository.findPassengerById(ticket.get().getUid());
                     totalAdult = ticket.get().getTotalAdult();
                     totalChildren = ticket.get().getTotalChildren();
