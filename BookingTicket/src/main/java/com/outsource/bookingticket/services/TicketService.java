@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,8 +58,9 @@ public class TicketService extends BaseService {
                 Optional<Airplane> airplane = airplaneRepository.findById(flightEntity.get().getAirplaneId());
 
                 Passenger passenger = null;
-
-                if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED) {
+                // Nếu là vé đã được đặt thì sẽ trả về thông tin đã được đặt
+                if (ticket.get().getBookingState() == BOOKINGSTATE.BOOKED ||
+                        ticket.get().getBookingState() == BOOKINGSTATE.PENDING) {
                     passenger = clientRepository.findPassengerById(ticket.get().getUid());
                     totalAdult = ticket.get().getTotalAdult();
                     totalChildren = ticket.get().getTotalChildren();
@@ -87,26 +90,23 @@ public class TicketService extends BaseService {
         return ResponseEntity.ok(Helper.createSuccessListCommon(new ArrayList<>(ticketResponseDTOS)));
     }
 
-    // Hàm lọc Location theo ID
-    private Location filterLocation(List<Location> locationList, Integer locationId) {
-        return locationList.stream().filter(l -> l.getLocationId().equals(locationId)).findFirst().orElse(null);
-    }
-
     // Chuyến dữ liệu từ TicketCommon sang TicketResponseDTO
     private TicketResponseDTO mapToTicketCommon(TicketCommon ticketCommon){
         // Khởi tạo đối tượng TicketResponseDTO
         TicketResponseDTO dto = new TicketResponseDTO();
         // Gán các giá trị thuộc tính
         dto.setTicketId(ticketCommon.getTicketId());
-        dto.setSeatNumber(ticketCommon.getSeatNumber());
-        dto.setPrice(ticketCommon.getPrice());
+        dto.setRowSeat(ticketCommon.getRowSeat());
+        dto.setPrice(withLargeIntegers(ticketCommon.getPrice()));
         dto.setBookingState(ticketCommon.getBookingState());
         dto.setAirplaneName(ticketCommon.getAirplaneName());
         dto.setStartTime(convertLocalDatetimeToString(ticketCommon.getStartTime()));
         dto.setEndTime(convertLocalDatetimeToString(ticketCommon.getEndTime()));
         dto.setAvailableSeat(ticketCommon.getAvailableSeat());
         dto.setFlightNo(ticketCommon.getFlightNo());
-        dto.setUsername(ticketCommon.getUsername());
+        dto.setUsername(ticketCommon.getFullname());
+        dto.setFlightId(ticketCommon.getFlightId());
+
 
         // Tìm kiếm lịch trình chuyến bay
         Optional<FlightSchedule> flightSchedule =
@@ -124,6 +124,7 @@ public class TicketService extends BaseService {
 
         dto.setFromAirport(locationFrom);
         dto.setToAirport(locationTo);
+        dto.setAirplaneId(ticketCommon.getAirplaneId());
 
         // Trả về dữ liệu
         return dto;
@@ -139,6 +140,10 @@ public class TicketService extends BaseService {
         if (ticket.get().getBookingState().equals(BOOKINGSTATE.AVAILABLE)) throw new ErrorException("Vé Chưa Được Đặt Nên Không Thể Hủy");
         // Thay đổi trạng thái vé từ BOOKED sang CANCELED
         ticket.get().setBookingState(BOOKINGSTATE.AVAILABLE);
+        ticket.get().setTotalAdult(0);
+        ticket.get().setTotalChildren(0);
+        ticket.get().setTotalBaby(0);
+        ticket.get().setTotalPrice(0L);
         // Cập nhật thông tin vé vào database
         ticketRepository.saveAndFlush(ticket.get());
 
@@ -162,11 +167,12 @@ public class TicketService extends BaseService {
                                      Integer totalAdult, Integer totalChildren, Integer totalBaby) {
         TicketDTO ticketDTO = new TicketDTO();
         ticketDTO.setTicketId(ticket.getTicketId());
-        ticketDTO.setSeatNumber(ticket.getSeatNumber());
-        ticketDTO.setTicketType(ticket.getSeatNumber() + "_" + TICKETTYPE.getValue(ticket.getTicketType().name()).value);
+        ticketDTO.setRowSeat(ticket.getRowSeat());
+        ticketDTO.setTicketType(ticket.getRowSeat() + "_" + TICKETTYPE.getValue(ticket.getTicketType().name()).value);
         ticketDTO.setPrice(mapPriceDTO(totalAdult, totalChildren, totalBaby, ticket.getPrice()));
         ticketDTO.setBookingState(ticket.getBookingState().name());
-        ticketDTO.setAirplaneDTO(new AirplaneDTO(airplane.getAirplaneName(), airplane.getBrand(), airplane.getLinkImgBrand()));
+        ticketDTO.setAirplaneDTO(
+                new AirplaneDTO(null, airplane.getAirplaneName(), null, airplane.getBrand(), airplane.getLinkImgBrand()));
         ticketDTO.setFlightSchedule(convertFlightScheduleToDTO(flightSchedule));
         ticketDTO.setFlightDTO(convertFlightEntityToDTO(flightEntity, locationTo, locationFrom));
         ticketDTO.setUserDetailDTO(Objects.nonNull(passenger) ? mapPassengerToUserDetailDTO(passenger) : null);
@@ -195,15 +201,6 @@ public class TicketService extends BaseService {
         return responseDTO;
     }
 
-    // Hàm chuyển Location sang LocationDTO để trả về
-    private LocationDTO mapLocation(Location location) {
-        LocationDTO locationDTO = new LocationDTO();
-        locationDTO.setLocationId(location.getLocationId());
-        locationDTO.setCountry(Objects.nonNull(location.getCountryName()) ? location.getCountryName() : "");
-        locationDTO.setCity(Objects.nonNull(location.getCityName()) ? location.getCityName() : "");
-        return locationDTO;
-    }
-
     private UserDetailDTO mapPassengerToUserDetailDTO(Passenger passenger) {
         return UserDetailDTO.builder()
                 .id(passenger.getId())
@@ -220,11 +217,11 @@ public class TicketService extends BaseService {
         long tax = totalPrice / 10;
 
         TicketDTO.PriceDTO priceDTO = new TicketDTO.PriceDTO();
-        priceDTO.setAdultPrice(new DetailPriceDTO(totalAdult, price, totalAdult * price));
-        priceDTO.setChildrenPrice(totalChildren == 0 ? null : new DetailPriceDTO(totalChildren, childrenPrice, totalChildren * childrenPrice));
-        priceDTO.setBabyPrice(totalBaby == 0 ? null : new DetailPriceDTO(totalBaby, babyPrice, totalBaby * babyPrice));
-        priceDTO.setTax(tax);
-        priceDTO.setTotalPrice(totalPrice);
+        priceDTO.setAdultPrice(new DetailPriceDTO(totalAdult, withLargeIntegers(price), withLargeIntegers(totalAdult * price)));
+        priceDTO.setChildrenPrice(totalChildren == 0 ? null : new DetailPriceDTO(totalChildren, withLargeIntegers(childrenPrice), withLargeIntegers(totalChildren * childrenPrice)));
+        priceDTO.setBabyPrice(totalBaby == 0 ? null : new DetailPriceDTO(totalBaby, withLargeIntegers(babyPrice), withLargeIntegers(totalBaby * babyPrice)));
+        priceDTO.setTax(withLargeIntegers(tax));
+        priceDTO.setTotalPrice(withLargeIntegers(totalPrice + tax));
 
         return priceDTO;
     }
@@ -238,10 +235,105 @@ public class TicketService extends BaseService {
 
         content = content.replace("[[name]]", passenger.getFullName());
         content = content.replace("[[flightNo]]", schedule.getFlightNo());
-        content = content.replace("[[seatNumber]]", ticket.getSeatNumber());
+        content = content.replace("[[rowSeat]]", ticket.getRowSeat());
 
         String[] values = new String[]{passenger.getEmail()};
         Helper.sendMailCommon(values, subject, content);
     }
 
+    // Hàm tạo vé cho flight schedule
+    public ResponseCommon createTicketsForFlightSchedule(TicketCreateDTO ticketCreateDTO) {
+        if (Objects.nonNull(ticketCreateDTO)) {
+            Objects.requireNonNull(ticketCreateDTO.getFirstClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getBusinessClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getPremiumClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getEconomyClassNumber());
+            Objects.requireNonNull(ticketCreateDTO.getFlightScheduleId());
+
+            FlightSchedule flightSchedule = flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticketCreateDTO.getFlightScheduleId()).orElse(null);
+            if (flightSchedule == null) {
+                throw new ErrorException(Constants.FLIGHT_SCHEDULE_NON_EXISTENT);
+            }
+
+            Integer flightScheduleId = flightSchedule.getFlightScheduleId();
+            List<Ticket> tickets = new ArrayList<>();
+            // tạo vé cho loại vé FIRST_CLASS
+            int firstClassNumber =  ticketCreateDTO.getFirstClassNumber();
+            if (firstClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, firstClassNumber, TICKETTYPE.FIRST_CLASS, 7000000L, 70);
+            }
+
+            // tạo vé cho loại vé BUSINESS_CLASS
+            int businessClassNumber = ticketCreateDTO.getBusinessClassNumber();
+            if (businessClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, businessClassNumber, TICKETTYPE.BUSINESS_CLASS, 3500000L, 60);
+            }
+
+            // tạo vé cho loại vé PREMIUM_CLASS
+            int premiumClassNumber = ticketCreateDTO.getPremiumClassNumber();
+            if (premiumClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, premiumClassNumber, TICKETTYPE.PREMIUM_CLASS, 2000000L, 50);
+            }
+
+            // tạo vé cho loại vé ECONOMY_CLASS
+            int economyClassNumber = ticketCreateDTO.getEconomyClassNumber();
+            if (economyClassNumber > 0) {
+                addTicket(flightScheduleId, tickets, economyClassNumber, TICKETTYPE.ECONOMY_CLASS, 1500000L, 40);
+            }
+
+            // Tạo tên seatRow cho từng vé theo fomart: [A-Z]d{2} => VD: A12
+            Random random = new Random();
+            String valueRow = null;
+            int number;
+            for (int i = 0; i < tickets.size(); i++) {
+                number = random.nextInt(90) + 10;
+                if (i % 6 == 0) {
+                    valueRow = "A" + number;
+                }
+                if (i % 6 == 1) {
+                    valueRow = "B" + number;
+                }
+                if (i % 6 == 2) {
+                    valueRow = "C" + number;
+                }
+                if (i % 6 == 3) {
+                    valueRow = "D" + number;
+                }
+                if (i % 6 == 4) {
+                    valueRow = "E" + number;
+                }
+                if (i % 6 == 5) {
+                    valueRow = "F" + number;
+                }
+
+                tickets.get(i).setRowSeat(valueRow);
+            }
+
+            // Lưu tất cả vé
+            ticketRepository.saveAll(tickets);
+        } else throw new ErrorException("Invalid Request");
+
+        ResponseCommon responseCommon = new ResponseCommon();
+        responseCommon.setCode(200);
+        responseCommon.setResult(Constants.TICKET_CREATED_SUCCESS);
+        return responseCommon;
+    }
+
+    // Hàm tạo từng chiếc vè và cho vào danh sách List<Ticket> tickets
+    private void addTicket(Integer flightScheduleId, List<Ticket> tickets, int classNumber, TICKETTYPE tickettype, long price, int weightPackage) {
+        Ticket ticket = null;
+        for (int i = 0; i < classNumber; i++) {
+            ticket = new Ticket();
+            ticket.setTicketType(tickettype);
+            ticket.setFlightScheduleId(flightScheduleId);
+            ticket.setWeightPackage(weightPackage);
+            ticket.setPrice(price);
+            ticket.setBookingState(BOOKINGSTATE.AVAILABLE);
+            ticket.setTotalAdult(0);
+            ticket.setTotalChildren(0);
+            ticket.setTotalBaby(0);
+            ticket.setTotalPrice(0L);
+            tickets.add(ticket);
+        }
+    }
 }

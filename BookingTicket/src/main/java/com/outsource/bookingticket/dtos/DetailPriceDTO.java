@@ -12,8 +12,8 @@ public class DetailPriceDTO {
     @JsonProperty("number_people")
     private Integer numberPeople;
 
-    private Long price;
+    private String price;
 
     @JsonProperty("total_price")
-    private Long totalPrice;
+    private String totalPrice;
 }

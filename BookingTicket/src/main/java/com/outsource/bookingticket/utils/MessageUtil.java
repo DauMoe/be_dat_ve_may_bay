@@ -3,7 +3,7 @@ package com.outsource.bookingticket.utils;
 public class MessageUtil {
     public static final String FLIGHT_NOT_FOUND_EX = "Không tìm thấy chuyến bay";
     public static final String TICKET_NOT_FOUND_EX = "Không tìm thấy vé bay";
-    public static final String FLIGHT_SCHEDULE_NOT_FOUND_EX = "Không tìm thấy lịch trình bay";
+    public static final String FLIGHT_SCHEDULE_NOT_FOUND_EX = "Không tìm thấy lịch trình bay nào";
     public static final String UPDATED_EXCEPTION = "Thay đổi không thành công";
     public static final String UPDATED_SUCCESS = "Thay đổi thành công";
     public static final String FLIGHT_IS_EMPTY = "Không có chuyến bay nào";
@@ -23,6 +23,8 @@ public class MessageUtil {
     public static final String LOCATION_NOT_FOUND = "Không tìm thấy địa điểm";
     public static final String DELETE_LOCATION_SUCCESS = "Xóa địa điểm thành công";
     public static final String DELETE_LOCATION_NOT_SUCCESS = "Xóa địa điểm không thành công";
-
-
+    public static final String EXIST_TICKET = "VÉ ĐÃ ĐƯỢC ĐẶT.";
+    public static final String AIRPLANE_IS_EMPTY = "Không có máy bay nào";
+    public static final String AIRPLANE_IS_EXIST = "Máy bay đã tồn tại!";
+    public static final String AIRPLANE_IS_NOT_EXIST = "Không tìm thấy máy bay!";
 }

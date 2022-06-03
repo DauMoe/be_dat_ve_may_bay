@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -35,8 +37,11 @@ public class AdminController extends BaseController {
     // API lấy hết danh sách lịch trình bay
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/list-flight-schedule")
-    ResponseEntity<?> getAllFlightSchedule() {
-        return flightScheduleService.getAllFlightSchedule();
+    ResponseEntity<?> getAllFlightSchedule(@RequestParam(value = "start_time", required = false) String startTime,
+                                           @RequestParam(value = "end_time", required = false) String endTime,
+                                           @RequestParam(value = "from", required = false) Integer from,
+                                           @RequestParam(value = "to", required = false) Integer to) {
+        return flightScheduleService.getAllFlightSchedule(startTime, endTime, from, to);
     }
 
     // API lấy hết danh sách thông tin vé theo schedule ID
@@ -61,17 +66,40 @@ public class AdminController extends BaseController {
         return flightService.updateFlightState(flightId);
     }
 
+    // Thêm địa điểm
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PostMapping(path = "/location-add")
     ResponseEntity<?> addLocation(@RequestBody LocationRequestDTO locationRequestDTO) {
         return locationService.addLocation(locationRequestDTO);
     }
 
+    // Thay đổi thông tin địa điểm
     @CrossOrigin(maxAge = 3600, origins = "*")
     @PutMapping(path = "/location-update/{location_id}")
     ResponseEntity<?> addLocation(@PathVariable("location_id") Integer locationId,
                                   @RequestBody LocationRequestDTO locationRequestDTO) {
         return locationService.editLocation(locationId, locationRequestDTO);
+    }
+
+    // Thêm máy bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/airplane")
+    public ResponseEntity<?> addFlight(@RequestBody AirplaneDTO airplaneDTO) {
+        return airplaneService.addAirplane(airplaneDTO);
+    }
+
+    // Lấy hết danh sách thông tin máy bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @GetMapping(path = "/airplane")
+    public ResponseEntity<?> getAllFlight() {
+        return airplaneService.getAllAirplane();
+    }
+
+    // Thêm lịch trình bay
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/add-schedule")
+    public ResponseEntity<?> addFlightSchedule(@RequestBody FlightRequestDTO flightRequestDTO) {
+        return flightScheduleService.addFlightSchedule(flightRequestDTO);
     }
 
     /*************API Quản lý Tin Tức Chuyến Bay******************/
@@ -206,7 +234,7 @@ public class AdminController extends BaseController {
         flightNews.setCreatedTime(flightNewsDTO.getCreatedTime());
         flightNews.setUpdatedTime(flightNewsDTO.getUpdatedTime());
         flightNews.setUpdateBy(flightNewsDTO.getUpdateBy());
-
+        flightNews.setCreatedTime(LocalDateTime.now());
         return flightNews;
     }
 
@@ -251,6 +279,14 @@ public class AdminController extends BaseController {
         return ResponseEntity.ok(responseCommon);
     }
 
+    // API tạo vé cho flight schedule
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/ticket/create")
+    ResponseEntity<?> createTicketForFlightSchedule(@RequestBody TicketCreateDTO ticketCreateDTO) {
+        ResponseCommon responseCommon = ticketService.createTicketsForFlightSchedule(ticketCreateDTO);
+        return ResponseEntity.ok(responseCommon);
+    }
+
     // API lấy thông tin chi tiết của vé
     @CrossOrigin(maxAge = 3600, origins = "*")
     @GetMapping(path = "/ticket/{ticket_id}")
@@ -266,6 +302,13 @@ public class AdminController extends BaseController {
     @PostMapping(path = "/passenger")
     ResponseEntity<?> editPassenger(@RequestBody Passenger passenger) {
         ResponseCommon responseCommon = passengerService.editPassenger(passenger);
+        return ResponseEntity.ok(responseCommon);
+    }
+
+    @CrossOrigin(maxAge = 3600, origins = "*")
+    @PostMapping(path = "/confirm-ticket")
+    public ResponseEntity<?> confirmBooking(@RequestParam("ticket_id") Integer ticketId) throws MessagingException, UnsupportedEncodingException {
+        ResponseCommon responseCommon = bookingService.bookingConfirm(ticketId);
         return ResponseEntity.ok(responseCommon);
     }
 }
