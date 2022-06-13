@@ -211,10 +211,10 @@ public class TicketService extends BaseService {
     }
 
     private TicketDTO.PriceDTO mapPriceDTO(Integer totalAdult, Integer totalChildren, Integer totalBaby, Long price) {
-        long childrenPrice = price * 2/ 3;
-        long babyPrice = price / 2;
+        long childrenPrice = price * 90/100;
+        long babyPrice = price * 10/100;
         long totalPrice = price * totalAdult + totalChildren * childrenPrice + totalBaby * babyPrice;
-        long tax = totalPrice / 10;
+        long tax = totalPrice * 45/100;
 
         TicketDTO.PriceDTO priceDTO = new TicketDTO.PriceDTO();
         priceDTO.setAdultPrice(new DetailPriceDTO(totalAdult, withLargeIntegers(price), withLargeIntegers(totalAdult * price)));

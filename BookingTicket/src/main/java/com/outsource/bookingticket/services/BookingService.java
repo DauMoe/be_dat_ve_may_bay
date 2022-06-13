@@ -238,10 +238,15 @@ public class BookingService extends BaseService {
     }
 
     private Long totalPrice(Integer totalAdult, Integer totalChildren, Integer totalBaby, Long price) {
-        long childrenPrice = price * 2/ 3;
-        long babyPrice = price / 2;
+//        long childrenPrice = price * 2/ 3;
+//        long babyPrice = price / 2;
+//        long totalPrice = price * totalAdult + totalChildren * childrenPrice + totalBaby * babyPrice;
+//        long tax = totalPrice / 10;
+
+        long childrenPrice = price * 90/100;
+        long babyPrice = price * 10/100;
         long totalPrice = price * totalAdult + totalChildren * childrenPrice + totalBaby * babyPrice;
-        long tax = totalPrice / 10;
+        long tax = totalPrice * 45/100;
         return totalPrice + tax;
 
     }
