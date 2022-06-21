@@ -228,7 +228,7 @@ public class BookingService extends BaseService {
     }
 
     private Boolean checkAvailableSeat(Integer totalSeat){
-        if (totalSeat <= 0) return true;
+        if (totalSeat < 0) return true;
         else return false;
     }
 
