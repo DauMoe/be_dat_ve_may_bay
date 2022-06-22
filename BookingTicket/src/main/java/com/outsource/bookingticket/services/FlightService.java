@@ -2,7 +2,6 @@ package com.outsource.bookingticket.services;
 
 import com.outsource.bookingticket.dtos.FlightCommonDTO;
 import com.outsource.bookingticket.dtos.FlightResponseDTO;
-import com.outsource.bookingticket.dtos.LocationDTO;
 import com.outsource.bookingticket.entities.common.FlightCommon;
 import com.outsource.bookingticket.entities.common.FlightTicketEntity;
 import com.outsource.bookingticket.entities.enums.BOOKINGSTATE;
