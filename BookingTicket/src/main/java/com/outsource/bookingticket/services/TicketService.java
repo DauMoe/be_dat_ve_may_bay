@@ -138,7 +138,10 @@ public class TicketService extends BaseService {
         if (ticket.isEmpty()) throw new ErrorException("Không Tìm Thấy Vé");
         // Kiểm tra vé đó đã được đặt hay chưa hay chưa? nếu đã được đặt thì trả về lỗi
         if (ticket.get().getBookingState().equals(BOOKINGSTATE.AVAILABLE)) throw new ErrorException("Vé Chưa Được Đặt Nên Không Thể Hủy");
-        // Thay đổi trạng thái vé từ BOOKED sang CANCELED
+        // Lấy thông tin của khách hàng đã đặt vé
+        Passenger passenger = clientRepository.getById(ticket.get().getUid());
+        // Thay đổi trạng thái vé từ BOOKED sang AVAILABLE
+        ticket.get().setUid(null);
         ticket.get().setBookingState(BOOKINGSTATE.AVAILABLE);
         ticket.get().setTotalAdult(0);
         ticket.get().setTotalChildren(0);
@@ -147,8 +150,6 @@ public class TicketService extends BaseService {
         // Cập nhật thông tin vé vào database
         ticketRepository.saveAndFlush(ticket.get());
 
-        // Lấy thông tin của khách hàng đã đặt vé
-        Passenger passenger = clientRepository.getById(ticket.get().getUid());
         // Lấy FlightSchedule của vé
         FlightSchedule flightSchedule = flightScheduleRepository.findFlightSchedulesByFlightScheduleId(ticket.get().getFlightScheduleId()).get();
         // Gửi email tới người dùng

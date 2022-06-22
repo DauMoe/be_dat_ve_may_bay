@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 public class BookingService extends BaseService {
 
     // Hàm đặt vé máy bay với tham số truyền vào là requestDto
-    public ResponseCommon bookingFlight(BookingRequestDto requestDto) throws MessagingException, UnsupportedEncodingException {
+    public ResponseCommon bookingFlight(BookingRequestDto requestDto) {
 
         // Kiểm tra requestDto có null không? nếu null trả ra lỗi
         if (Objects.nonNull(requestDto)) {
@@ -38,14 +38,16 @@ public class BookingService extends BaseService {
             FlightSchedule flightScheduleTo = saveSchedule(ticketTo.getFlightScheduleId());
             Passenger passenger = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
 
-            if (checkAvailableSeat(flightScheduleTo.getAvailableSeat()))throw new ErrorException(Constants.SEAT_UNAVAILABLE);
+            if (checkAvailableSeat(flightScheduleTo.getAvailableSeat()))
+                throw new ErrorException(Constants.SEAT_UNAVAILABLE);
 
-            if (requestDto.getTicketIdBack() !=  null){
+            if (requestDto.getTicketIdBack() != null) {
                 Ticket ticketBack = ticketRepository.findTicketByTicketId(requestDto.getTicketIdBack()).get();
                 if (ticketBack.getBookingState().equals(BOOKINGSTATE.BOOKED))
                     throw new ErrorException(MessageUtil.EXIST_TICKET);
                 FlightSchedule flightScheduleBack = saveSchedule(ticketBack.getFlightScheduleId());
-                if (checkAvailableSeat(flightScheduleBack.getAvailableSeat()))throw new ErrorException(Constants.SEAT_UNAVAILABLE);
+                if (checkAvailableSeat(flightScheduleBack.getAvailableSeat()))
+                    throw new ErrorException(Constants.SEAT_UNAVAILABLE);
 
                 ticketTo.setBookingState(BOOKINGSTATE.PENDING);
                 Passenger passengerTo = getClient(requestDto.getNamePassenger(), requestDto.getPhoneNumber(), requestDto.getEmail());
@@ -86,7 +88,7 @@ public class BookingService extends BaseService {
                     // Lưu dối tượng Ticket vào database.
                     ticketRepository.saveAndFlush(ticketTo);
                     // Lưu dối tượng Ticket vào database.
-                    ticketBack =  ticketRepository.saveAndFlush(ticketBack);
+                    ticketBack = ticketRepository.saveAndFlush(ticketBack);
                     // Cập nhật thông tin vào database
                     flightScheduleBack = flightScheduleRepository.saveAndFlush(flightScheduleBack);
                     // Gọi hàm sendBookingSuccessEmail() để gửi thông tin vé về mail
@@ -98,7 +100,7 @@ public class BookingService extends BaseService {
                     return responseCommon;
 
                 }
-                throw new ErrorException(MessageUtil.EXIST_TICKET) ;
+                throw new ErrorException(MessageUtil.EXIST_TICKET);
             }
 
             // Khởi tạo 1 đối tượng của Ticket để set dữ liệu cho đối tượng đó. Dữ liệu được lấy từ tham số truyền vào
@@ -131,15 +133,15 @@ public class BookingService extends BaseService {
         return responseCommon;
     }
 
-    public ResponseCommon bookingConfirm (Integer ticketId) throws MessagingException, UnsupportedEncodingException {
+    public ResponseCommon bookingConfirm(Integer ticketId) throws MessagingException, UnsupportedEncodingException {
 
-        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow( () -> new ErrorException(MessageUtil.TICKET_NOT_FOUND));
+        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new ErrorException(MessageUtil.TICKET_NOT_FOUND));
         if (ticket.getBookingState().equals(BOOKINGSTATE.BOOKED))
             throw new ErrorException(MessageUtil.EXIST_TICKET);
         // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
         FlightSchedule flightScheduleTo = saveSchedule(ticket.getFlightScheduleId());
 
-        Passenger passenger = clientRepository.findById(ticket.getUid()).orElseThrow( () -> new ErrorException(MessageUtil.USER_NOT_FOUND));
+        Passenger passenger = clientRepository.findById(ticket.getUid()).orElseThrow(() -> new ErrorException(MessageUtil.USER_NOT_FOUND));
         ticket.setBookingState(BOOKINGSTATE.BOOKED);
         ticketRepository.saveAndFlush(ticket);
 
@@ -150,6 +152,11 @@ public class BookingService extends BaseService {
         responseCommon.setCode(200);
         responseCommon.setResult(Constants.BOOKING_SUCCESS);
         return responseCommon;
+    }
+
+    private static boolean validateEmail(String email) {
+        Matcher matcher = Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(email);
+        return matcher.find();
     }
 
     // Hàm thực hiện gửi thông tin vé về mail
@@ -202,7 +209,7 @@ public class BookingService extends BaseService {
 
     }
 
-    private Passenger getClient(String fullName, String phoneNo, String email){
+    private Passenger getClient(String fullName, String phoneNo, String email) {
         Optional<Passenger> passenger = clientRepository.findClientByPhoneNo(phoneNo);
         if (passenger.isEmpty()) {
             Passenger newPassenger = new Passenger();
@@ -215,7 +222,7 @@ public class BookingService extends BaseService {
         return passenger.get();
     }
 
-    private FlightSchedule saveSchedule(Integer flightScheduleId){
+    private FlightSchedule saveSchedule(Integer flightScheduleId) {
         if (Objects.nonNull(flightScheduleId)) {
             // Hàm tìm kiếm lịch trình 1 chuyến bay theo ID của lịch trình chuyến bay cần tìm
             Optional<FlightSchedule> flightSchedule = flightScheduleRepository.findById(flightScheduleId);
@@ -227,14 +234,8 @@ public class BookingService extends BaseService {
         return null;
     }
 
-    private Boolean checkAvailableSeat(Integer totalSeat){
-        if (totalSeat < 0) return true;
-        else return false;
-    }
-
-    private static boolean validateEmail(String email) {
-        Matcher matcher = Constants.VALID_EMAIL_ADDRESS_REGEX.matcher(email);
-        return matcher.find();
+    private Boolean checkAvailableSeat(Integer totalSeat) {
+        return totalSeat < 0;
     }
 
     private Long totalPrice(Integer totalAdult, Integer totalChildren, Integer totalBaby, Long price) {
@@ -243,10 +244,10 @@ public class BookingService extends BaseService {
 //        long totalPrice = price * totalAdult + totalChildren * childrenPrice + totalBaby * babyPrice;
 //        long tax = totalPrice / 10;
 
-        long childrenPrice = price * 90/100;
-        long babyPrice = price * 10/100;
+        long childrenPrice = price * 90 / 100;
+        long babyPrice = price * 10 / 100;
         long totalPrice = price * totalAdult + totalChildren * childrenPrice + totalBaby * babyPrice;
-        long tax = totalPrice * 45/100;
+        long tax = totalPrice * 45 / 100;
         return totalPrice + tax;
 
     }
