@@ -43,12 +43,11 @@ public class FlightService extends BaseService {
                                                     .collect(Collectors.toList());
             // Hàm huỷ các vé của lịch trình mà đã được đặt đủ hết số ghế
             if (!CollectionUtils.isEmpty(flightScheduleIdToCancel)) {
-                List<Ticket> ticketCancelList = ticketRepository.findByFlightScheduleIdIn(flightScheduleIdToCancel);
-                ticketCancelList.forEach(p -> {
-                    if (p.getBookingState() != BOOKINGSTATE.AVAILABLE && p.getBookingState() != BOOKINGSTATE.PENDING) {
-                        p.setBookingState(BOOKINGSTATE.CANCELED);
-                    }
-                });
+                List<Ticket> ticketList = ticketRepository.findByFlightScheduleIdIn(flightScheduleIdToCancel);
+                List<Ticket> ticketCancelList = ticketList.stream()
+                        .filter(p -> p.getBookingState() != BOOKINGSTATE.AVAILABLE && p.getBookingState() != BOOKINGSTATE.PENDING)
+                        .collect(Collectors.toList());
+                ticketCancelList.forEach(p -> p.setBookingState(BOOKINGSTATE.CANCELED));
                 ticketRepository.saveAll(ticketCancelList);
             }
         }
